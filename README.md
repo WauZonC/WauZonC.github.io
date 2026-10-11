@@ -2,11 +2,11 @@
 
 个人主页本地仓库。
 
-- 线上地址：<https://wauzonc.github.io>（尚未上线，见 `PLAN.md` 路线图 P5–P6）
+- 线上地址：**<https://wauzonc.github.io>（已上线）**，由 GitHub Actions 自动部署
 - 技术栈：Astro + Markdown Content Collections
 - 包管理器：pnpm
 
-> **当前状态：P5 完成 —— 全站内容（3 篇博客 / 4 个项目 / `about`）与玻璃拟态样式已落地，GitHub Actions 部署工作流（`.github/workflows/deploy.yml`）已写入并通过本地校验（actionlint 0 告警、`pnpm install --frozen-lockfile` 与 `pnpm build` 均退出码 0）；尚未创建远端仓库、尚未上线。**
+> **当前状态：P6 完成（已上线）—— 站点发布在 <https://wauzonc.github.io>，内容为 3 篇博客 / 4 个项目 / `about`，玻璃拟态样式；推送 `main` 即由 `.github/workflows/deploy.yml` 自动构建并部署（首次运行 build+deploy 全绿，6 条路由实测 200、中文正常）。**
 > 唯一权威设计文档是 **[PLAN.md](./PLAN.md)**，所有后续开发步骤以它为准。
 
 ## 目录结构
@@ -48,10 +48,10 @@ pnpm preview     # 预览构建产物
 
 ## 部署
 
-推送到 `main` 即由 `.github/workflows/deploy.yml` 自动构建并发布到 GitHub Pages（<https://wauzonc.github.io>）；也可在 Actions 页面手动 `workflow_dispatch` 触发。首次上线前需先在仓库 `Settings → Pages` 把来源设为 **GitHub Actions**（详见 `PLAN.md` 的 P6）。
+推送到 `main` 即由 `.github/workflows/deploy.yml` 自动构建并发布到 GitHub Pages（<https://wauzonc.github.io>）；也可在 Actions 页面手动 `workflow_dispatch` 触发。仓库 Pages 来源为 **GitHub Actions**（`Settings → Pages`）。
 
 ## 后续步骤
 
-见 [PLAN.md](./PLAN.md) 的「路线图 P0–P6」。P0–P5 已完成（脚手架、样式定稿、真实内容、部署工作流），**下一步是 P6：GitHub 侧配置与首次上线**（创建远端仓库、推送、启用 Pages、验证 G1/G2）。
+[PLAN.md](./PLAN.md) 的路线图 **P0–P6 已全部完成**，站点已上线。可选增量（均需先在 PLAN.md 中立项）：自定义域名（`public/CNAME` + 同步 `site`）、RSS / 站点搜索 / 评论（giscus）/ 访问统计 / 文章目录、为手势识别项目补配图。
 
 > 所有命令请在 `D:\WZC\mypage\WauZonC.github.io` 下执行。

@@ -8,8 +8,8 @@
 - 仓库名（目标，GitHub 侧）：`WauZonC.github.io`
 - 线上地址（目标）：<https://wauzonc.github.io>
 - 本地仓库根目录：`D:\WZC\mypage\WauZonC.github.io`
-- 当前阶段：**P5 已完成（GitHub Actions 自动部署工作流落地，并通过 actionlint + 结构断言 + CI 等价命令本地验收）—— 下一步 P6（GitHub 侧配置与首次上线）**
-- 文档版本：v1.7（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
+- 当前阶段：**P6 已完成 —— 站点已上线：<https://wauzonc.github.io>（P0–P6 全部完成）**
+- 文档版本：v1.8（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
 
 ---
 
@@ -28,6 +28,8 @@
 | G5 | 移动端与桌面端均可读，无横向滚动 | 浏览器 375px / 1440px 两档目测 |
 | G6 | 推送 `main` 后 Actions 自动部署，无需手动操作 | Actions 绿色通过，站点内容更新 |
 
+> **验收状态（2026-10-11，P6 上线后实测）**：G1 ✅ `https://wauzonc.github.io` → **200**（`charset=utf-8`、中文正常、canonical 为根路径、**无** `/mypage/` 前缀）；G2 ✅ 首页 `/about/` `/blog/` `/projects/` `/404.html` 及 3 篇博客详情**全部 200**，且不存在路径返回 **404 状态**并渲染自定义 404 内容；G3 ✅ 全站由 Markdown 驱动（P4 起新增条目未改任何 `.astro`）；G4 ✅ 本地与 CI 的 `pnpm build` **均退出码 0**；G5 ✅ P4 已用同源 iframe 探针实测 24 组（8 路由 × 320/390/1440）无横向滚动，且**部署产物与本地 `dist` 逐字节一致**，结论适用；G6 ✅ 推送后首次 Actions 运行的 **build 与 deploy 两个作业全绿**，站点内容已更新
+
 ---
 
 ## 2. 已确认的环境事实（P0 实测）
@@ -45,7 +47,7 @@
 | GitHub SSH | **已验证通过**：`ssh -T git@github.com` → `Hi WauZonC!`，密钥 `~/.ssh/id_ed25519` |
 | HTTPS 连通性 | `api.github.com` 直连 200 |
 | `WauZonC/WauZonC.github.io` | **不存在**（GitHub API 404） |
-| `https://wauzonc.github.io` | **尚未上线**（404） |
+| `https://wauzonc.github.io` | **尚未上线**（404）—— 此行为 P0 时实测；**P6 已上线**，见 §1.2 验收状态 |
 | 依赖版本基线 | Astro `7.3.8`；GitHub Actions（P5 于 2026-10-11 按 Releases 实测）：`actions/checkout@v7.0.1`、`pnpm/action-setup@v6.1.0`、`actions/setup-node@v7.1.0`、`actions/upload-pages-artifact@v5.0.0`、`actions/deploy-pages@v5.0.1` |
 
 ---
@@ -441,7 +443,7 @@ export default defineConfig({
 - **写作用域的实际扩展（已披露）**：除 `.github/workflows/**` 外，另修改了 `PLAN.md`（§2 依赖版本基线、本节"版本裁定"与本执行记录、§7 风险表 3 行、§9 之外的变更记录 v1.7）与 `README.md`（把过时的"P2 完成 / 下一步 P3"更新为当前进度，并在目录树中登记部署工作流）。**未**改动 `src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml`、`.gitignore`
 - **遗留问题**：远端验收（G6：推送后 Actions 两步绿色、站点更新）**待 P6**；本阶段无阻塞项
 
-### P6 —— GitHub 侧配置与首次上线
+### P6 —— GitHub 侧配置与首次上线 ✅ 已完成（2026-10-11）
 - **前置依赖**：P1（本地仓库位于 `D:\WZC\mypage\WauZonC.github.io`）、P5（工作流文件已提交）
 - **手动步骤（在 GitHub 网页完成，`gh` CLI 未安装）**
   1. 登录 `WauZonC` 账号，创建**公开**仓库，名称**精确为** `WauZonC.github.io`，**不要**勾选 "Add a README/.gitignore/license"（避免与本地首次提交冲突）
@@ -453,6 +455,27 @@ export default defineConfig({
 - **可选**：自定义域名——需在 `public/` 放 `CNAME` 文件并在域名商配置 DNS；**若采用自定义域名，必须同步更新 `astro.config.mjs` 的 `site` 为本节约定**（否则 canonical/og URL 错误）
 - **验收命令**：`Invoke-WebRequest -Method Head https://wauzonc.github.io` → 200；页面中文正常
 - **写作用域**：`git remote` 配置；可选 `public/CNAME`
+
+#### P6 实际执行记录（2026-10-11）
+
+- **前置确认（事实核对，非假设）**：`git ls-remote git@github.com:WauZonC/WauZonC.github.io.git` → `Repository not found`（仓库不存在）；`ssh -T git@github.com` → `Hi WauZonC!`（SSH 认证有效）；`https://wauzonc.github.io` → **404**（尚未上线）。故仓库创建由**用户**在 GitHub 网页完成（无 `gh` CLI、无 token），**未**由本 agent 代为创建
+- **用户决策（闭合两处开放项）**：①**不绑定自定义域名**（§9 开放项 1）；②仓库**公开**（§9 开放项 4 末句）。并且用户**先**把仓库 Pages 来源设为 **GitHub Actions** 再让我推送，因此**首次推送即一次通过**，未出现 P5 预警的 `deploy` 失败（该预警已写在 §7 风险表，此处保留作为一般性提醒）
+- **执行动作**
+  1. 用户建仓后核对：`api.github.com` 返回 `private: false`、`default_branch: main`、`has_pages: true`、`size: 0`；`git ls-remote origin` **无任何 ref**（空仓库 → 无需 `git pull --rebase`，不存在 README 冲突）
+  2. `git remote add origin git@github.com:WauZonC/WauZonC.github.io.git`（步骤 2）
+  3. `git push -u origin main` → 退出码 **0**，`main` 已跟踪 `origin/main`
+- **实测验收**
+  - **步骤 3 验收**：`git ls-remote origin` → `refs/heads/main` = `20c2571e9e5e538818b5875025374104a3893586`，与本地 `HEAD` **完全一致**
+  - **G6（Actions）**：run `38128165438`（`Deploy to GitHub Pages`，`event=push`，`head_sha=20c2571`）→ **conclusion=success**；**Build 作业**逐步全绿（Checkout / Setup pnpm / Setup Node / Install dependencies / Build site / Upload Pages artifact），**Deploy 作业**全绿（Deploy to GitHub Pages）。**首次运行即成功，无需重跑**。链接：<https://github.com/WauZonC/WauZonC.github.io/actions/runs/38128165438>
+  - **G1**：`https://wauzonc.github.io/` → **HTTP 200**（15 341 bytes）；响应头含 `Content-Type: text/html; charset=utf-8`、`Strict-Transport-Security`、`Server: GitHub.com`；页面实测 `<html lang="zh-CN">`、含站名 `WauZonC`、「个人主页」出现 **11 次**、`canonical` = `https://wauzonc.github.io/`、**不含** `/mypage/` 前缀
+  - **G2**：`/`、`/about/`、`/blog/`、`/projects/`、`/404.html`、`/blog/build-site-with-astro/`、`/blog/self-learning-cs/`、`/blog/cuda-notes/` **全部 200**；`/favicon.svg`（749 B）、`/images/pku-table-canvas.png`（104 589 B）亦均 200
+  - **404 语义**：`/no-such-page-xyz/` → **404 状态**且内容与本地 `dist/404.html` **逐字节一致**；P2 占位文章 `/blog/hello-world/` → **404**（P4 的删除已生效）
+  - **部署正确性（最有力的一条）**：线上 `index.html` 与本地 `dist/index.html` 的 **SHA-256 完全相同**（`71B2DAF6AD25D62FF801CF5CCF2F2DD370090AE2E1EFC9456DC41AAB646DB22C`），即"线上 = 本地构建产物"，**未发生路径 / `base` 错配**
+  - **G4/G5 的线上等价性**：CI 侧 `pnpm build` 在 Build 作业中成功（`Build site` 步骤 success）；部署内容与本地 `dist` 逐字节一致，故 P4 的 24 组无横向滚动结论对线上同样成立
+- **与设计的偏离**：**无**。未绑定域名、未新增 `public/CNAME`；工作流文件在 P6 期间**零改动**（`git hash-object .github/workflows/deploy.yml` 与 `HEAD` blob 一致）
+- **写作用域的实际扩展（已披露）**：除 P6 原定（`git remote` 配置）外，另更新了 `PLAN.md`（文档头、§1.2 验收状态、本节执行记录、§9 开放项 1 与 4、变更记录 v1.8）与 `README.md`（状态、线上地址、部署与后续步骤）。**未**改动 `src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml`
+- **副作用说明（预期行为）**：本次 P6 文档更新会**再触发一次** Actions 运行（`push: main`）——这正是 G6 的预期行为；由于 `src/`、`public/` 未变，重新部署的产物与既有站点**逐字节相同**
+- **遗留问题**：无阻塞项。可选增量见 §9 开放项 3（RSS / 搜索 / 评论 / 统计 / TOC）与 P4 遗留项（手势识别项目缺配图；**本站项目卡片现可补 `repoUrl` = `https://github.com/WauZonC/WauZonC.github.io`**，因远端仓库已存在）
 
 ---
 
@@ -500,10 +523,10 @@ export default defineConfig({
 
 以下事项不阻塞 P1–P3，但在对应阶段前需要用户确认：
 
-1. **自定义域名**：是否绑定个人域名？（影响 P6 与 `astro.config.mjs` 的 `site`）
+1. **自定义域名**：是否绑定个人域名？（影响 P6 与 `astro.config.mjs` 的 `site`）→ **已闭合（2026-10-11，P6 用户决定）：不绑定**，站点以 <https://wauzonc.github.io> 上线，`site` 保持 `https://wauzonc.github.io`，未添加 `public/CNAME`。若日后绑定，须先更新本项与 ADR-2，再改 `site` 并放 `CNAME`
 2. **首页布局**：**结论（P2.5 随选型一并决定）：保持多页导航式**——用户选定的风格 10 为多页式样例，`demo/07-onepage.html` 的单页方案不采用；§4.1 路由表维持 6 条路由不变（原问题：单页滚动式还是多页导航式）
 3. **是否增加**：RSS 订阅、站点搜索、评论系统（utterances / giscus）、访问统计、文章目录（TOC）
-4. **公开范围**：**P4 已逐项确认并闭合**——`about` **不**包含手机号、学号、出生日期、成绩、住址；只用 `WauZonC`（不露真名），只写学院不写年级与专业，不放头像与简历 PDF，公开 `zhongchangwang25@…` 与 `WauZonC@qq.com` 两个邮箱。**仓库是否公开**仍由 P6 决定
+4. **公开范围**：**P4 已逐项确认并闭合**——`about` **不**包含手机号、学号、出生日期、成绩、住址；只用 `WauZonC`（不露真名），只写学院不写年级与专业，不放头像与简历 PDF，公开 `zhongchangwang25@…` 与 `WauZonC@qq.com` 两个邮箱。**仓库是否公开**：**已闭合（2026-10-11，P6 用户决定）＝公开**——免费账号的 Pages 用户主站需要公开仓库，且 `api.github.com` 实测 `private: false`；站点内容已通过 P4 泄漏扫描（`src/`、`public/`、`dist/` 0 命中）
 
 ---
 
@@ -519,3 +542,4 @@ export default defineConfig({
 | v1.5 | P3 | P3 完成：**用户选定风格 10「玻璃拟态渐变」**并落地全站（新增 ADR-7）。重写 `global.css` 设计令牌与玻璃工具类、粘性玻璃导航、玻璃卡片（PostCard/新增 ProjectCard）、文章与关于/404 面板化、跳转链接与 `theme-color`。实测：`pnpm build` 退出码 0、6 条路由、`dist` 零 `.js`、**12 组（6 路由 × 375/1440）无横向滚动**、浅/暗两套配色目视通过。临时目录 `demo/` 已按约定删除。同步更新：文档头「当前阶段」与版本、ADR-7、§9 开放项 2 结论（保持多页式）、P3 章节（选定方案 + 执行记录）、风险表新增 2 行 |
 | v1.6 | P4 | P4 完成：按**两阶段人工审批**落地真实内容——博客 3 篇（Astro 建站 / 自学 CS61A·CS61B·15-213 / CUDA 笔记）、项目 4 条（pku-table / 个人主页本站 / 手势识别原型 / CS61B Proj 3）、`about` 重写为 8 节。审批文档置于 `p4-review/`（**不入库**，`.gitignore` 已兜住）。实测：`pnpm build` 退出码 0、8 个页面、`dist` 零 `.js`、**24 组（8 路由 × 320/390/1440）无横向滚动**、浅/暗两套配色目视通过、**发布前泄漏扫描 0 命中**。**修正 4 处事实性错误并新增 4 行风险**：P4 素材来源第 1 条（他人主页存档不得作为本人履历）、`articles` 实为 AI 整理的文献笔记库（未采用）、`project/src/**` 属排除项、§9 开放项 4 结论落地；§2 全局 git 邮箱按「文件会公开」脱敏。同步更新：文档头「当前阶段」与版本、§6 P4 章节（素材来源 / 写作用域 / 验收命令 + 执行记录）、§7 风险表、§9 开放项 4 |
 | v1.7 | P5 | P5 完成：写入 `.github/workflows/deploy.yml`（checkout → pnpm → Node 24 → `pnpm install --frozen-lockfile` → `pnpm build` → 上传 Pages 产物 → 部署；触发 `push[main]` + `workflow_dispatch`，权限 `contents:read`/`pages:write`/`id-token:write`，并发 `group: pages` 且不取消进行中部署）。**先改文档后执行的必要偏离（1 处）**：把 `pnpm/action-setup@v4`、`actions/setup-node@v4`、`actions/upload-pages-artifact@v3` 升级到 Node 24 代际的 `@v6`/`@v7`/`@v5`（GitHub 自 2026-06-16 默认 node24、2026 年秋移除 node20；旧版实测 `runs.using: node20`），并显式传 `version: 11.21.0`（`package.json` 无 `packageManager` 字段），`checkout@v7`/`deploy-pages@v5` 与本节点一致，**工作流结构零变化**。实测验收（本地）：actionlint 1.7.12 **退出码 0 零告警**、PyYAML 结构断言全通过、文件 UTF-8/仅 LF/无 BOM、`pnpm install --frozen-lockfile` 与 `pnpm build` **均退出码 0**（8 pages，`dist` 零 `.js`）。**诚实声明**：本节"推送后 origin/main 一致 + Actions 两步绿色"的验收**必须等 P6 建仓后**才能完成。新增 3 行风险（旧版 Action、pnpm 版本未指定、首次 push 早于 Pages 来源设置）；P6 增加 1 条交接提醒（先设 Pages 来源再重跑工作流）。同步更新：文档头「当前阶段」与版本、§2 依赖版本基线、§6 P5 章节（版本裁定 + 执行记录）、§6 P6 步骤 5 提醒、§7 风险表、README.md |
+| v1.8 | P6 | P6 完成：站点上线 <https://wauzonc.github.io>。用户建仓（**公开**）并把 Pages 来源设为 **GitHub Actions** → 本地 `git remote add origin`（SSH）→ `git push -u origin main`（退出码 0）。**实测**：`git ls-remote` 的 `refs/heads/main` = 本地 `HEAD`（`20c2571`）；Actions run `38128165438` **首次运行即 build + deploy 全绿**（无需重跑）；`/` `/about/` `/blog/` `/projects/` `/404.html` 与 3 篇博客详情**全部 200**、UTF-8 中文正常、canonical 为根路径、无 `/mypage/` 前缀；不存在路径返回 **404** 且与本地 `dist/404.html` 逐字节一致；线上 `index.html` 与本地 `dist/index.html` **SHA-256 相同**（线上 = 本地构建产物）。**无设计偏离**，工作流文件在 P6 期间零改动。**闭合 §9 开放项 1**（不绑定自定义域名）与**开放项 4 末句**（仓库公开）；§1.2 新增 G1–G6 验收状态。同步更新：文档头「当前阶段」与版本、§1.2、§6 P6 章节（执行记录）、§9、README.md |

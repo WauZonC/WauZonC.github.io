@@ -18,6 +18,11 @@
 > 唯一权威设计文档是 **[PLAN.md](./PLAN.md)**，所有后续步骤以它为准（状态切换见其中的 **ADR-8**）。
 >
 > ⚠️ **R3 的判读方式已更新**：`(Get-ChildItem -Recurse -File -Filter *.js dist).Count` **仍然应为 `0`**，但「零客户端 JS」自 ADR-9 起**不再是字面事实**——`src/**` 里有 2 段 `is:inline` 内联脚本用于主题切换。`is:inline` 不产出 `.js` 文件，所以命令返回 0；**不要**把这理解成「HTML 里没有 `<script>`」。
+>
+> **2026-10-11 新增（M-3，仅原型）**：`demo/` 目录里有一版 **iOS 26 风格「液态玻璃」原型**（真位移折射 + 磨砂 + 镜面 + 厚度；**零脚本、零依赖、零外部请求**）。
+> **站点本身仍是原来的毛玻璃设计，`src/**` 一行都没改**。双击 `demo/index.html` 即可查看（无需构建、无需起服务器）。
+> 方案说明与实测结论见 [demo/README.md](./demo/README.md)；运维台账为 [PLAN.md](./PLAN.md) §10.5 的 **M-3** 行与 §10.6 的 M-3 执行记录。
+> ⚠️ **正式接入前必须先立 ADR-11**；且 `demo/` 按 §10.2 轨道 B 的惯例属**临时目录**，定稿后应删除。
 
 ## 目录结构
 
@@ -46,8 +51,12 @@ D:\WZC\mypage\                 # 外层容器目录
     │   ├── pages/             # 中文路由见 PLAN.md §4.1；en/ 下为英文镜像路由
     │   └── styles/global.css  # 设计令牌 + 玻璃拟态工具类（P3 定稿）
     ├── README.md
-    └── PLAN.md
+    ├── PLAN.md
+    └── demo/                  # M-3 液态玻璃原型（临时目录；不参与构建、不进 dist）
 ```
+
+> **关于 `demo/`**：它是**原型**，用于在真实首页版式上预览 iOS 26 风格液态玻璃。
+> 站点源码零改动；正式接入需先立 ADR-11。详见 [demo/README.md](./demo/README.md)。
 
 > **注意**：本仓库的线上路径与本地目录层级**无关**。GitHub Pages 的 URL 路径只由 GitHub 仓库名决定，因此站点仍发布在 <https://wauzonc.github.io/>（根路径），`astro.config.mjs` 中**不设置 `base`**。
 

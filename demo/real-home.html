@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>液态玻璃原型 · 真实首页版式</title>
+
+    <!-- 站点自己的样式（从 dist 产物原样提取，见 demo/site.css 头部说明）。
+         外链被刻意改为站内引用：demo 必须能双击直接打开（file://），且零外部请求。 -->
+    <link rel="stylesheet" href="site.css" />
+    <!-- 本次原型新增的液态玻璃材质层 -->
+    <link rel="stylesheet" href="liquid-glass.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+
+    <!-- 页头：sticky + 液态玻璃（真实站点这里是 .site-header + global.css 的玻璃材质） -->
+    <header class="site-header lg lg-header lg-refract">
+      <div class="container header-inner">
+        <a class="site-title" href="/">WauZonC</a>
+        <div class="header-actions">
+          <nav class="site-nav" aria-label="主导航">
+            <ul>
+              <li><a class="lg lg-pillbtn lg-refract" href="/" aria-current="page">首页</a></li>
+              <li><a class="lg lg-pillbtn lg-refract" href="/about/">关于</a></li>
+              <li><a class="lg lg-pillbtn lg-refract" href="/blog/">博客</a></li>
+              <li><a class="lg lg-pillbtn lg-refract" href="/projects/">项目</a></li>
+            </ul>
+          </nav>
+          <div class="header-toggles">
+            <a class="toggle-btn lang-toggle lg lg-pillbtn lg-refract" href="/en/" hreflang="en" lang="en" aria-label="Switch to English" title="Switch to English">EN</a>
+            <button class="toggle-btn theme-toggle lg lg-pillbtn lg-refract" type="button" aria-pressed="false" aria-label="切换到深色模式" title="切换到深色模式">
+              <span class="icon-stack">
+                <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.75 14.62A8.75 8.75 0 0 1 9.38 3.25a8.75 8.75 0 1 0 11.37 11.37Z" fill="currentColor" /></svg>
+                <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.1" fill="currentColor" /><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" /></g></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <!-- ============ 唯一一处有意偏离真实首页的区块（仅为本 demo 存在） ============
+           作用：折射只有在玻璃背后有高频细节时才看得见。压缩到 200px 后，这一块会正好
+           滑动到 sticky 页头背后，用来直观展示「折射真的发生了」。真实站点没有这一块。 -->
+      <section class="demo-strip" aria-labelledby="demo-strip-title">
+        <p class="demo-strip-tag">demo 专用区块 · 真实站点没有</p>
+        <h2 id="demo-strip-title">向下滚动约 200px，让这一块滑到页头背后</h2>
+        <p>
+          页头是 sticky 的。当下面这行高频条纹与文字穿过页头时，如果页头的边缘出现「内容被
+          轻微推挤 / 错位」，那就是真折射在起作用；把材质换成普通模糊（见
+          <a href="real-home-plain.html">对照组</a>）时同样位置只会变糊，不会错位。
+        </p>
+        <div class="demo-stripes" aria-hidden="true"></div>
+      </section>
+      <!-- ======================== demo 区块结束 ======================== -->
+
+      <section class="glass panel hero lg lg-panel lg-refract">
+        <p class="hero-eyebrow">个人主页</p>
+        <h1>你好，我是 WauZonC</h1>
+        <p class="hero-lead">
+          北京大学信息科学技术学院本科生，对计算机系统与底层实现感兴趣。目前主要在自学计算机基础课程，并做了一些课程项目与个人小工具。这个站点用来记录文章、项目和一点学习过程。
+        </p>
+        <ul class="pill-row hero-pills">
+          <li class="pill">Astro 7</li>
+          <li class="pill">Markdown</li>
+          <li class="pill">GitHub Pages</li>
+          <li class="pill">零客户端 JS</li>
+        </ul>
+        <p class="hero-cta"><a href="/about/">更多关于我 →</a></p>
+      </section>
+
+      <div class="home-grid">
+        <section class="home-column">
+          <h2 class="section-title">最新文章</h2>
+          <div class="stack">
+            <article class="card post-card lg lg-refract">
+              <h3 class="post-card-title"><a href="/blog/build-site-with-astro/">用 Astro 7 搭一个零客户端 JS 的个人主页</a></h3>
+              <p class="post-card-meta"><time datetime="2026-10-11T00:00:00.000Z">2026/10/11</time></p>
+              <p class="post-card-description">从零建站的完整记录：路由设计、Content Collections 的 Astro 7 新写法，以及构建期 schema 校验的真实踩坑。</p>
+              <ul class="pill-row post-card-tags">
+                <li class="pill">Astro</li>
+                <li class="pill">建站</li>
+                <li class="pill">Markdown</li>
+              </ul>
+            </article>
+
+            <article class="card post-card lg lg-refract">
+              <h3 class="post-card-title"><a href="/blog/self-learning-cs/">自学 CS61A / CS61B / 15-213：我的顺序、方法和踩坑</a></h3>
+              <p class="post-card-meta"><time datetime="2026-10-11T00:00:00.000Z">2026/10/11</time></p>
+              <p class="post-card-description">自学计算机基础课的推进顺序与做法：以作业驱动、卡住时怎么办，以及课程材料与题解上的边界。</p>
+              <ul class="pill-row post-card-tags">
+                <li class="pill">自学</li>
+                <li class="pill">计算机基础</li>
+              </ul>
+            </article>
+
+            <article class="card post-card lg lg-refract">
+              <h3 class="post-card-title"><a href="/blog/cuda-notes/">CUDA 入门笔记：从执行模型到内存层级</a></h3>
+              <p class="post-card-meta"><time datetime="2026-09-13T00:00:00.000Z">2026/9/13</time></p>
+              <p class="post-card-description">参加「AI Infra」夏令营时的自学笔记整理：SIMT 执行模型、内存层级与 coalescing、occupancy 与延迟隐藏，以及 block reduction 的几种写法。</p>
+              <ul class="pill-row post-card-tags">
+                <li class="pill">CUDA</li>
+                <li class="pill">并行计算</li>
+                <li class="pill">自学笔记</li>
+              </ul>
+            </article>
+          </div>
+          <p class="more"><a href="/blog/">全部文章 →</a></p>
+        </section>
+
+        <section class="home-column">
+          <h2 class="section-title">精选项目</h2>
+          <div class="stack">
+            <article class="card project-card lg lg-refract">
+              <h3 class="project-card-title">pku-table · 课程积木排布系统</h3>
+              <p class="project-card-description">把 12 个学期的课程排布做成可拖拽的「积木」，由服务端规则引擎实时校验学分负载、先修冲突与毕业/保研达标。</p>
+              <ul class="pill-row project-card-tech">
+                <li class="pill">TypeScript</li>
+                <li class="pill">React</li>
+                <li class="pill">NestJS</li>
+                <li class="pill">Prisma</li>
+                <li class="pill">SQLite</li>
+                <li class="pill">PostgreSQL</li>
+                <li class="pill">Vite</li>
+                <li class="pill">Vitest</li>
+                <li class="pill">pnpm workspace</li>
+              </ul>
+            </article>
+
+            <article class="card project-card lg lg-refract">
+              <h3 class="project-card-title">个人主页（本站）</h3>
+              <p class="project-card-description">用 Astro 7 构建的静态个人主页：内容全部 Markdown 驱动，页面默认零客户端 JavaScript，托管于 GitHub Pages。</p>
+              <ul class="pill-row project-card-tech">
+                <li class="pill">Astro</li>
+                <li class="pill">Markdown</li>
+                <li class="pill">CSS</li>
+                <li class="pill">GitHub Pages</li>
+              </ul>
+            </article>
+
+            <article class="card project-card lg lg-refract">
+              <h3 class="project-card-title">手势识别原型（MediaPipe + OpenCV）</h3>
+              <p class="project-card-description">用 MediaPipe HandLandmarker 做实时手部 21 点关键点捕捉，再用手指关节角度的规则法识别 16 种手势。</p>
+              <ul class="pill-row project-card-tech">
+                <li class="pill">Python</li>
+                <li class="pill">OpenCV</li>
+                <li class="pill">MediaPipe</li>
+                <li class="pill">Computer Vision</li>
+              </ul>
+            </article>
+          </div>
+          <p class="more"><a href="/projects/">全部项目 →</a></p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© 2026 WauZonC · 由 Astro 构建，托管于 GitHub Pages</p>
+      </div>
+    </footer>
+
+    <!-- 页面级样式只放「demo 专用区块」的规则：真实首页的样式全部来自 site.css，
+         这样 A/B 对比的差异才能唯一归因于材质层。 -->
+    <style>
+      .demo-strip {
+        margin: 0 0 2.5rem;
+        padding: 1.1rem 1.35rem 1.35rem;
+        border: 1px dashed var(--hairline);
+        border-radius: var(--radius-sm);
+        background: var(--glass-tint);
+      }
+
+      .demo-strip-tag {
+        margin: 0 0 0.4rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .demo-strip h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+      }
+
+      .demo-strip p {
+        margin: 0;
+        color: var(--fg-muted);
+        font-size: 0.9rem;
+      }
+
+      /* 高频条纹：折射的「试金石」。平滑渐变的背景区域看不出折射，这里能看出来。 */
+      .demo-stripes {
+        margin-top: 1rem;
+        height: 56px;
+        border-radius: 8px;
+        background:
+          repeating-linear-gradient(90deg,
+            rgba(22, 32, 46, 0.9) 0 2px,
+            rgba(22, 32, 46, 0) 2px 11px),
+          repeating-linear-gradient(0deg,
+            rgba(47, 111, 237, 0.65) 0 2px,
+            rgba(47, 111, 237, 0) 2px 11px);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .demo-stripes {
+          background:
+            repeating-linear-gradient(90deg,
+              rgba(238, 242, 249, 0.85) 0 2px,
+              rgba(238, 242, 249, 0) 2px 11px),
+            repeating-linear-gradient(0deg,
+              rgba(158, 193, 255, 0.6) 0 2px,
+              rgba(158, 193, 255, 0) 2px 11px);
+        }
+      }
+    </style>
+  </body>
+</html>

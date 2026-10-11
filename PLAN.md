@@ -13,7 +13,8 @@
 - 维护期内容基线（对照基准，2026-10-11 实测）：博客 **3** 篇 / 项目 **4** 条 / 构建页面 **8** 个 / `dist` 内 `.js` **0** 个
   - **m2.2 更新（M-1 + M-2 后）**：构建页面 **8 → 13**（+5 条英文镜像路由，见 §4.1）；博客仍 **3**、项目仍 **4**（英文集合 `blogEn`/`projectsEn` 为空，正文待翻译）；`dist` 内 `.js` 仍为 **0**。**页面数基线自此改为 13**
 - 已知未闭合项（维护期待办）：**英文正文翻译**（M-2 只交付了框架，接缝见 ADR-10）；RSS / 站点搜索 / 评论 / 访问统计 / 文章 TOC（§9 开放项 3 → §10.3 候选清单）；手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`
-- 文档版本：**v2.3**（2026-10-11，**M-1 + M-2 已发布**：提交 `7b5e9c0` 推送 `origin/main`（`d9f451c..7b5e9c0`），Actions run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679) 的 **Build 与 Deploy 两个作业均 success**；**线上 R6 实测**：13 条资源全部 **200**（含 5 条新增 `/en/` 路由）、不存在路径 → **404**、线上 `index.html` 与本地 `dist/index.html` 的 **SHA-256 相同**（`42393CB1…D6C2AF`），并实测线上页面确实带上了两个新按钮与首屏前主题脚本；§10.5 台账两行状态按 §10.4 步骤 7 回填为「已发布」）；上一版 **v2.2**（2026-10-11，**M-1 + M-2 落地**：页头新增「中英文切换」与「浅色/深色切换」两个按钮；新增 **ADR-9**（主题手动切换，取代 ADR-7 取舍第 1 条）与 **ADR-10**（`/`+`/en/` 两套真实路由）；§4.1/4.2/4.3 同步、§1.2 的 R2/R3 基线更新、新增 **§10.6 维护任务执行记录**；本地门禁全绿，**尚未 `git push`**，故 §10.5 状态为「本地已验收 · 待推送」）；上一版 **v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
+- `demo/` 当前状态（**M-3，2026-10-11**）：**液态玻璃原型已生成但尚未接入站点** —— `demo/` 下有 6 个文件（`liquid-glass.css` / `real-home.html` / `real-home-plain.html` / `index.html` / `site.css` / `README.md`）。**`src/**` 零改动**，站点仍是 ADR-7 的毛玻璃。正式接入前**必须先立 ADR-11**，详见 §10.5 的 M-3 行与 §10.6 的执行记录。
+- 文档版本：**v2.4**（2026-10-11，**M-3 液态玻璃原型落地（仅 `demo/`）**：新增 `demo/` 6 个文件 + 新增首版的**液态玻璃材质层**（零 JS、零依赖、零外部请求；`backdrop-filter: url(<SVG 滤镜 data URI>)` 做真位移折射，Chromium 生效、Safari/Firefox 降级为磨砂）；本轮**未改动任何站点源码**（`src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml` 零改动），站点仍是 ADR-7 的毛玻璃；实测：`demo/` 内 3 个 HTML 的 `<script` 计数均为 **0**、真折射 A/B 像素差 **33.5%** 面积 > 8/255、水平结构强度 **10.82 vs 1.03（10.5×）**、**27 组无横向滚动全过**、`pnpm build` 退出码 0 / 13 页 / `dist` 内 `.js` **0**；**修正 1 个功能性 bug**（≤768px 关折射的选择器特异性不足，导致该分支完全没生效）并记录 2 条测量陷阱（headless 窗口最小宽度约 504px、`file://` iframe 需 `--allow-file-access-from-files`）；§10.5 新增 M-3 行、§10.6 新增 M-3 执行记录；**尚未 `git push`**））；上一版 **v2.3**（2026-10-11，**M-1 + M-2 已发布**：提交 `7b5e9c0` 推送 `origin/main`（`d9f451c..7b5e9c0`），Actions run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679) 的 **Build 与 Deploy 两个作业均 success**；**线上 R6 实测**：13 条资源全部 **200**（含 5 条新增 `/en/` 路由）、不存在路径 → **404**、线上 `index.html` 与本地 `dist/index.html` 的 **SHA-256 相同**（`42393CB1…D6C2AF`），并实测线上页面确实带上了两个新按钮与首屏前主题脚本；§10.5 台账两行状态按 §10.4 步骤 7 回填为「已发布」）；上一版 **v2.2**（2026-10-11，**M-1 + M-2 落地**：页头新增「中英文切换」与「浅色/深色切换」两个按钮；新增 **ADR-9**（主题手动切换，取代 ADR-7 取舍第 1 条）与 **ADR-10**（`/`+`/en/` 两套真实路由）；§4.1/4.2/4.3 同步、§1.2 的 R2/R3 基线更新、新增 **§10.6 维护任务执行记录**；本地门禁全绿，**尚未 `git push`**，故 §10.5 状态为「本地已验收 · 待推送」）；上一版 **v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
 
 ---
 
@@ -805,6 +806,7 @@ export default defineConfig({
 |---|---|---|---|---|---|---|
 | M-1 | C | 页头右上角新增**浅色/深色切换按钮**：默认跟随系统，点击后锁定并持久化 | `src/styles/global.css`、`src/components/BaseHead.astro`、`src/components/Header.astro`、`src/components/ThemeToggle.astro`、`src/layouts/BaseLayout.astro` | `pnpm build` 退出码 0；`dist` 内 `.js` 计数仍为 **0**；浅/暗两态无头截图目视；刷新与跳页后选择保持；系统配色改变且无手动选择时跟随 | 触碰 ADR-1（零 JS）与 ADR-7 取舍 1 → **先立 ADR-9**；需 2 段内联脚本 | **已发布** |
 | M-2 | C | 页头右上角新增**中英文切换按钮** + `/en/` 全套路由框架（界面文案双语，正文待翻译） | `src/i18n/**`、`src/pages/en/**`、`src/content.config.ts`、`src/content/blog-en/**`、`src/content/projects-en/**`、`src/components/**`、`src/layouts/**`、`src/pages/**`、`src/content-types.ts` | `pnpm build` 退出码 0；页面数 **8 → 13**；5 条 `/en/` 路由均 200；语言按钮在中英两侧都落在存在的页面（无死链） | 触碰 ADR-1 / ADR-6 → **先立 ADR-10**；不得改既有中文 URL；不得把 schema 可选字段改成必填 | **已发布** |
+| M-3 | B | 把现有毛玻璃升级为 iOS 26 风格**液态玻璃**：先只做原型 `demo/`（自包含、零 JS、零依赖），**本轮不动 `src/`**；供用户看效果后决定是否正式接入 | `demo/**`（本轮）；**正式接入时**才扩到 `src/styles/global.css`、`src/components/{Header,PostCard,ProjectCard,ThemeToggle,LangSwitch}.astro`、`src/layouts/BaseLayout.astro`、`PLAN.md` | 本轮：`demo/` 内 3 个 HTML 的 `<script` 计数 = **0**、无 `http(s)` 外链、`lg-*` 类全部有定义；**真折射 A/B 像素差 33.5% 面积 > 8/255**、水平结构强度 **10.82 vs 1.03**；**27 组（3 页面 × 9 档宽度 320/360/390/430/640/768/960/1200/1440）`scrollWidth == clientWidth`**；`pnpm build` 退出码 0、`dist` 内 `.js` 仍为 **0** | 轨道 B 常规门禁 + **触 ADR-7 材质部分 → 正式接入前必须先立 ADR-11**；不得引入客户端 JS / CSS 框架 / 外部依赖；`demo/` 按 P2.5 惯例属**临时目录** | **原型已完成（本地）· 未接入 · 未推送** |
 
 > M-1 与 M-2 的写作用域在 `src/components/Header.astro`、`src/components/BaseHead.astro`、`src/layouts/**` 上**重叠**，因此**串行执行**，不做并行写入。两者均属轨道 C，但语言与主题互不依赖，故拆成两条以便分别回滚。
 >
@@ -847,6 +849,79 @@ export default defineConfig({
   3. 英文集合为空会让每次构建打印若干 `[glob-loader]` / `collection ... is empty` **告警**（退出码 0，非故障）；放入第一篇英文文章后消失。
   4. 主题按钮是**两态**（浅/深），没有第三个「跟随系统」档；要加需再立 ADR。
 
+#### M-3 原型实际执行记录（2026-10-11，**仅原型，未接入站点**）
+
+- **用户需求**：把当前毛玻璃改成 iOS 26 系统那种液态玻璃效果，参考
+  [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react)；**先做一版 demo 放在新建的 `demo/` 下，不急于改现有设计**。
+- **产出物（新增，6 个文件，全部在 `demo/`）**
+  | 文件 | 作用 |
+  |---|---|
+  | `demo/liquid-glass.css` | 材质层：设计令牌 + 四层材质 + 4 组角色化滤镜 + `@supports` 降级 + 无障碍分支 |
+  | `demo/real-home.html` | ★ 真实首页版式 + 液态玻璃 |
+  | `demo/real-home-plain.html` | 对照组：同一内容 + 现有毛玻璃 |
+  | `demo/index.html` | 参数与观感对比页（四种底频 / 四层材质 / 三种角色 / 参数速查） |
+  | `demo/site.css` | 站点自身样式（从 `dist` 产物提取，剥掉 Astro 作用域属性，只为让 demo 能 `file://` 打开） |
+  | `demo/README.md` | 方案、参数表、浏览器支持、已量化验收、正式接入路径 |
+- **技术路线（与参考实现的关系，均为 MIT）**
+  1. **不引入 React、不引入任何依赖**（`liquid-glass-react` 需 React 19 + `react-dom` peer 依赖 + 客户端 JS，
+     与 ADR-1 / ADR-5 / §8.1 直接冲突）。只借鉴其**视觉配方**：内置位移贴图、三次 `feDisplacementMap`
+     做色散、`feColorMatrix` 抽 R/G/B、`feBlend screen` 合成、**边缘掩膜 + 干净中心**。
+  2. **实现路线取自 [nikdelvin/liquid-glass](https://github.com/nikdelvin/liquid-glass)（同样是 Astro 站）**：
+     位移贴图由 **SVG 图元现拼**（`feImage` + `linearGradient` + `mix-blend-mode: screen`），
+     整个 `<filter>` 编码成 **data URI** 直接挂在 `backdrop-filter: url(...)` 上。
+     → **无需在文档里插入 `<svg>`、无需 JS 注入、零 DOM 污染、零外部请求**，比参考实现的注入式做法更干净。
+  3. **工程取舍参考 [SquareMediaGroup/glassfx](https://github.com/SquareMediaGroup/glassfx)**：
+     折射用 `@supports` 门禁、Safari/Firefox 降级为磨砂、**≤768px 关闭折射**、honour `prefers-reduced-transparency`。
+- **实测验收（本地，2026-10-11）**
+  - **零脚本**：`demo/` 内 3 个 HTML 的 `<script` 计数均为 **0**；无 `http(s)` 外链、无 `@import`；
+    id / 锚点完整；`lg-*` 类全部有定义（自动断言，`tmp/check_demo.py`）
+  - **真折射确实发生（A/B 量化）**：同一材质、同一底、只差 `url()` 位移滤镜 → 像素差 > 8/255 的面积 **33.5%**、
+    > 32/255 的面积 4.0%；**水平结构强度 10.82（有折射）vs 1.03（纯模糊）= 10.5×**。
+    判据是「结构还在但被弯折」，不是「变糊」
+  - **无横向滚动**：3 页面 × **9 档宽度**（320/360/390/430/640/768/960/1200/1440）= **27 组全过**，`scrollWidth == clientWidth`
+  - **可读性未退化**：同一底、同一文案的 A/B，正文最深像素亮度差仅 **0.4/255**，明暗跨度（stdev）**完全相等**
+  - **降级分支可用**：宽窗（1370px）`backdrop-filter` 5002 字符含 `url()`；窄窗（670px）**41 字符不含 `url()`**
+  - **浅色 / 深色两态**目视通过；`--force-prefers-reduced-motion` 实测媒体特性为 `true`
+  - **站点门禁未破**：`pnpm build` 退出码 **0**、`13 page(s) built`、`dist` 内 `.html` **13**、`.js` **0**（R1/R2/R3 ✅）
+  - **写作用域纪律**：`git diff HEAD -- src public astro.config.mjs package.json pnpm-lock.yaml` **无输出**（D8 ✅）
+- **发现的真实问题（对后续 agent 有价值）**
+  1. **`@media` 内部的 `@supports` 覆盖必须与角色规则同特异性**。≤768px 的「关闭折射」第一版只写
+     `.lg-refract`（`0,1,0`），被 `.lg-refract.lg-panel` / `.lg-refract.lg-header`（`0,2,0`）压住，
+     **移动端关折射完全没生效**（宽窗与窄窗读到的 `backdrop-filter` 都是 5002 字符含 `url()`）。
+     改为逐角色各写一条后窄窗读数 41 字符。**这是本轮唯一的功能性 bug，靠「读计算样式」而不是目视才发现**。
+  2. **headless Edge 存在约 504px 的窗口最小宽度**：`--window-size=320/390` 实际得到 `innerWidth=504`，
+     据此算出的「无横向滚动」结论**全是假的**。正确做法是用**精确 CSS 宽度的 iframe**，
+     再以 `--allow-file-access-from-files` 打开探针页（不加该 flag 时 `file://` iframe 的
+     `contentDocument` 为 `null`）。M-1 记录的「同源 iframe 探针」其实依赖这个 flag。
+  3. **`demo/` 的样式不能直接引用 `dist` 产物**：两个 demo 页面若各自内联一份产物样式，
+     会人为放大 diff、也让 A/B 无法唯一归因；故提取为共享的 `demo/site.css`，
+     并**剥掉 Astro 的 `[data-astro-cid-*]` 属性**（demo 复刻真实标记但拿不到那些内容哈希，
+     不剥则组件样式全部不命中——第一版页头导航堆成竖排就是这个原因）。
+  4. **`backdrop-filter: url()` 的真折射目前仅 Chromium 生效**，Safari / WebKit 侧对应 WebKit Bug 245510，
+     W3C SVG WG [issue #1142](https://github.com/w3c/svgwg/issues/1142)（2026-06 提出，**至今 open**）记录该不可互操作性。
+     故材质做成四层（折射 / 磨砂 / 镜面 / 厚度），**让观感像 iOS 26 的主要是后三层**，不支持折射的浏览器不会看到空壳。
+  5. **折射只有在玻璃背后有高频细节时才可见**（本站背景是平滑柔光渐变）。这是物理限制，
+     故 `demo/real-home.html` 特意加了一块标注「demo 专用区块 · 真实站点没有」的高频条纹区，
+     用来把 sticky 页头滚动时的折射展示出来——**这是本轮唯一有意偏离真实首页的地方**。
+- **与设计的偏离（已披露）**
+  1. **`demo/` 里放了一份站点样式的提取物 `demo/site.css`**：它是 `dist/_astro/*.css` 与
+     `dist/index.html` 两段页面级 `<style>` 的拼接（生成脚本 `tmp/gen_site_css.py`），
+     **不是手写样式**；站点样式一改就需重跑。若日后并入正式改造，该文件应当删除而非维护。
+  2. **`.lg` 不能叠加在 `.glass` 上**：`.glass { background: var(--glass) }` 在样式表中位置更靠后，
+     会覆盖新材质的底色（本轮原型实测踩到，表现为玻璃变成一块实色深块）。
+     正式接入时必须**摘掉** `.glass` / `.card` / `.panel` 再换 `.lg` 角色类，不能只做叠加。
+- **遗留项（交给后续任务）**
+  1. **尚未接入站点**（用户明确要求「不急于改现有设计」）：`src/**` 零改动。
+  2. **正式接入前必须先立 ADR-11**（详见 `demo/README.md` 末节）。
+  3. **`demo/` 按 P2.5 惯例属临时目录**：正式改造验收通过后应整目录删除（或先入库以便跨设备复核）。
+  4. **贴图按名义尺寸烘焙、由 `feImage width/height=100% + preserveAspectRatio=none` 拉伸**，
+     因此**圆角半径会随元素尺寸缩放**。要逐元素精确需客户端按真实尺寸现场生成贴图
+     （即 `ResizeObserver` + 一段 JS）→ 触碰 **ADR-1**，需另立 ADR；本轮刻意不做。
+  5. **`corner-shape: squircle`（iOS 26 方角，本机 Edge 155 实测支持）与贴图里的 `rx`（圆弧）几何不完全一致**，
+     边缘形状有细微出入；要精修需改用超椭圆路径生成贴图。
+  6. **滚动性能未实测帧率**：`backdrop-filter` + sticky 页头在长页面滚动时的合成成本需要真机复核后
+     再决定是否全站铺开（本原型已把折射限制在 4 类角色并在 ≤768px 关闭）。
+
 
 ---
 
@@ -867,3 +942,4 @@ export default defineConfig({
 | v2.1 | 维护 | **文档同步 + 维护期首次发布**。提交 `98454f6`（`docs(plan): 状态由开发切换为维护（ADR-8 + §10 维护手册 + R1-R6）并同步 README`，2 文件 / `216 插入 / 16 删除`）并 `git push origin main`（SSH，`28e258c..98454f6`）。**本地门禁实测（R1–R3、R5）**：`pnpm build` 退出码 **0**（`8 page(s) built`，2.09 s）；`dist` 下 `.html` **8** = 路由数，博客非 draft **3**、项目 **4**（R2 ✅）；`dist` 内 `.js` **0**（R3 ✅）；对 `src/`、`public/`、`dist/` 扫硬红线（手机号 / 18 位身份证 / 「学号 + 数字」/ 政治面貌 / 成绩排名）**全部 0 命中**，出现的邮箱仅用户批准公开的 `WauZonC@qq.com` 与 `zhongchangwang25@stu.pku.edu.cn`（R5 ✅）。**R4 说明（诚实标注）**：本次**未**改动 `src/**`、`public/**`，构建产物与已通过 24 组 iframe 探针的版本**逐字节相同**，故 R4 由同一性保证，**未**重复起服务实测。**线上门禁实测（R6）**：Actions run [`38129131299`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38129131299)（`head_sha=98454f6`）**run 与 Build / Deploy 两个作业全绿**（`Install dependencies`、`Build site`、`Upload Pages artifact`、`Deploy to GitHub Pages` 每一步 success）；线上 10 条资源全部 **200**（`/` `/about/` `/blog/` `/projects/` `/404.html` + 3 篇博客详情 + `/favicon.svg` + `/images/pku-table-canvas.png`），不存在路径 `/no-such-page-xyz/` → **404**；线上 `index.html` 与本地 `dist/index.html` 的 SHA-256 **均为** `71B2DAF6AD25D62FF801CF5CCF2F2DD370090AE2E1EFC9456DC41AAB646DB22C`，**与 P6 记录的值相同** → 纯文档改动确实未改变站点产物。**补充记录**：前一条 P6 文档推送（`28e258c`）触发的运行 `38128305072` 亦为 **success**（P6 记录中的「副作用说明」已预测该行为，此处补上实测编号）。**未改动任何代码 / 配置 / 内容文件**；PLAN.md 与 README.md 之外零改动 |
 | v2.2 | 维护 | **M-1 + M-2 落地：页头右上角新增「中英文切换」与「浅色/深色切换」两个按钮**（用户 2026-10-11 需求，参考 csdiy.wiki 的实现）。**先改 ADR 后动代码**：新增 **ADR-9**（主题手动切换，**取代** ADR-7 取舍第 1 条）与 **ADR-10**（中英文 = `/` + `/en/` 两套真实路由，语言按钮是纯链接）；§10.5 台账新增 M-1 / M-2 两行并附「写作用域重叠 → 串行」说明；新增 **§10.6 维护任务执行记录**；§4.1 路由表补 5 条英文路由、§4.2 目录树更新、§4.3 新增 `blogEn`/`projectsEn` 集合说明；§1.2 的 R2 基线由 8 页改为 **13 页**，R3 明确标注「命令仍为 0，但零 JS 已不再是字面事实」。**实测（本地）**：`pnpm build` 退出码 **0**、**13 page(s)**；`dist` 内 `.js` **0**；10 条代表性路由全 **200**；**33 组（11 路由 × 320/390/1440）无横向滚动**；真实浏览器探针验证主题「跟随系统 → 点击锁定 → 刷新保持 → 可切回」在**浅色与深色两种系统配色下各通过一遍**，且无 JS 时主题按钮自动隐藏；站内链接 **13 个唯一地址 0 死链**；泄漏扫描 `src/`+`dist/` 仅命中用户批准公开的邮箱。**过程中发现并修正 3 个真实 bug**：① 英文 404 产物是 `/en/404/` 而非 `/en/404.html`（第一版指向死链）；② `hreflang` 输出了相对 URL；③ `PostLayout` 的语言按钮在无译文时回退到了**当前中文页**（点击等于没反应，且链接完整性检查抓不到）。**未推送**（§10.5 状态记为「本地已验收 · 待推送」） |
 | v2.3 | 维护 | **M-1 + M-2 发布回填**。提交 `7b5e9c0`（`feat(ui): 页头新增中英文与浅色/深色切换按钮（ADR-9 / ADR-10 + /en 路由框架）`，29 文件 / `1345 插入 / 191 删除`）已 `git push origin main`（`d9f451c..7b5e9c0`，退出码 0；推送前工作树无 `dist/`、`tmp/`、`p4-review/` 混入，暂存路径逐个显式列出而非 `git add -A`）。**发现并修正一处提交卫生问题**：首次提交的消息文件被 PowerShell 写入了 **UTF-8 BOM**，提交标题变成 `<BOM>feat(ui): …`；用 `git cat-file commit HEAD` **逐字节**核对发现（`Format-Hex`/字符串比较会被 PowerShell 的解码器吃掉 BOM 而看不出来），已 `git commit --amend` 去掉 BOM 后重推。**Actions**：run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679)（`head_sha=7b5e9c0`）**Build 与 Deploy 均 success**。**线上 R6 实测**：13 条资源全部 **200**（`/` `/about/` `/blog/` `/projects/` `/404.html` `/blog/cuda-notes/` `/en/` `/en/about/` `/en/blog/` `/en/projects/` `/en/404/` `/favicon.svg` `/images/pku-table-canvas.png`）；不存在路径 `/no-such-page-xyz/` → **404**；线上 `index.html` 与本地 `dist/index.html` 的 SHA-256 **均为 `42393CB1580313BA56E44D6AD2D35A9B9BC8AF38584016471CF623D886D6C2AF`**（线上 = 本地构建产物）；线上页面实测带 `lang-toggle`（href `/en/`）、`theme-toggle`、首屏前 `localStorage.getItem('theme')` 脚本与绝对 URL 的 `hreflang="en"`，`/en/` 实测含英文导航与「翻译中」面板。**本次为回填提交（仅 PLAN.md）**，按 §10.4 说明纯文档改动同样会触发一次部署，属预期行为 |
+| v2.4 | 维护 | **M-3 液态玻璃原型（仅 `demo/`，未接入站点）**。用户需求：把当前毛玻璃改成 iOS 26 风格液态玻璃，参考 [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react)，**先做 demo 在新目录 `demo/`，不急于改现有设计**。故本轮**只新增 `demo/`（6 文件）+ 本文件同步**，**`src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml` 零改动**。**技术路线**：不引入 React / 任何依赖（`liquid-glass-react` 需 React 19 + 客户端 JS，与 ADR-1 / ADR-5 / §8.1 冲突），只借鉴其视觉配方（内置位移贴图 + 三次 `feDisplacementMap` 色散 + 颜色通道抽取 + screen 合成 + 边缘掩膜与干净中心）；实现路线取自同为 Astro 站的 [nikdelvin/liquid-glass](https://github.com/nikdelvin/liquid-glass)：**位移贴图由 SVG 图元现拼并编码成 data URI，直接挂在 `backdrop-filter: url(...)`**，因此**无需插入 `<svg>`、无需 JS 注入**；工程取舍（`@supports` 门禁 / Safari 降级 / ≤768px 关折射 / `prefers-reduced-transparency`）参考 [SquareMediaGroup/glassfx](https://github.com/SquareMediaGroup/glassfx)。**实测（本地）**：`demo/` 3 个 HTML **`<script` 计数均为 0**、无外链、无 `@import`；**真折射 A/B 量化** 像素差 > 8/255 面积 **33.5%**、水平结构强度 **10.82 vs 1.03（10.5×）**；**无横向滚动 27 组（3 页面 × 320/360/390/430/640/768/960/1200/1440）全过**；可读性 A/B 正文最深像素亮度差仅 **0.4/255**；宽窗 `backdrop-filter` 5002 字符含 `url()`、窄窗 **41 字符不含**（分支可用）；`pnpm build` 退出码 **0**、**13 页**、`dist` 内 `.js` **0**；`git diff HEAD -- src public` **无输出**。**发现并修正 1 个功能性 bug + 记录 2 条测量陷阱**：① ≤768px 关折射的第一版选择器特异性不足（`.lg-refract` 被 `.lg-refract.lg-panel` 压住）**完全没生效**，改为逐角色各写一条后复测通过；② **headless Edge 有约 504px 窗口最小宽度**，`--window-size=390` 实际得到 `innerWidth=504`，据此得出的「无横向滚动」结论**全部无效**，必须改用**精确 CSS 宽度的 iframe**（且 `file://` iframe 需要 `--allow-file-access-from-files` 才能读 `contentDocument`）；③ demo 复刻真实标记但拿不到 Astro 的 `[data-astro-cid-*]` 内容哈希，样式的**作用域属性必须剥离**，否则组件样式全部不命中。**新增 §10.5 台账 M-3 行**、**新增 §10.6「M-3 原型实际执行记录」**。**遗留**：正式接入前**必须先立 ADR-11**（取代 ADR-7 材质部分、保留其 `@supports` 兜底、明确不引入 JS）；贴图按名义尺寸烘焙并拉伸 → 圆角随尺寸缩放；`demo/` 按 P2.5 惯例属临时目录。**未推送** |

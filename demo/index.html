@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>液态玻璃原型 · 参数与观感对比</title>
+    <link rel="stylesheet" href="site.css" />
+    <link rel="stylesheet" href="liquid-glass.css" />
+    <style>
+      .lab-intro {
+        margin: 0 0 1.5rem;
+        color: var(--fg-muted);
+        font-size: 0.9rem;
+      }
+
+      .lab-note {
+        margin: 0 0 2rem;
+        padding: 0.85rem 1.1rem;
+        border: 1px dashed var(--hairline);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        background: var(--glass-tint);
+        color: var(--fg-muted);
+        font-size: 0.88rem;
+      }
+
+      .lab-note strong {
+        color: var(--fg);
+      }
+
+      .lab-h2 {
+        margin: 2.5rem 0 0.4rem;
+        font-size: 1.15rem;
+      }
+
+      .lab-h2:first-of-type {
+        margin-top: 0;
+      }
+
+      .lab-sub {
+        margin: 0 0 1rem;
+        color: var(--fg-muted);
+        font-size: 0.88rem;
+      }
+
+      /* ---------- 观感测试区：同一块玻璃压在三种不同频率的底上 ---------- */
+      .freq-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+
+      .freq-cell {
+        position: relative;
+        min-height: 168px;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 1px solid var(--hairline);
+      }
+
+      /* 底一：本站真实的柔光渐变背景（低频） */
+      .bg-site {
+        background-color: var(--bg-color);
+        background-image: var(--bg-image);
+      }
+
+      /* 底二：高频条纹（折射的试金石） */
+      .bg-stripes {
+        background:
+          repeating-linear-gradient(90deg,
+            rgba(22, 32, 46, 0.85) 0 2px,
+            rgba(22, 32, 46, 0) 2px 10px),
+          repeating-linear-gradient(0deg,
+            rgba(47, 111, 237, 0.7) 0 2px,
+            rgba(47, 111, 237, 0) 2px 10px),
+          #eaf1fb;
+      }
+
+      /* 底三：细密方格 */
+      .bg-checker {
+        background:
+          repeating-conic-gradient(#16202e 0 25%, #eaf1fb 0 50%) 0 0 / 18px 18px;
+      }
+
+      /* 底四：文字（真实内容穿过玻璃的典型场景） */
+      .bg-text {
+        background: #eaf1fb;
+        color: #16202e;
+      }
+
+      .bg-text p {
+        margin: 0;
+        padding: 0.9rem;
+        font-size: 0.82rem;
+        line-height: 1.75;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .bg-stripes {
+          background:
+            repeating-linear-gradient(90deg,
+              rgba(238, 242, 249, 0.8) 0 2px,
+              rgba(238, 242, 249, 0) 2px 10px),
+            repeating-linear-gradient(0deg,
+              rgba(158, 193, 255, 0.65) 0 2px,
+              rgba(158, 193, 255, 0) 2px 10px),
+            #0b1020;
+        }
+
+        .bg-checker {
+          background: repeating-conic-gradient(#eef2f9 0 25%, #0b1020 0 50%) 0 0 / 18px 18px;
+        }
+
+        .bg-text {
+          background: #0b1020;
+          color: #eef2f9;
+        }
+      }
+
+      /* 压在底上的玻璃样本 */
+      .freq-sample {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 58%;
+        height: 56%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .freq-label {
+        margin: 0.5rem 0 0;
+        font-size: 0.82rem;
+        color: var(--fg-muted);
+      }
+
+      /* ---------- 参数矩阵：三组对照 ---------- */
+      .matrix {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+
+      .matrix-cell {
+        position: relative;
+        min-height: 132px;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 1px solid var(--hairline);
+      }
+
+      .matrix-cell .freq-sample {
+        width: 66%;
+        height: 60%;
+        font-size: 0.8rem;
+      }
+
+      .matrix-tag {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 2;
+        padding: 0.15rem 0.5rem;
+        border-radius: 0 0 8px 0;
+        background: rgba(22, 32, 46, 0.82);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .matrix-cap {
+        margin: 0.45rem 0 0;
+        font-size: 0.82rem;
+        color: var(--fg-muted);
+      }
+
+      .matrix-cap code {
+        color: var(--fg);
+      }
+
+      table.lab-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+        margin: 0.75rem 0 0;
+      }
+
+      table.lab-table th,
+      table.lab-table td {
+        border: 1px solid var(--hairline);
+        padding: 0.4rem 0.55rem;
+        text-align: left;
+      }
+
+      table.lab-table th {
+        background: var(--glass-tint);
+      }
+
+      @media (max-width: 900px) {
+        .matrix {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .freq-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main id="main" class="container" style="padding-top: 2.25rem">
+      <section class="glass panel">
+        <p class="hero-eyebrow">M-3 原型</p>
+        <h1 style="margin: 0 0 0.75rem; font-size: clamp(1.6rem, 4.4vw, 2.2rem)">液态玻璃：参数与观感</h1>
+        <p class="lab-intro">
+          本页的玻璃材质来自 <code>liquid-glass.css</code>（原生 CSS，零依赖、零脚本、零外部请求）。
+          要看「装在真实首页上是什么样」，请打开 <a href="real-home.html">real-home.html</a>；
+          要看「和现在的毛玻璃差多少」，请打开 <a href="real-home-plain.html">real-home-plain.html</a> 对照。
+        </p>
+        <p class="lab-note">
+          <strong>先读这一条，否则容易误判：</strong>
+          折射只有在玻璃<strong>背后有高频细节</strong>（文字、条纹、图片边界）时才看得见。
+          本站背景是平滑的多层柔光渐变，在纯背景区域，液态玻璃和现在的毛玻璃<strong>几乎看不出差别</strong>——
+          这不是没生效，而是没有可折射的东西。下面第一组图就是为了说明这一点。
+        </p>
+      </section>
+
+      <h2 class="lab-h2">一、同一块玻璃，压在四种不同频率的底上</h2>
+      <p class="lab-sub">
+        四格的玻璃完全一样（都是 <code>.lg .lg-refract .lg-panel</code>），只有背后的内容不同。
+      </p>
+      <div class="freq-grid">
+        <figure style="margin: 0">
+          <div class="freq-cell bg-site">
+            <div class="freq-sample lg lg-panel lg-refract">平滑渐变底</div>
+          </div>
+          <figcaption class="freq-label">本站真实背景（低频）—— 几乎看不出折射</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="freq-cell bg-stripes">
+            <div class="freq-sample lg lg-panel lg-refract">高频条纹底</div>
+          </div>
+          <figcaption class="freq-label">高频条纹 —— 边缘处条纹被推挤、错位，折射清晰可见</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="freq-cell bg-checker">
+            <div class="freq-sample lg lg-panel lg-refract">细密方格底</div>
+          </div>
+          <figcaption class="freq-label">细密方格 —— 四角与边缘出现放大/压缩感</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="freq-cell bg-text">
+            <div class="freq-sample lg lg-panel lg-refract">文字底</div>
+            <p style="position: absolute; inset: 0; margin: 0; padding: 0.9rem; font-size: 0.8rem; line-height: 1.7">
+              玻璃背后的文字穿过圆角边缘时会被轻微弯折，而玻璃正中的文字保持锐利——这是「干净的圆心 + 只在边缘色散」这一配方的作用。
+              如果需要连圆心也一起弯折，就把 filter 里的 <code>feComposite over</code> 那一步去掉。
+            </p>
+          </div>
+          <figcaption class="freq-label">文字底 —— 边缘弯折、圆心保持锐利</figcaption>
+        </figure>
+      </div>
+
+      <h2 class="lab-h2">二、四层材质，逐层叠出来的效果</h2>
+      <p class="lab-sub">
+        真正让观感像 iOS 26 的主要是后三层，而不是折射；这也是为什么在不支持真折射的浏览器上它不会塌。
+      </p>
+      <div class="matrix">
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-stripes">
+            <span class="matrix-tag">第 2 层</span>
+            <div class="freq-sample lg">只有磨砂+镜面+厚度</div>
+          </div>
+          <figcaption class="matrix-cap">普通模糊：<code>blur + saturate + brightness</code></figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-stripes">
+            <span class="matrix-tag">+ 第 1 层</span>
+            <div class="freq-sample lg lg-refract">加上真折射</div>
+          </div>
+          <figcaption class="matrix-cap">叠上 <code>backdrop-filter: url(滤镜)</code> 的位移</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-stripes">
+            <span class="matrix-tag">+ 镜面</span>
+            <div class="freq-sample lg lg-refract">再叠斜向高光</div>
+          </div>
+          <figcaption class="matrix-cap">镜面层：<code>::before</code> 斜向 + 顶部径向光</figcaption>
+        </figure>
+      </div>
+
+      <h2 class="lab-h2">三、面板 / 卡片 / 药丸 三个角色的差异</h2>
+      <p class="lab-sub">
+        面积越小，折射要越收敛，否则小控件会显得「脏」。目前三种角色的参数在下表。
+      </p>
+      <div class="matrix">
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-checker">
+            <div class="freq-sample lg lg-panel lg-refract">大面板</div>
+          </div>
+          <figcaption class="matrix-cap"><code>.lg-panel</code>：厚度 16，位移 34，色散 3</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-checker">
+            <div class="freq-sample lg lg-refract">卡片</div>
+          </div>
+          <figcaption class="matrix-cap"><code>.lg-refract</code>（默认）：厚度 10，位移 28，色散 2</figcaption>
+        </figure>
+
+        <figure style="margin: 0">
+          <div class="matrix-cell bg-checker">
+            <div class="freq-sample lg lg-pillbtn lg-refract">药丸按钮</div>
+          </div>
+          <figcaption class="matrix-cap"><code>.lg-pillbtn</code>：厚度 5，位移 18，色散 1</figcaption>
+        </figure>
+      </div>
+
+      <section class="glass panel" style="margin-top: 2.5rem">
+        <h2 style="margin: 0 0 0.5rem; font-size: 1.05rem">四、参数速查</h2>
+        <p class="lab-sub" style="margin-bottom: 0.5rem">
+          单位都在 SVG 的 <code>feDisplacementMap scale</code> 上（像素量级），贴图尺寸是该角色「烘焙时的名义尺寸」。
+        </p>
+        <table class="lab-table">
+          <thead>
+            <tr>
+              <th>角色</th>
+              <th>名义尺寸</th>
+              <th>圆角 rx</th>
+              <th>边缘厚度 depth</th>
+              <th>位移 scale</th>
+              <th>色散级差</th>
+              <th>用在哪</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.lg-header</code></td>
+              <td>1280 × 58</td>
+              <td>0</td>
+              <td>8</td>
+              <td>26</td>
+              <td>3</td>
+              <td>sticky 页头</td>
+            </tr>
+            <tr>
+              <td><code>.lg-panel</code></td>
+              <td>960 × 320</td>
+              <td>26</td>
+              <td>16</td>
+              <td>34</td>
+              <td>3</td>
+              <td>hero / 大面板</td>
+            </tr>
+            <tr>
+              <td>默认（卡片）</td>
+              <td>460 × 150</td>
+              <td>16</td>
+              <td>10</td>
+              <td>28</td>
+              <td>2</td>
+              <td>文章卡 / 项目卡</td>
+            </tr>
+            <tr>
+              <td><code>.lg-pillbtn</code></td>
+              <td>130 × 34</td>
+              <td>17</td>
+              <td>5</td>
+              <td>18</td>
+              <td>1</td>
+              <td>药丸标签 / 导航 / 切换按钮</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="lab-note" style="margin: 1rem 0 0">
+          <strong>想改这些数字：</strong>它们不是 CSS 变量，而是烘焙进 <code>data URI</code> 的
+          固定值（这是「零 JS」的代价）。改动方式是调 <code>tmp/gen_lg_maps.py</code> 里的
+          <code>ROLES</code> 字典重新生成 <code>liquid-glass.css</code>，不要手改那一长串 base64/百分号编码。
+        </p>
+      </section>
+
+      <p class="lab-intro" style="margin: 2rem 0 0; text-align: center">
+        <a href="real-home.html">真实首页版式（液态玻璃）</a> ·
+        <a href="real-home-plain.html">对照组（现有毛玻璃）</a>
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>demo 原型 · 未接入站点 · 零依赖 / 零脚本 / 零外部请求</p>
+      </div>
+    </footer>
+  </body>
+</html>

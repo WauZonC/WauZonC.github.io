@@ -223,3 +223,129 @@
     opacity: 0.4;
   }
 }
+
+/* ==========================================================================
+ * 照片背景（演示用；为看「液态玻璃压在真实照片上」什么效果而加）
+ *
+ * 用法：<body class="bg-photo">                   -> 整页照片，滚动时照片固定
+ *       <body class="bg-photo bg-photo-band">     -> 照片只占首屏一条
+ *
+ * 照片本身是高频内容，玻璃边缘的折射比在柔光渐变底上明显得多——这正是要看的效果。
+ *
+ * 三点必须知道：
+ * 1. 这个背景替换掉的是站点的 --bg-image（多层柔光渐变）。
+ * 2. 照片会盖掉原本的渐变底，**正文对比度随之改变**。实测：不覆盖文字颜色时，
+ *    浅色主题的正文落到照片上会明显不够清楚（文字是深色、照片中段是深蓝海面）。
+ *    所以这里对文字令牌做了**作用域覆盖**——只在照片背景内把 --fg / --fg-muted
+ *    改成浅色（照片已被压暗，所以浅色文字才站得住）。站点其它页面不受影响。
+ * 3. 调参入口都在下面 :root 里：--photo-dim 压暗、--photo-blur 模糊、
+ *    --photo-band 首屏条高度。
+ * ========================================================================== */
+:root {
+  /* 压暗照片，保证其上的正文对比度（0 = 不压暗） */
+  --photo-dim: 0.42;
+  /* 轻微模糊：把高频细节降到不干扰阅读、但玻璃仍能折射出结构的程度 */
+  --photo-blur: 1.5px;
+  --photo-saturate: 1.05;
+  /* 照片只占首屏时的高度 */
+  --photo-band: 34rem;
+}
+
+/* 作用域文字令牌：只作用于照片背景内的元素 */
+.bg-photo {
+  --fg: #f4f7fc;
+  --fg-muted: #d3dbe8;
+  --accent: #a9c8ff;
+  --accent-soft: rgba(169, 200, 255, 0.18);
+  --hairline: rgba(255, 255, 255, 0.22);
+  --code-bg: rgba(255, 255, 255, 0.14);
+  --code-fg: #f0f4fa;
+}
+
+/* 标题类大面积文字加一层极淡描影，照片明暗跳动时仍能站住 */
+.bg-photo h1,
+.bg-photo h2,
+.bg-photo h3,
+.bg-photo .site-title,
+.bg-photo .more {
+  text-shadow: 0 1px 3px rgba(6, 12, 22, 0.55);
+}
+
+.bg-photo {
+  background-color: #0d1420;
+  background-image:
+    /* 压暗 + 轻微模糊叠在照片之上（用 backdrop 无法做，故用 filter 放在图源上） */
+    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
+    url('backgroud_chunk.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* 照片只占首屏一条，且**下缘渐隐**——直接硬切一条会在 hero 面板中间留下一条
+ * 突兀的横线（实测踩到）。
+ *
+ * 实现要点（两个坑都实测踩过，别再走回去）：
+ * 1. 不能给 body 兜深色底 + 用负 z-index 的伪元素——body 的底色画在 html 之上，
+ *    负 z-index 会藏到它后面，照片直接看不见。
+ * 2. **不能把 mask 打在 body 上**——body 上的 mask 会把整棵子树一起裁掉，
+ *    实测结果是照片条以下的内容全部消失（一片纯黑）。
+ *    正确做法：把照片条放进一个固定定位的独立层（用伪元素），mask 只作用于这一层。
+ *
+ * 层级安排：html 垫站点渐变（见下面的 html 规则）-> body 透明 ->
+ *           body::before 是照片条（z-index 0）-> header/main/footer 提到 z-index 1。
+ * body 透明是必须的：body 有背景像素时，子元素的 backdrop-filter 取的是 body
+ * 自己的背景而不是 html 上的渐变（backdrop root 的边界，与 ADR-10 记的 hreflang
+ * 问题同属「看起来该生效、其实不会」的一类）。 */
+.bg-photo-band {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* 站点自己的渐变改垫到 html 上，作为照片条渐隐之后的底 */
+html:has(.bg-photo-band) {
+  background-color: var(--bg-color);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+}
+
+.bg-photo-band::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--photo-band);
+  z-index: 0;
+  pointer-events: none;
+  background-color: #0d1420;
+  background-image:
+    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
+    url('backgroud_chunk.jpg');
+  background-size: cover, cover;
+  background-position: center, center top;
+  background-repeat: no-repeat, no-repeat;
+  /* 下缘渐隐到透明（露出 html 上的站点渐变） */
+  -webkit-mask-image: linear-gradient(to bottom,
+      #000 0, #000 calc(var(--photo-band) - 9rem), transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      #000 0, #000 calc(var(--photo-band) - 9rem), transparent 100%);
+}
+
+/* 把内容层提到照片层之上（照片层是 z-index 0） */
+.bg-photo-band .site-header,
+.bg-photo-band main,
+.bg-photo-band .site-footer,
+.bg-photo .site-header,
+.bg-photo main,
+.bg-photo .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* 照片背景启用时，页脚改用半透明实色，避免和照片抢注意力 */
+.bg-photo .site-footer,
+.bg-photo-band .site-footer {
+  background: rgba(var(--lg-tint), 0.16);
+}

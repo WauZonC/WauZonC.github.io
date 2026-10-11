@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const featuredProjects = (await getCollection('projects', ({ data }) => data.featured)).sort(
+  (a, b) => b.data.order - a.data.order,
+);
+---
+
+<BaseLayout>
+  <section class="glass panel hero">
+    <p class="hero-eyebrow">个人主页</p>
+    <h1>你好，我是 WauZonC</h1>
+    <p class="hero-lead">
+      北京大学信息科学技术学院本科生，对计算机系统与底层实现感兴趣。目前主要在自学计算机基础课程，并做了一些课程项目与个人小工具。这个站点用来记录文章、项目和一点学习过程。
+    </p>
+    <ul class="pill-row hero-pills">
+      <li class="pill">Astro 7</li>
+      <li class="pill">Markdown</li>
+      <li class="pill">GitHub Pages</li>
+      <li class="pill">零客户端 JS</li>
+    </ul>
+    <p class="hero-cta"><a href="/about/">更多关于我 →</a></p>
+  </section>
+
+  <div class="home-grid">
+    <section class="home-column">
+      <h2 class="section-title">最新文章</h2>
+      <div class="stack">
+        {posts.length > 0 ? posts.map((post) => <PostCard post={post} />) : <p>暂无文章。</p>}
+      </div>
+      <p class="more"><a href="/blog/">全部文章 →</a></p>
+    </section>
+
+    <section class="home-column">
+      <h2 class="section-title">精选项目</h2>
+      <div class="stack">
+        {
+          featuredProjects.length > 0 ? (
+            featuredProjects.map((project) => <ProjectCard project={project} compact />)
+          ) : (
+            <p>暂无精选项目。</p>
+          )
+        }
+      </div>
+      <p class="more"><a href="/projects/">全部项目 →</a></p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* 首页：玻璃 Hero 面板 + 双列卡片区（≤900px 降为单列） */
+  .hero {
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .hero h1 {
+    margin: 0 0 0.85rem;
+    font-size: clamp(1.9rem, 5.4vw, 3rem);
+    line-height: 1.18;
+  }
+
+  .hero-lead {
+    margin: 0;
+    max-width: 52ch;
+    color: var(--fg-muted);
+  }
+
+  .hero-pills {
+    margin-top: 1.35rem;
+  }
+
+  .hero-cta {
+    margin: 1.35rem 0 0;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.25rem;
+  }
+
+  .home-column {
+    min-width: 0;
+  }
+
+  @media (max-width: 900px) {
+    .home-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+    }
+  }
+</style>

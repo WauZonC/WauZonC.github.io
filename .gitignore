@@ -1,0 +1,43 @@
+# ---------- 依赖与构建产物 ----------
+node_modules/
+dist/
+.output/
+.astro/
+.vercel/
+.netlify/
+.cache/
+
+# ---------- 锁文件例外说明 ----------
+# pnpm-lock.yaml / package-lock.json 必须入库，请勿在此忽略
+
+# ---------- 环境变量与密钥 ----------
+.env
+.env.*
+!.env.example
+
+# ---------- 编辑器 / IDE 私有配置 ----------
+.obsidian/
+.claude/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.idea/
+
+# ---------- 操作系统文件 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- P4 内容取材与人工审批（本地临时目录，绝不入库） ----------
+# 阶段一产出的「待审批内容」包含个人隐私素材（联系方式/成绩/学号等），
+# 仅供人工逐项审阅与删改；严禁 `git add -f p4-review/`。
+p4-review/
+
+# ---------- 日志与临时文件 ----------
+*.log
+npm-debug.log*
+pnpm-debug.log*
+tmp/
+temp/
+*.tmp
+*.bak

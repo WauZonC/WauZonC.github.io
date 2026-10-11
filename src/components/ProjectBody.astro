@@ -1,0 +1,59 @@
+---
+/**
+ * 项目卡片的 Markdown 正文容器（P4 新增）。
+ *
+ * 为什么单独做一个组件：Astro 的模板里**不能把组件写在 JS 表达式内部**
+ * （`{cond && <Content />}` 会编译失败），所以「是否显示正文」这件事改成
+ * 由 CSS 控制——组件本身只作为普通元素出现在模板顶层。
+ */
+interface Props {
+  Content: any;
+  /** 首页紧凑卡片传 true：正文仍在 DOM 中，但隐藏显示。 */
+  hidden?: boolean;
+}
+
+const { Content, hidden = false } = Astro.props;
+---
+
+<div class={hidden ? 'project-card-body is-hidden' : 'project-card-body'}>
+  <Content />
+</div>
+
+<style>
+  .project-card-body {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--hairline);
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+  }
+
+  .is-hidden {
+    display: none;
+  }
+
+  .project-card-body :global(p) {
+    margin: 0 0 0.55rem;
+  }
+
+  .project-card-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .project-card-body :global(ul) {
+    margin: 0 0 0.55rem;
+    padding-left: 1.15rem;
+  }
+
+  .project-card-body :global(li) {
+    margin: 0.22rem 0;
+  }
+
+  .project-card-body :global(strong) {
+    color: var(--fg);
+  }
+
+  .project-card-body :global(a) {
+    color: var(--accent);
+  }
+</style>

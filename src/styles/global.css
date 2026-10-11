@@ -1,0 +1,402 @@
+/* ==========================================================================
+ * P3 样式体系 —— 风格 10「玻璃拟态渐变」（用户于 P2.5 选定，决策见 PLAN.md ADR-7）
+ *
+ * 结构：设计令牌 → 基础重置 → 排版与链接 → 版式容器 → 玻璃组件工具类
+ *       → 正文(prose) → 响应式断点（900px 版式 / 640px 排版）
+ * 约束：零客户端 JS；仅原生 CSS；不引入任何框架；
+ *       backdrop-filter 通过 @supports 提供不透明兜底，保证正文对比度。
+ * ========================================================================== */
+
+/* ---------- 设计令牌：浅色（默认） ---------- */
+:root {
+  color-scheme: light dark;
+
+  /* 文本与强调色 */
+  --fg: #16202e;
+  --fg-muted: #55637a;
+  --accent: #2f6fed;
+  --accent-soft: rgba(47, 111, 237, 0.12);
+
+  /* 玻璃材质 */
+  --glass: rgba(255, 255, 255, 0.62);
+  --glass-solid: rgba(255, 255, 255, 0.9); /* 不支持 backdrop-filter 时的兜底 */
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-tint: rgba(255, 255, 255, 0.34);
+  --hairline: rgba(22, 32, 46, 0.12);
+
+  /* 阴影与圆角 */
+  --shadow: 0 18px 50px rgba(23, 43, 77, 0.14);
+  --shadow-sm: 0 8px 24px rgba(23, 43, 77, 0.1);
+  --radius: 24px;
+  --radius-sm: 14px;
+  --blur: 14px;
+
+  /* 背景：底色 + 多层柔光斑（纯 CSS，无位图） */
+  --bg-color: #eaf1fb;
+  --bg-image:
+    radial-gradient(46rem 30rem at 12% -8%, #c7ddff 0%, rgba(199, 221, 255, 0) 62%),
+    radial-gradient(38rem 26rem at 92% 6%, #ffd9ec 0%, rgba(255, 217, 236, 0) 60%),
+    radial-gradient(40rem 30rem at 50% 108%, #cdf5e6 0%, rgba(205, 245, 230, 0) 62%);
+
+  /* 代码块 */
+  --code-bg: rgba(22, 32, 46, 0.07);
+  --code-fg: #0f172a;
+
+  /* 版式 */
+  --container: 960px;   /* 玻璃卡片网格所需画布宽度，理由见 ADR-7 */
+  --measure: 44rem;     /* 文本类页面的行宽上限（≈700px），保证中文阅读舒适 */
+  --gap: 1.25rem;
+}
+
+/* ---------- 设计令牌：暗色（跟随系统） ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #eef2f9;
+    --fg-muted: #a7b2c5;
+    --accent: #9ec1ff;
+    --accent-soft: rgba(158, 193, 255, 0.16);
+
+    --glass: rgba(22, 28, 40, 0.55);
+    --glass-solid: rgba(20, 25, 37, 0.94);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-tint: rgba(255, 255, 255, 0.08);
+    --hairline: rgba(255, 255, 255, 0.14);
+
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.42);
+
+    --bg-color: #0b1020;
+    --bg-image:
+      radial-gradient(46rem 30rem at 12% -10%, #1c3a6e 0%, rgba(28, 58, 110, 0) 62%),
+      radial-gradient(38rem 26rem at 92% 4%, #4a1f47 0%, rgba(74, 31, 71, 0) 60%),
+      radial-gradient(40rem 30rem at 50% 110%, #10403a 0%, rgba(16, 64, 58, 0) 62%);
+
+    --code-bg: rgba(255, 255, 255, 0.09);
+    --code-fg: #e8eef8;
+  }
+}
+
+/* ---------- 基础重置 ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--fg);
+  background-color: var(--bg-color);
+  background-image: var(--bg-image);
+  background-attachment: fixed; /* 滚动时柔光斑不动，避免视觉跳动 */
+  font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  font-size: 16px;
+  line-height: 1.8; /* 中文排版：行高略大于英文习惯，见 PLAN.md 5.2 */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 长英文串 / 链接不撑破容器（防横向滚动） */
+p,
+li,
+h1,
+h2,
+h3,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 链接与焦点 ---------- */
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 键盘用户的跳转链接：默认视觉隐藏，聚焦时出现（不用负坐标，避免产生横向滚动） */
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 40;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-solid);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+/* ---------- 版式容器 ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gap);
+}
+
+/* 文本类页面（博客列表 / 文章 / 关于 / 404）的行宽约束，居中 */
+.measure {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* 纵向卡片栈 */
+.stack {
+  display: grid;
+  gap: var(--gap);
+}
+
+/* ---------- 玻璃材质工具类 ----------
+ * .glass = 材质底座；.card = 玻璃卡片（更小圆角 + 悬浮反馈）；.panel = 大区内边距
+ * 用法示例：<article class="glass card">、<section class="glass panel">
+ */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
+  backdrop-filter: blur(var(--blur)) saturate(140%);
+}
+
+/* 兜底：不支持 backdrop-filter 时改为不透明玻璃，确保正文对比度 */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .glass {
+    background: var(--glass-solid);
+  }
+}
+
+.card {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 1.35rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+.panel {
+  padding: 2.25rem 1.9rem;
+}
+
+/* ---------- 药丸标签 / 章节标题 / 页头 ---------- */
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 0.1rem 0.7rem;
+}
+
+.section-title {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.page-head {
+  margin: 0 0 1.75rem;
+}
+
+.page-head h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.7rem, 4.4vw, 2.4rem);
+}
+
+.page-head p {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+.more {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* ---------- 正文排版（Markdown 输出） ---------- */
+.prose {
+  font-size: 1rem;
+}
+
+.prose h1 {
+  font-size: clamp(1.6rem, 4.2vw, 2.2rem);
+  margin: 0 0 0.75rem;
+}
+
+.prose h2 {
+  font-size: 1.3rem;
+  margin: 2rem 0 0.6rem;
+}
+
+.prose h3 {
+  font-size: 1.08rem;
+  margin: 1.5rem 0 0.4rem;
+}
+
+.prose p {
+  margin: 0 0 1.1rem;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 1.1rem;
+  padding-left: 1.4rem;
+}
+
+.prose li + li {
+  margin-top: 0.3rem;
+}
+
+.prose blockquote {
+  margin: 0 0 1.1rem;
+  padding: 0.65rem 1rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--glass-tint);
+  color: var(--fg-muted);
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Courier New', monospace;
+  font-size: 0.88em;
+  color: var(--code-fg);
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+}
+
+.prose pre {
+  margin: 0 0 1.2rem;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  border: 1px solid var(--hairline);
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose img {
+  border-radius: var(--radius-sm);
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 2rem 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 0 0 1.2rem;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--hairline);
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+}
+
+/* ---------- 响应式断点 ---------- */
+/* 900px：版式降列（玻璃网格 → 单列） */
+@media (max-width: 900px) {
+  .panel {
+    padding: 1.75rem 1.4rem;
+  }
+}
+
+/* 640px：排版与内边距收紧（PLAN.md 5.2 约定断点） */
+@media (max-width: 640px) {
+  :root {
+    --gap: 1rem;
+    --radius: 20px;
+  }
+
+  body {
+    font-size: 15.5px;
+  }
+
+  .panel {
+    padding: 1.4rem 1.15rem;
+  }
+
+  .card {
+    padding: 1.1rem 1.15rem;
+  }
+}

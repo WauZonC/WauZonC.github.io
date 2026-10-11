@@ -1,0 +1,46 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title = 'WauZonC 的个人主页',
+  description = 'WauZonC 的个人主页：文章、项目与简介。',
+  ogType = 'website',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <BaseHead title={title} description={description} ogType={ogType} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <Header />
+    <main id="main" class="container">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  /* 玻璃拟态风格下，主区域与页头/页脚之间留出呼吸感（见 PLAN.md ADR-7） */
+  main {
+    padding-block: 2.25rem 3rem;
+  }
+
+  @media (max-width: 640px) {
+    main {
+      padding-block: 1.5rem 2.25rem;
+    }
+  }
+</style>

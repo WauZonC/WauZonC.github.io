@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => b.data.order - a.data.order || a.data.title.localeCompare(b.data.title),
+);
+---
+
+<BaseLayout title="项目 | WauZonC" description="WauZonC 的项目与作品集。">
+  <div class="page-head">
+    <h1>项目</h1>
+    <p>共 {projects.length} 个条目。</p>
+  </div>
+
+  {
+    projects.length > 0 ? (
+      <div class="project-grid">
+        {projects.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+    ) : (
+      <p>暂无项目条目。</p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  /* 项目页用宽画布双列玻璃卡片；≤760px 降为单列 */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap);
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .project-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

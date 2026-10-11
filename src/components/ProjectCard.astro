@@ -1,0 +1,89 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import ProjectBody from './ProjectBody.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  /** 首页「精选项目」用紧凑卡片（不显示配图与正文），/projects 用完整卡片。 */
+  compact?: boolean;
+}
+
+const { project, compact = false } = Astro.props;
+const { title, description, tech, repoUrl, demoUrl, cover } = project.data;
+const hasLinks = Boolean(repoUrl || demoUrl);
+const coverAlt = title + ' 界面截图';
+const showCover = Boolean(cover) && !compact;
+// 正文由 ProjectBody 渲染：Astro 不允许把组件写进 JS 表达式，所以这里不用条件表达式包组件
+const { Content } = await render(project);
+---
+
+<article class="glass card project-card">
+  {showCover && <img class="project-card-cover" src={cover} alt={coverAlt} decoding="async" />}
+  <h3 class="project-card-title">{title}</h3>
+  <p class="project-card-description">{description}</p>
+  {
+    tech.length > 0 && (
+      <ul class="pill-row project-card-tech">
+        {tech.map((item) => (
+          <li class="pill">{item}</li>
+        ))}
+      </ul>
+    )
+  }
+  <ProjectBody Content={Content} hidden={compact} />
+  {
+    hasLinks && (
+      <p class="project-card-links">
+        {repoUrl && <a href={repoUrl}>仓库</a>}
+        {repoUrl && demoUrl && <span class="sep">·</span>}
+        {demoUrl && <a href={demoUrl}>演示</a>}
+      </p>
+    )
+  }
+</article>
+
+<style>
+  /* 与 PostCard 同族的玻璃卡片；项目的条目没有独立详情页，故标题为纯文本 */
+  .project-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* P4 新增：项目配图（截图）。发丝边框 + 圆角，与玻璃卡片同一语言 */
+  .project-card-cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 0.9rem;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--glass-tint);
+  }
+
+  .project-card-title {
+    margin: 0 0 0.3rem;
+    font-size: 1.05rem;
+  }
+
+  .project-card-description {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+  }
+
+  .project-card-tech {
+    margin-top: 0.75rem;
+  }
+
+  .project-card-links {
+    margin: 0.85rem 0 0;
+    font-size: 0.88rem;
+  }
+
+  .project-card-links .sep {
+    margin: 0 0.4rem;
+    color: var(--fg-muted);
+  }
+</style>

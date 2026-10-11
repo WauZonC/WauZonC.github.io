@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="博客 | WauZonC" description="WauZonC 的全部文章，按发布时间倒序排列。">
+  <div class="measure">
+    <div class="page-head">
+      <h1>博客</h1>
+      <p>共 {posts.length} 篇文章（草稿不参与构建）。</p>
+    </div>
+
+    <div class="stack">
+      {posts.length > 0 ? posts.map((post) => <PostCard post={post} />) : <p>暂无文章。</p>}
+    </div>
+  </div>
+</BaseLayout>

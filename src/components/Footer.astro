@@ -1,0 +1,27 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>© {year} WauZonC · 由 Astro 构建，托管于 GitHub Pages</p>
+  </div>
+</footer>
+
+<style>
+  /* 与玻璃材质同族的低调分隔：用半透明底 + 发丝线，避免再叠一层模糊 */
+  .site-footer {
+    border-top: 1px solid var(--glass-border);
+    background: var(--glass-tint);
+    color: var(--fg-muted);
+    font-size: 0.86rem;
+  }
+
+  .footer-inner {
+    padding-block: 1.25rem 1.5rem;
+  }
+
+  .footer-inner p {
+    margin: 0;
+  }
+</style>

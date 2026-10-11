@@ -1,0 +1,118 @@
+---
+const siteName = 'WauZonC';
+
+const navItems = [
+  { href: '/', label: '首页' },
+  { href: '/about/', label: '关于' },
+  { href: '/blog/', label: '博客' },
+  { href: '/projects/', label: '项目' },
+];
+
+const currentPath = Astro.url.pathname;
+
+function isCurrent(href: string, pathname: string): boolean {
+  if (href === '/') {
+    return pathname === '/';
+  }
+  return pathname === href || pathname.startsWith(href);
+}
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="site-title" href="/">{siteName}</a>
+    <nav class="site-nav" aria-label="主导航">
+      <ul>
+        {
+          navItems.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href, currentPath) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* 粘性玻璃导航栏：材质令牌与 global.css 的 .glass 一致（P3 / ADR-7） */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--glass);
+    border-bottom: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
+    backdrop-filter: blur(var(--blur)) saturate(140%);
+  }
+
+  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+    .site-header {
+      background: var(--glass-solid);
+    }
+  }
+
+  .header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+    padding-block: 0.75rem;
+  }
+
+  .site-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: var(--fg);
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav a {
+    display: block;
+    padding: 0.25rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+
+  .site-nav a:hover {
+    color: var(--fg);
+    background: var(--glass-tint);
+  }
+
+  .site-nav a[aria-current='page'] {
+    color: var(--fg);
+    background: var(--glass-tint);
+    font-weight: 600;
+  }
+
+  /* 窄屏不留白浪费：品牌与导航各占一行时左对齐堆叠 */
+  @media (max-width: 640px) {
+    .header-inner {
+      padding-block: 0.6rem;
+    }
+
+    .site-nav a {
+      padding: 0.2rem 0.65rem;
+      font-size: 0.86rem;
+    }
+  }
+</style>

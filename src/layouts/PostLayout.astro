@@ -1,0 +1,79 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = post.data;
+---
+
+<BaseLayout title={`${title} | WauZonC`} description={description} ogType="article">
+  <article class="glass panel measure">
+    <header class="post-header">
+      <h1>{title}</h1>
+      <p class="post-meta">
+        <time datetime={pubDate.toISOString()}>{pubDate.toLocaleDateString('zh-CN')}</time>
+        {
+          updatedDate && (
+            <>
+              <span class="sep">·</span>
+              <span>更新于 {updatedDate.toLocaleDateString('zh-CN')}</span>
+            </>
+          )
+        }
+      </p>
+      {
+        tags.length > 0 && (
+          <ul class="pill-row post-tags">
+            {tags.map((tag) => (
+              <li class="pill">{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="prose post-body">
+      <slot />
+    </div>
+  </article>
+
+  <p class="post-back measure"><a href="/blog/">← 返回文章列表</a></p>
+</BaseLayout>
+
+<style>
+  /* 文章页：玻璃面板 + .prose 正文排版，面板与返回链接同宽（.measure） */
+  .post-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .post-header h1 {
+    margin: 0 0 0.45rem;
+    font-size: clamp(1.6rem, 4.6vw, 2.3rem);
+  }
+
+  .post-meta {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sep {
+    margin: 0 0.4rem;
+  }
+
+  .post-tags {
+    margin-top: 0.75rem;
+  }
+
+  .post-back {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+  }
+</style>

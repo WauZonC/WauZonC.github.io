@@ -28,7 +28,7 @@ const t = ui[lang].themeSwitch;
 
 <button
   id="theme-toggle"
-  class="toggle-btn theme-toggle"
+  class="toggle-btn theme-toggle lg lg-pillbtn lg-refract"
   type="button"
   aria-pressed="false"
   aria-label={t.toDark}
@@ -59,8 +59,8 @@ const t = ui[lang].themeSwitch;
     var btn = document.getElementById('theme-toggle');
     if (!btn) return;
 
-    // 与 global.css 的 --bg-color 保持一致（浅 #eaf1fb / 暗 #0b1020）
-    var THEME_COLOR = { light: '#eaf1fb', dark: '#0b1020' };
+    // 与 BaseHead 的两条 media 版 theme-color 保持一致（ADR-11 后背景是压暗的照片）
+    var THEME_COLOR = { light: '#1b2a3d', dark: '#0d1420' };
     var mq = window.matchMedia('(prefers-color-scheme: dark)');
 
     // 有效主题 = 手动选择优先，否则跟随系统

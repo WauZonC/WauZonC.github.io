@@ -16,7 +16,7 @@ const href = withLang(`/blog/${post.id}/`, lang);
 const dateLocale = ui[lang].dateLocale;
 ---
 
-<article class="glass card post-card">
+<article class="card post-card lg lg-refract">
   <h3 class="post-card-title">
     <a href={href}>{title}</a>
   </h3>
@@ -28,7 +28,7 @@ const dateLocale = ui[lang].dateLocale;
     tags.length > 0 && (
       <ul class="pill-row post-card-tags">
         {tags.map((tag) => (
-          <li class="pill">{tag}</li>
+          <li class="pill lg lg-pillbtn lg-refract">{tag}</li>
         ))}
       </ul>
     )
@@ -36,7 +36,7 @@ const dateLocale = ui[lang].dateLocale;
 </article>
 
 <style>
-  /* 卡片材质来自全局 .glass + .card（P3 / ADR-7），此处只管卡片内部排版 */
+  /* 卡片材质来自 .lg .lg-refract + .card（ADR-11），此处只管卡片内部排版 */
   .post-card {
     min-width: 0;
   }

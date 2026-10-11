@@ -56,10 +56,11 @@ const xDefault = zhHref ?? canonical;
   })();
 </script>
 
-<!-- 移动端地址栏配色：与 global.css 的 --bg-color 保持一致（浅色 #eaf1fb / 暗色 #0b1020）。
-     未手动选择主题时由这两条生效；手动选择后由 ThemeToggle 的脚本换成单一 meta。 -->
-<meta name="theme-color" content="#eaf1fb" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)" />
+<!-- 移动端地址栏配色：与 global.css 的 body 底色一致（ADR-11 后背景是压暗的照片，
+     所以浅/深两态都偏深）。未手动选择主题时由这两条生效；
+     手动选择后由 ThemeToggle 的脚本换成单一 meta。 -->
+<meta name="theme-color" content="#1b2a3d" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0d1420" media="(prefers-color-scheme: dark)" />
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

@@ -276,7 +276,7 @@
   background-image:
     /* 压暗 + 轻微模糊叠在照片之上（用 backdrop 无法做，故用 filter 放在图源上） */
     linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
-    url('backgroud_chunk.jpg');
+    url('../public/images/background.jpg');
   background-size: cover, cover;
   background-position: center, center;
   background-repeat: no-repeat, no-repeat;
@@ -322,7 +322,7 @@ html:has(.bg-photo-band) {
   background-color: #0d1420;
   background-image:
     linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
-    url('backgroud_chunk.jpg');
+    url('../public/images/background.jpg');
   background-size: cover, cover;
   background-position: center, center top;
   background-repeat: no-repeat, no-repeat;

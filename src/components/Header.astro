@@ -35,7 +35,7 @@ function isCurrent(path: string): boolean {
 const homeHref = withLang('/', lang);
 ---
 
-<header class="site-header">
+<header class="site-header lg lg-header lg-refract">
   <div class="container header-inner">
     <a class="site-title" href={homeHref}>{t.siteName}</a>
 
@@ -45,7 +45,11 @@ const homeHref = withLang('/', lang);
           {
             navItems.map((item) => (
               <li>
-                <a href={item.href} aria-current={isCurrent(item.path) ? 'page' : undefined}>
+                <a
+                  class="lg lg-pillbtn lg-refract"
+                  href={item.href}
+                  aria-current={isCurrent(item.path) ? 'page' : undefined}
+                >
                   {item.label}
                 </a>
               </li>
@@ -63,21 +67,12 @@ const homeHref = withLang('/', lang);
 </header>
 
 <style>
-  /* 粘性玻璃导航栏：材质令牌与 global.css 的 .glass 一致（P3 / ADR-7） */
+  /* 粘性页头：材质与形状来自 global.css 的 .lg .lg-header .lg-refract（ADR-11），
+   * 这里只管定位、内部排布与导航项的排版。 */
   .site-header {
     position: sticky;
     top: 0;
     z-index: 20;
-    background: var(--glass);
-    border-bottom: 1px solid var(--glass-border);
-    -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
-    backdrop-filter: blur(var(--blur)) saturate(140%);
-  }
-
-  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
-    .site-header {
-      background: var(--glass-solid);
-    }
   }
 
   .header-inner {
@@ -95,6 +90,7 @@ const homeHref = withLang('/', lang);
     letter-spacing: 0.05em;
     text-decoration: none;
     color: var(--fg);
+    text-shadow: 0 1px 3px rgba(6, 12, 22, 0.45);
   }
 
   /* 导航与右侧两个切换按钮同组，窄屏时整组换行（避免撑出横向滚动） */
@@ -122,10 +118,10 @@ const homeHref = withLang('/', lang);
     list-style: none;
   }
 
+  /* 材质（药丸玻璃）由 .lg .lg-pillbtn .lg-refract 提供，这里只管排版 */
   .site-nav a {
     display: block;
     padding: 0.25rem 0.8rem;
-    border-radius: 999px;
     font-size: 0.9rem;
     color: var(--fg-muted);
     text-decoration: none;
@@ -133,12 +129,10 @@ const homeHref = withLang('/', lang);
 
   .site-nav a:hover {
     color: var(--fg);
-    background: var(--glass-tint);
   }
 
   .site-nav a[aria-current='page'] {
     color: var(--fg);
-    background: var(--glass-tint);
     font-weight: 600;
   }
 

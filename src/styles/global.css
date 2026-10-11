@@ -11,40 +11,64 @@
  *    由 2 段 is:inline 内联脚本实现。本文件仍不含任何 JS；R3（dist 内 .js 计数为 0）依然成立。
  * ========================================================================== */
 
-/* ---------- 设计令牌：浅色（默认） ---------- */
+/* ==========================================================================
+ * 视觉体系 —— 风格「液态玻璃 + 照片背景」（ADR-11，取代 ADR-7 的材质与背景）
+ *
+ * 结构：设计令牌 → 基础重置 → 排版与链接 → 版式容器 → 液态玻璃四层材质
+ *       → 正文(prose) → 响应式断点
+ * 约束：仅原生 CSS；不引入任何框架、不引入客户端 JS；
+ *       真折射走 @supports 门禁，不支持时降级为磨砂 + 镜面 + 厚度；
+ *       backdrop-filter 完全不支持时降级为不透明玻璃（承接 ADR-7 的兜底要求）。
+ * 主题：浅色在 :root，暗色有两处同步块（手动 data-theme / 跟随系统），见下方 ADR-9 说明。
+ *
+ * ⚠️ 2026-10-11 起「零客户端 JS」的性质有变（ADR-1 → ADR-9）：新增了浅色/深色手动切换，
+ *    由 2 段 is:inline 内联脚本实现。本文件仍不含任何 JS；R3（dist 内 .js 计数为 0）依然成立。
+ * ⚠️ 同日「零位图背景」的性质也结束了：背景改成 public/images/background.jpg（ADR-11）。
+ * ========================================================================== */
+
+/* ---------- 设计令牌：浅色（默认） ----------
+ * ⚠️ 背景是照片（深色礁石 + 海面），所以正文用【浅色】。这是 ADR-11 的关键改动：
+ *    沿用它之前的「浅底 + 深字」会让正文在照片上明显读不清（原型阶段实测踩到）。
+ */
 :root {
   color-scheme: light dark;
 
-  /* 文本与强调色 */
-  --fg: #16202e;
-  --fg-muted: #55637a;
-  --accent: #2f6fed;
-  --accent-soft: rgba(47, 111, 237, 0.12);
+  /* 文本与强调色（照片上的浅色文字） */
+  --fg: #f4f7fc;
+  --fg-muted: #dbe2ee;
+  --accent: #a9c8ff;
+  --accent-soft: rgba(169, 200, 255, 0.18);
+  --hairline: rgba(255, 255, 255, 0.22);
 
-  /* 玻璃材质 */
-  --glass: rgba(255, 255, 255, 0.62);
-  --glass-solid: rgba(255, 255, 255, 0.9); /* 不支持 backdrop-filter 时的兜底 */
-  --glass-border: rgba(255, 255, 255, 0.75);
-  --glass-tint: rgba(255, 255, 255, 0.34);
-  --hairline: rgba(22, 32, 46, 0.12);
+  /* 液态玻璃材质令牌
+   * ⚠️ 浅/深两态的玻璃都是【深色底】，这不是随手选的，是实测算出来的：
+   *    照片是深色礁石 + 深蓝海面，正文必须用浅色；而「浅色文字 + 浅色（白）玻璃」
+   *    叠在照片较亮处只有约 2.2:1，远低于 WCAG AA 的 4.5:1（原型阶段目视就发现
+   *    导航与标签发灰读不清）。换成深色玻璃后同一位置是 6.5~6.9:1，两态都稳过。
+   *    因此两态的区别改由 --photo-dim 与 --lg-alpha 承担（见下面两个暗色块）。 */
+  --lg-tint: 18, 25, 38;
+  --lg-alpha: 0.44;
+  --lg-saturate: 150%;
+  --lg-brightness: 1.06;
+  --lg-sheen: 0.3;               /* 镜面层强度 */
+  --lg-rim: rgba(255, 255, 255, 0.62);   /* 内侧顶部高光 */
+  --lg-hair: rgba(255, 255, 255, 0.18);  /* 发丝内描边 */
+  --lg-radius: 24px;
+  --lg-radius-sm: 14px;
+  --lg-shadow:
+    0 18px 46px rgba(6, 12, 22, 0.34),
+    0 2px 6px rgba(6, 12, 22, 0.22);
 
-  /* 阴影与圆角 */
-  --shadow: 0 18px 50px rgba(23, 43, 77, 0.14);
-  --shadow-sm: 0 8px 24px rgba(23, 43, 77, 0.1);
-  --radius: 24px;
-  --radius-sm: 14px;
-  --blur: 14px;
+  /* 通用「极淡表面」：页脚、标签这类不需要完整材质的场景（原 --glass-tint 的接任者） */
+  --tint-soft: rgba(255, 255, 255, 0.12);
 
-  /* 背景：底色 + 多层柔光斑（纯 CSS，无位图） */
-  --bg-color: #eaf1fb;
-  --bg-image:
-    radial-gradient(46rem 30rem at 12% -8%, #c7ddff 0%, rgba(199, 221, 255, 0) 62%),
-    radial-gradient(38rem 26rem at 92% 6%, #ffd9ec 0%, rgba(255, 217, 236, 0) 60%),
-    radial-gradient(40rem 30rem at 50% 108%, #cdf5e6 0%, rgba(205, 245, 230, 0) 62%);
+  /* 照片背景（ADR-11） */
+  --photo-dim: 0.42;             /* 压暗强度：保证正文对比度的关键旋钮 */
+  --photo-position: center;      /* 取景位置 */
 
   /* 代码块 */
-  --code-bg: rgba(22, 32, 46, 0.07);
-  --code-fg: #0f172a;
+  --code-bg: rgba(255, 255, 255, 0.14);
+  --code-fg: #f0f4fa;
 
   /* 版式 */
   --container: 960px;   /* 玻璃卡片网格所需画布宽度，理由见 ADR-7 */
@@ -66,58 +90,64 @@
  *      ② @media (prefers-color-scheme: dark) 下的 :root:not([data-theme='light'])
  *                                                                —— 未手动选择时跟随系统（含无 JS 环境）
  *    只改一处的后果：手动切换与跟随系统两条路径配色不一致。
+ *
+ * ⚠️ ADR-11 影响：背景是照片，浅/深两态都显示同一张照片，文字都保持浅色，
+ *    玻璃也都是深色底（理由见 :root 里的说明）。两态的区别是「照片压多暗 + 玻璃多实」，
+ *    因此视觉差异比 ADR-7 时期小；ADR-9 的「手动切换 + 持久化」机制完全保留。
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --fg: #eef2f9;
-  --fg-muted: #a7b2c5;
-  --accent: #9ec1ff;
-  --accent-soft: rgba(158, 193, 255, 0.16);
+  --fg: #f4f7fc;
+  --fg-muted: #c9d3e2;
+  --accent: #a9c8ff;
+  --accent-soft: rgba(169, 200, 255, 0.16);
+  --hairline: rgba(255, 255, 255, 0.18);
 
-  --glass: rgba(22, 28, 40, 0.55);
-  --glass-solid: rgba(20, 25, 37, 0.94);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-tint: rgba(255, 255, 255, 0.08);
-  --hairline: rgba(255, 255, 255, 0.14);
+  /* 深色态 = 把照片压得更暗、玻璃更实（浅色态的 --lg-tint 已经是深色，这里只调暗度） */
+  --lg-tint: 14, 20, 32;
+  --lg-alpha: 0.58;
+  --lg-brightness: 1.1;
+  --lg-sheen: 0.24;
+  --lg-rim: rgba(255, 255, 255, 0.22);
+  --lg-hair: rgba(255, 255, 255, 0.12);
+  --lg-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4);
 
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.42);
+  --tint-soft: rgba(255, 255, 255, 0.09);
 
-  --bg-color: #0b1020;
-  --bg-image:
-    radial-gradient(46rem 30rem at 12% -10%, #1c3a6e 0%, rgba(28, 58, 110, 0) 62%),
-    radial-gradient(38rem 26rem at 92% 4%, #4a1f47 0%, rgba(74, 31, 71, 0) 60%),
-    radial-gradient(40rem 30rem at 50% 110%, #10403a 0%, rgba(16, 64, 58, 0) 62%);
+  --photo-dim: 0.62;
 
-  --code-bg: rgba(255, 255, 255, 0.09);
+  --code-bg: rgba(255, 255, 255, 0.12);
   --code-fg: #e8eef8;
 }
 
 /* ② 跟随系统（未手动选择）。:not([data-theme='light']) 保证用户显式选了浅色时系统暗色不生效 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --fg: #eef2f9;
-    --fg-muted: #a7b2c5;
-    --accent: #9ec1ff;
-    --accent-soft: rgba(158, 193, 255, 0.16);
+    --fg: #f4f7fc;
+    --fg-muted: #c9d3e2;
+    --accent: #a9c8ff;
+    --accent-soft: rgba(169, 200, 255, 0.16);
+    --hairline: rgba(255, 255, 255, 0.18);
 
-    --glass: rgba(22, 28, 40, 0.55);
-    --glass-solid: rgba(20, 25, 37, 0.94);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-tint: rgba(255, 255, 255, 0.08);
-    --hairline: rgba(255, 255, 255, 0.14);
+    /* 深色态 = 把照片压得更暗、玻璃更实（浅色态的 --lg-tint 已经是深色，这里只调暗度） */
+    --lg-tint: 14, 20, 32;
+    --lg-alpha: 0.58;
+    --lg-brightness: 1.1;
+    --lg-sheen: 0.24;
+    --lg-rim: rgba(255, 255, 255, 0.22);
+    --lg-hair: rgba(255, 255, 255, 0.12);
+    --lg-shadow:
+      0 18px 46px rgba(0, 0, 0, 0.55),
+      0 2px 6px rgba(0, 0, 0, 0.4);
 
-    --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.42);
+    --tint-soft: rgba(255, 255, 255, 0.09);
 
-    --bg-color: #0b1020;
-    --bg-image:
-      radial-gradient(46rem 30rem at 12% -10%, #1c3a6e 0%, rgba(28, 58, 110, 0) 62%),
-      radial-gradient(38rem 26rem at 92% 4%, #4a1f47 0%, rgba(74, 31, 71, 0) 60%),
-      radial-gradient(40rem 30rem at 50% 110%, #10403a 0%, rgba(16, 64, 58, 0) 62%);
+    --photo-dim: 0.62;
 
-    --code-bg: rgba(255, 255, 255, 0.09);
+    --code-bg: rgba(255, 255, 255, 0.12);
     --code-fg: #e8eef8;
   }
 }
@@ -133,25 +163,34 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* 照片背景（ADR-11）。photo-dim 那层叠在照片之上，负责压暗到正文可读。
+ * 照片已是清空 EXIF、缩到 2560×1920 的副本，见 PLAN.md ADR-11 的隐私说明。 */
 body {
   margin: 0;
   min-height: 100vh;
   color: var(--fg);
-  background-color: var(--bg-color);
-  background-image: var(--bg-image);
-  background-attachment: fixed; /* 滚动时柔光斑不动，避免视觉跳动 */
+  background-color: #0d1420; /* 照片加载前的兜底底色 */
+  background-image:
+    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
+    url('/images/background.jpg');
+  background-size: cover, cover;
+  background-position: center, var(--photo-position);
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed; /* 滚动时照片不动，避免视觉跳动 */
   font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 1.8; /* 中文排版：行高略大于英文习惯，见 PLAN.md 5.2 */
   -webkit-font-smoothing: antialiased;
 }
 
+/* 照片明暗跳动处的标题加一层极淡描影，保证始终站得住 */
 h1,
 h2,
 h3,
 h4 {
   line-height: 1.35;
   letter-spacing: -0.01em;
+  text-shadow: 0 1px 3px rgba(6, 12, 22, 0.45);
 }
 
 img {
@@ -205,9 +244,9 @@ a:hover {
   height: auto;
   clip-path: none;
   padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-border);
-  background: var(--glass-solid);
+  border-radius: var(--lg-radius-sm);
+  border: 1px solid var(--lg-rim);
+  background: rgba(14, 22, 36, 0.86);
   color: var(--fg);
   text-decoration: none;
 }
@@ -233,36 +272,173 @@ a:hover {
   gap: var(--gap);
 }
 
-/* ---------- 玻璃材质工具类 ----------
- * .glass = 材质底座；.card = 玻璃卡片（更小圆角 + 悬浮反馈）；.panel = 大区内边距
- * 用法示例：<article class="glass card">、<section class="glass panel">
- */
-.glass {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
-  backdrop-filter: blur(var(--blur)) saturate(140%);
+/* ---------- 液态玻璃材质（ADR-11） ----------
+ * .lg       = 材质底座：第 2/3/4 层（磨砂 + 镜面 + 厚度），所有浏览器都生效
+ * .lg-refract = 第 1 层：真折射，仅 Chromium（由 @supports 门禁）
+ * .lg-panel / .lg-header / .lg-pillbtn = 角色化尺寸，面积越小折射越收敛
+ * 用法示例：<article class="lg lg-refract card">、<section class="lg lg-panel panel">
+ *
+ * ⚠️ 不要把这些材质与旧的 .glass 工具类叠加使用：.glass 已删除（ADR-11）。 */
+.lg {
+  position: relative;
+  border-radius: var(--lg-radius-sm);
+  background: rgba(var(--lg-tint), var(--lg-alpha));
+  box-shadow:
+    inset 0 1px 0 0 var(--lg-rim),
+    inset 0 0 0 1px var(--lg-hair),
+    var(--lg-shadow);
+  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  backdrop-filter: blur(12px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
 }
 
-/* 兜底：不支持 backdrop-filter 时改为不透明玻璃，确保正文对比度 */
-@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
-  .glass {
-    background: var(--glass-solid);
+/* 镜面层：斜向柔光 + 顶部径向光晕，随圆角裁切。
+ * 用 ::before 而不是额外元素，保证页面结构不变。z-index 留 auto，
+ * 让它落在元素背景之上、内容之下（内容不是定位元素时，定位的伪元素会盖过它，
+ * 所以这里显式压到 -0 以下的层：见 .lg > * 的说明）。 */
+.lg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(146deg,
+      rgba(255, 255, 255, var(--lg-sheen)) 0%,
+      rgba(255, 255, 255, 0.05) 34%,
+      rgba(255, 255, 255, 0) 62%),
+    radial-gradient(120% 90% at 50% -32%,
+      rgba(255, 255, 255, var(--lg-sheen)) 0%,
+      rgba(255, 255, 255, 0) 62%);
+}
+
+/* 内容保持在镜面层之上 */
+.lg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* iOS 26 的方角是超椭圆（corner-shape）。用 @supports 门禁：
+ * 不支持的浏览器保持普通圆角，不会因不认识的属性而失效。 */
+@supports (corner-shape: squircle) {
+  .lg {
+    corner-shape: squircle;
   }
 }
 
+/* 大面板（hero / 章节容器） */
+.lg-panel {
+  border-radius: var(--lg-radius);
+}
+
+/* sticky 页头：只留一条底部发丝线，去掉悬浮投影（贴边时投影没有意义） */
+.lg-header {
+  border-radius: 0;
+  box-shadow:
+    inset 0 -1px 0 0 var(--lg-hair),
+    inset 0 1px 0 0 var(--lg-rim),
+    0 2px 12px rgba(6, 12, 22, 0.28);
+}
+
+.lg-header::before {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, var(--lg-sheen)) 0%,
+    rgba(255, 255, 255, 0) 70%);
+}
+
+/* 药丸（标签 / 导航项 / 两个切换按钮）：小面积，折射要更收敛 */
+.lg-pillbtn {
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 0 var(--lg-rim),
+    inset 0 0 0 1px var(--lg-hair),
+    0 1px 5px rgba(6, 12, 22, 0.18);
+}
+
+/* ---------- 第 1 层：真折射（仅 Chromium） ----------
+ * @supports 门禁确保不被不支持 url() 滤镜的浏览器误用；不匹配时上面第 2/3/4 层
+ * 的磨砂材质照常生效，这就是降级路径。
+ *
+ * ⚠️ 下面四条里的 url("data:...") 是【生成的】，不要手改那一长串百分号编码。
+ *    改参数要改原型目录里的生成脚本，再重新生成本段（见 PLAN.md §10.6 的 M-3 记录）。
+ *    四条按 .lg-refract 单独写、以及逐角色再写一遍，是为了让「≤768px 关折射」
+ *    能靠同特异性的选择器覆盖——只写一条 .lg-refract 会被 .lg-refract.lg-panel
+ *    压住而静默失效（原型阶段实测踩到）。 */
+@supports (backdrop-filter: url("#x")) or (-webkit-backdrop-filter: url("#x")) {
+  .lg-refract {
+    -webkit-backdrop-filter:
+      blur(1px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520viewBox%253D%25220%25200%2520460%2520150%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25222.0%2525%2522%2520y2%253D%252298.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25221.0%2525%2522%2520x2%253D%252299.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%252210%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%252210%2522%2520y%253D%252210%2522%2520height%253D%2522130%2522%2520width%253D%2522440%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252216%2522%2520ry%253D%252216%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%220.7%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2232.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2230.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2228.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2228%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(10px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+    backdrop-filter:
+      blur(1px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520viewBox%253D%25220%25200%2520460%2520150%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25222.0%2525%2522%2520y2%253D%252298.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25221.0%2525%2522%2520x2%253D%252299.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%252210%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522150%2522%2520width%253D%2522460%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%252210%2522%2520y%253D%252210%2522%2520height%253D%2522130%2522%2520width%253D%2522440%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252216%2522%2520ry%253D%252216%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%220.7%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2232.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2230.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2228.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2228%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(10px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  }
+
+  .lg-refract.lg-panel {
+    -webkit-backdrop-filter:
+      blur(2px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520viewBox%253D%25220%25200%2520960%2520320%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25222.0%2525%2522%2520y2%253D%252298.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25221.0%2525%2522%2520x2%253D%252299.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%252216%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%252216%2522%2520y%253D%252216%2522%2520height%253D%2522288%2522%2520width%253D%2522928%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252226%2522%2520ry%253D%252226%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%221.0%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2240.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2237.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2234.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2234%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(13px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+    backdrop-filter:
+      blur(2px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520viewBox%253D%25220%25200%2520960%2520320%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25222.0%2525%2522%2520y2%253D%252298.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25221.0%2525%2522%2520x2%253D%252299.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%252216%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%2522320%2522%2520width%253D%2522960%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%252216%2522%2520y%253D%252216%2522%2520height%253D%2522288%2522%2520width%253D%2522928%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252226%2522%2520ry%253D%252226%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%221.0%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2240.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2237.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2234.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2234%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(13px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  }
+
+  .lg-refract.lg-header {
+    -webkit-backdrop-filter:
+      blur(2px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520viewBox%253D%25220%25200%25201280%252058%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%2522-0.0%2525%2522%2520y2%253D%2522100.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%2522-0.0%2525%2522%2520x2%253D%2522100.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25228%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%25228%2522%2520y%253D%25228%2522%2520height%253D%252242%2522%2520width%253D%25221264%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%25220%2522%2520ry%253D%25220%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%221.0%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2232.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2229.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2226.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2226%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(15px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+    backdrop-filter:
+      blur(2px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520viewBox%253D%25220%25200%25201280%252058%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%2522-0.0%2525%2522%2520y2%253D%2522100.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%2522-0.0%2525%2522%2520x2%253D%2522100.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25228%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252258%2522%2520width%253D%25221280%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%25228%2522%2520y%253D%25228%2522%2520height%253D%252242%2522%2520width%253D%25221264%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%25220%2522%2520ry%253D%25220%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%221.0%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2232.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2229.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2226.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2226%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(15px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  }
+
+  .lg-refract.lg-pillbtn {
+    -webkit-backdrop-filter:
+      blur(1px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520viewBox%253D%25220%25200%2520130%252034%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25228.0%2525%2522%2520y2%253D%252292.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25222.0%2525%2522%2520x2%253D%252298.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25225%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%25225%2522%2520y%253D%25225%2522%2520height%253D%252224%2522%2520width%253D%2522120%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252217%2522%2520ry%253D%252217%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%220.35%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2220.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2219.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2218.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2218%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(8px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+    backdrop-filter:
+      blur(1px) url("data:image/svg+xml;utf8,data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22d%22%20x%3D%220%25%22%20y%3D%220%25%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeImage%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20preserveAspectRatio%3D%22none%22%20result%3D%22map%22%20href%3D%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520viewBox%253D%25220%25200%2520130%252034%2522%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2522Y%2522%2520x1%253D%25220%2522%2520x2%253D%25220%2522%2520y1%253D%25228.0%2525%2522%2520y2%253D%252292.0%2525%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%25230F0%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253ClinearGradient%2520id%253D%2522X%2522%2520x1%253D%25222.0%2525%2522%2520x2%253D%252298.0%2525%2522%2520y1%253D%25220%2522%2520y2%253D%25220%2522%253E%253Cstop%2520offset%253D%25220%2525%2522%2520stop-color%253D%2522%2523F00%2522%252F%253E%253Cstop%2520offset%253D%2522100%2525%2522%2520stop-color%253D%2522%2523000%2522%252F%253E%253C%252FlinearGradient%253E%253Cfilter%2520id%253D%2522b%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25222%2522%252F%253E%253C%252Ffilter%253E%253Cfilter%2520id%253D%2522r%2522%253E%253CfeGaussianBlur%2520stdDeviation%253D%25225%2522%252F%253E%253C%252Ffilter%253E%253C%252Fdefs%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522%2523808080%2522%252F%253E%253Cg%2520filter%253D%2522url%2528%2523b%2529%2522%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522%2523000080%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522url%2528%2523Y%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253Crect%2520x%253D%25220%2522%2520y%253D%25220%2522%2520height%253D%252234%2522%2520width%253D%2522130%2522%2520fill%253D%2522url%2528%2523X%2529%2522%2520style%253D%2522mix-blend-mode%253Ascreen%2522%252F%253E%253C%252Fg%253E%253Crect%2520x%253D%25225%2522%2520y%253D%25225%2522%2520height%253D%252224%2522%2520width%253D%2522120%2522%2520fill%253D%2522%2523808080%2522%2520rx%253D%252217%2522%2520ry%253D%252217%2522%2520filter%253D%2522url%2528%2523r%2529%2522%252F%253E%253C%252Fsvg%253E%22%2F%3E%3CfeColorMatrix%20in%3D%22SourceGraphic%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%22%20result%3D%22black%22%2F%3E%3CfeColorMatrix%20in%3D%22map%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%201%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22edgeRaw%22%2F%3E%3CfeComponentTransfer%20in%3D%22edgeRaw%22%20result%3D%22edgeMask%22%3E%3CfeFuncA%20type%3D%22linear%22%20slope%3D%220.35%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2220.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dRRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dRRaw%22%20type%3D%22matrix%22%20values%3D%221%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dR%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2219.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dGRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dGRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%201%200%200%200%20%200%200%200%200%200%20%200%200%200%201%200%22%20result%3D%22dG%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2218.0%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22dBRaw%22%2F%3E%3CfeColorMatrix%20in%3D%22dBRaw%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%201%200%200%20%200%200%200%201%200%22%20result%3D%22dB%22%2F%3E%3CfeBlend%20in%3D%22dR%22%20in2%3D%22dG%22%20mode%3D%22screen%22%20result%3D%22rg%22%2F%3E%3CfeBlend%20in%3D%22rg%22%20in2%3D%22dB%22%20mode%3D%22screen%22%20result%3D%22rgb%22%2F%3E%3CfeComposite%20in%3D%22rgb%22%20in2%3D%22edgeMask%22%20operator%3D%22in%22%20result%3D%22edgeOnly%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22map%22%20scale%3D%2218%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%20result%3D%22centerClean%22%2F%3E%3CfeComposite%20in%3D%22edgeOnly%22%20in2%3D%22centerClean%22%20operator%3D%22over%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3C%2Fsvg%3E#d") blur(8px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  }
+}
+
+/* 兜底①：不支持 backdrop-filter 时改为不透明玻璃，确保正文对比度（承接 ADR-7） */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .lg {
+    background: rgba(14, 22, 36, 0.94);
+  }
+}
+
+/* 兜底②：手机上卡片密集，折射收益低而 GPU 成本高 → 只保留磨砂 + 镜面 + 厚度。
+ * 选择器必须与上面 @supports 块里的【逐角色】选择器同特异性或更高，理由见上。 */
+@media (max-width: 768px) {
+  @supports (backdrop-filter: url("#x")) or (-webkit-backdrop-filter: url("#x")) {
+    .lg-refract,
+    .lg-refract.lg-panel,
+    .lg-refract.lg-header,
+    .lg-refract.lg-pillbtn {
+      -webkit-backdrop-filter: blur(10px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+      backdrop-filter: blur(10px) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+    }
+  }
+}
+
+/* 兜底③：用户要求降低透明度时改为近乎不透明 */
+@media (prefers-reduced-transparency: reduce) {
+  .lg {
+    background: rgba(14, 22, 36, 0.94);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .lg::before {
+    opacity: 0.4;
+  }
+}
+
+/* .card / .panel 只负责间距与悬浮反馈，材质交给 .lg。
+ * 悬浮只做位移、不覆盖 box-shadow——材质的那套「内侧高光 + 发丝边 + 投影」比
+ * 单一阴影更好看，而且 .lg 与 .card:hover 特异性相同、.card 在源序更靠后，
+ * 在这里重设 box-shadow 会连未悬浮状态一起覆盖掉（原型阶段实测踩到）。 */
 .card {
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
   padding: 1.25rem 1.35rem;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease;
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -287,12 +463,11 @@ a:hover {
   list-style: none;
 }
 
+/* 材质由 .lg .lg-pillbtn 提供（见各组件），这里只管排版 */
 .pill {
   display: inline-block;
   font-size: 0.78rem;
   color: var(--fg-muted);
-  background: var(--glass-tint);
-  border: 1px solid var(--glass-border);
   border-radius: 999px;
   padding: 0.1rem 0.7rem;
 }
@@ -363,8 +538,8 @@ a:hover {
   margin: 0 0 1.1rem;
   padding: 0.65rem 1rem;
   border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--glass-tint);
+  border-radius: 0 var(--lg-radius-sm) var(--lg-radius-sm) 0;
+  background: var(--tint-soft);
   color: var(--fg-muted);
 }
 
@@ -385,7 +560,7 @@ a:hover {
   margin: 0 0 1.2rem;
   padding: 1rem 1.1rem;
   overflow-x: auto;
-  border-radius: var(--radius-sm);
+  border-radius: var(--lg-radius-sm);
   background: var(--code-bg);
   border: 1px solid var(--hairline);
 }
@@ -396,7 +571,7 @@ a:hover {
 }
 
 .prose img {
-  border-radius: var(--radius-sm);
+  border-radius: var(--lg-radius-sm);
 }
 
 .prose hr {
@@ -420,8 +595,7 @@ a:hover {
 }
 
 /* ---------- 页头工具按钮（ADR-9 主题切换 / ADR-10 语言切换） ----------
- * 与 .pill / 药丸导航同一材质语言：玻璃底 + 发丝边 + 全圆角。
- * 具体按钮的图标动画放在各自的组件里（ThemeToggle.astro）。
+ * 材质来自 .lg .lg-pillbtn（见各组件），这里只管排版与交互。
  */
 .toggle-btn {
   display: inline-flex;
@@ -431,9 +605,6 @@ a:hover {
   min-width: 2.15rem;
   height: 2.15rem;
   padding: 0 0.55rem;
-  border: 1px solid var(--glass-border);
-  border-radius: 999px;
-  background: var(--glass-tint);
   color: var(--fg-muted);
   font-family: inherit;
   font-size: 0.8rem;
@@ -444,14 +615,11 @@ a:hover {
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    color 0.18s ease,
-    background 0.18s ease;
+  transition: color 0.18s ease;
 }
 
 .toggle-btn:hover {
   color: var(--fg);
-  background: var(--glass);
 }
 
 .toggle-btn:focus-visible {
@@ -517,7 +685,7 @@ html:not(.js) .theme-toggle {
 @media (max-width: 640px) {
   :root {
     --gap: 1rem;
-    --radius: 20px;
+    --lg-radius: 20px;
   }
 
   body {

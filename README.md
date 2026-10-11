@@ -6,8 +6,10 @@
 - 技术栈：Astro + Markdown Content Collections
 - 包管理器：pnpm
 
-> **当前状态：P6 完成（已上线）—— 站点发布在 <https://wauzonc.github.io>，内容为 3 篇博客 / 4 个项目 / `about`，玻璃拟态样式；推送 `main` 即由 `.github/workflows/deploy.yml` 自动构建并部署（首次运行 build+deploy 全绿，6 条路由实测 200、中文正常）。**
-> 唯一权威设计文档是 **[PLAN.md](./PLAN.md)**，所有后续开发步骤以它为准。
+> **当前状态：🟢 维护阶段（Maintenance，自 2026-10-11 起）** —— 开发阶段 P0–P6 **全部完成**，站点发布在 <https://wauzonc.github.io>，内容为 3 篇博客 / 4 个项目 / `about`，玻璃拟态样式；推送 `main` 即由 `.github/workflows/deploy.yml` 自动构建并部署（首次运行 build+deploy 全绿，路由实测 200、中文正常）。
+>
+> **后续改动（新增博客 / 修改主页风格 / 新增功能）请按 [PLAN.md](./PLAN.md) 的 §10「维护阶段操作手册」执行**：先在 §10.5 台账立项（`M-<编号>` + 轨道 + 写作用域 + 验收命令），再动手，并通过回归验收 **R1–R6**（构建 / 页面数 / 零客户端 JS / 无横向滚动 / 泄漏扫描 / 线上一致）。
+> 唯一权威设计文档是 **[PLAN.md](./PLAN.md)**，所有后续步骤以它为准（状态切换见其中的 **ADR-8**）。
 
 ## 目录结构
 
@@ -44,14 +46,30 @@ pnpm preview     # 预览构建产物
 
 ## 新增文章
 
-在 `src/content/blog/` 下新增一个 `.md` 文件即可，**无需修改任何 `.astro` 文件**；frontmatter 由 `src/content.config.ts` 的 schema 在构建期校验（字段缺失会让 `pnpm build` 失败）。设 `draft: true` 的文章不参与构建。
+在 `src/content/blog/` 下新增一个 `.md` 文件即可，**无需修改任何 `.astro` 文件**（这是 G3 契约）；frontmatter 由 `src/content.config.ts` 的 schema 在构建期校验（字段缺失会让 `pnpm build` 非 0 退出，属预期行为）。设 `draft: true` 的文章不参与构建。
+
+- **文件名即 URL**（`/blog/<文件名>/`）：只用小写字母、数字与连字符，**不要用中文文件名**
+- **必填字段**：`title`、`description`、`pubDate`；可选 `updatedDate`、`tags`、`draft`、`cover`
+- `pubDate` 决定 `/blog` 列表与首页「最新文章」的排序，不要写成未来日期
+- 图片放 `public/images/`，正文用 `/images/<name>.png` 引用（先剥离 EXIF）
+- ⚠️ 内容涉及**本人隐私**（手机号 / 学号 / 成绩 / 住址 / 身份证 / 政治面貌）或**他人信息与版权素材**时，**必须先经用户逐项审批**再提交；完整流程见 [PLAN.md](./PLAN.md) §10.2 轨道 A（发布前须过泄漏扫描 R5）
 
 ## 部署
 
 推送到 `main` 即由 `.github/workflows/deploy.yml` 自动构建并发布到 GitHub Pages（<https://wauzonc.github.io>）；也可在 Actions 页面手动 `workflow_dispatch` 触发。仓库 Pages 来源为 **GitHub Actions**（`Settings → Pages`）。
 
-## 后续步骤
+## 维护阶段与后续计划
 
-[PLAN.md](./PLAN.md) 的路线图 **P0–P6 已全部完成**，站点已上线。可选增量（均需先在 PLAN.md 中立项）：自定义域名（`public/CNAME` + 同步 `site`）、RSS / 站点搜索 / 评论（giscus）/ 访问统计 / 文章目录、为手势识别项目补配图。
+开发阶段的路线图 **P0–P6 已全部完成并冻结**（见 [PLAN.md](./PLAN.md) §6），工作区现处于**维护阶段**（ADR-8）。后续改动分三条轨道，操作手册见 [PLAN.md](./PLAN.md) §10：
+
+| 轨道 | 场景 | 写作用域 |
+|---|---|---|
+| **A** 新增内容 | 新增博客 / 项目条目 | `src/content/**`（配图另加 `public/images/`） |
+| **B** 修改风格 | 调整配色、玻璃质感、排版、导航 | `src/styles/global.css`、`src/components/**`、`src/layouts/**` |
+| **C** 新增功能 | 新页面 / 新内容集合 / RSS / sitemap / 搜索 / 评论 / 统计 / TOC | 按功能立项（候选与代价见 PLAN.md §10.3） |
+
+**每次改动都必须**先在 [PLAN.md](./PLAN.md) §10.5 台账立项（`M-<编号>`），只改立项写明的写作用域，跑完 R1–R6 后再推送；涉及 ADR 的改动（引入客户端 JS、引入 CSS 框架、改 `site`/`base`、改内容 schema）**必须先改 ADR**。
+
+**已知待办**：手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`；自定义域名（已决定暂不绑定，见 PLAN.md §9 开放项 1）。
 
 > 所有命令请在 `D:\WZC\mypage\WauZonC.github.io` 下执行。

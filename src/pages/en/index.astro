@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LangNotice from '../../components/LangNotice.astro';
+import PostCard from '../../components/PostCard.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { ui } from '../../i18n/ui';
+
+const t = ui.en;
+
+// 英文集合当前为空（正文待翻译，见 PLAN.md ADR-10）；
+// 一旦 src/content/blog-en/ 里出现 .md，本页会自动列出，无需改动此文件。
+const posts = (await getCollection('blogEn', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const featuredProjects = (await getCollection('projectsEn', ({ data }) => data.featured)).sort(
+  (a, b) => b.data.order - a.data.order,
+);
+---
+
+<BaseLayout lang="en" title={t.defaultTitle} description={t.defaultDescription} altHref="/">
+  <div class="page-head measure">
+    <h1>{t.siteName}</h1>
+    <p>Articles, projects and a short bio — the English version is still in progress.</p>
+  </div>
+
+  <div class="notice-wrap">
+    <LangNotice zhHref="/" />
+  </div>
+
+  <div class="home-grid">
+    <section class="home-column">
+      <h2 class="section-title">Latest posts</h2>
+      <div class="stack">
+        {
+          posts.length > 0 ? (
+            posts.map((post) => <PostCard post={post} lang="en" />)
+          ) : (
+            <p>No English posts yet.</p>
+          )
+        }
+      </div>
+      <p class="more"><a href="/en/blog/">All posts →</a></p>
+    </section>
+
+    <section class="home-column">
+      <h2 class="section-title">Featured projects</h2>
+      <div class="stack">
+        {
+          featuredProjects.length > 0 ? (
+            featuredProjects.map((project) => (
+              <ProjectCard project={project} compact lang="en" />
+            ))
+          ) : (
+            <p>No English projects yet.</p>
+          )
+        }
+      </div>
+      <p class="more"><a href="/en/projects/">All projects →</a></p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* 提示面板是子组件，父页面的 scoped 样式够不到它，故包一层自己控制的元素 */
+  .notice-wrap {
+    margin-bottom: 2.5rem;
+  }
+</style>

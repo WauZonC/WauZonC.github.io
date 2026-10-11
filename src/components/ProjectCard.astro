@@ -1,18 +1,24 @@
 ---
 import { render } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
 import ProjectBody from './ProjectBody.astro';
+import { ui, type Lang } from '../i18n/ui';
+import type { ProjectEntry } from '../content-types';
 
 interface Props {
-  project: CollectionEntry<'projects'>;
+  project: ProjectEntry;
   /** 首页「精选项目」用紧凑卡片（不显示配图与正文），/projects 用完整卡片。 */
   compact?: boolean;
+  /** 缺省中文；英文页传 'en'（影响链接文案与配图 alt） */
+  lang?: Lang;
 }
 
 const { project, compact = false } = Astro.props;
+const lang: Lang = Astro.props.lang ?? 'zh';
+const t = ui[lang];
+
 const { title, description, tech, repoUrl, demoUrl, cover } = project.data;
 const hasLinks = Boolean(repoUrl || demoUrl);
-const coverAlt = title + ' 界面截图';
+const coverAlt = lang === 'zh' ? `${title} 界面截图` : `Screenshot of ${title}`;
 const showCover = Boolean(cover) && !compact;
 // 正文由 ProjectBody 渲染：Astro 不允许把组件写进 JS 表达式，所以这里不用条件表达式包组件
 const { Content } = await render(project);
@@ -35,9 +41,9 @@ const { Content } = await render(project);
   {
     hasLinks && (
       <p class="project-card-links">
-        {repoUrl && <a href={repoUrl}>仓库</a>}
+        {repoUrl && <a href={repoUrl}>{t.repoLink}</a>}
         {repoUrl && demoUrl && <span class="sep">·</span>}
-        {demoUrl && <a href={demoUrl}>演示</a>}
+        {demoUrl && <a href={demoUrl}>{t.demoLink}</a>}
       </p>
     )
   }

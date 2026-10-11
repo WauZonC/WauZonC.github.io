@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LangNotice from '../../components/LangNotice.astro';
+import { ui } from '../../i18n/ui';
+
+const t = ui.en;
+---
+
+<BaseLayout
+  lang="en"
+  title={`About | ${t.siteName}`}
+  description="About WauZonC — education, skills and contact."
+  altHref="/about/"
+>
+  <div class="measure">
+    <div class="page-head">
+      <h1>About</h1>
+      <p>Education, skills, projects and contact.</p>
+    </div>
+
+    <LangNotice zhHref="/about/" />
+  </div>
+</BaseLayout>

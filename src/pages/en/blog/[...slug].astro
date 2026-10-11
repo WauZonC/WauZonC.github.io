@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../../layouts/PostLayout.astro';
+
+/**
+ * 英文文章详情页。
+ *
+ * 当前 `blog-en` 集合为空 → `getStaticPaths` 返回 [] → 不生成任何页面，这是正确行为。
+ * 往 `src/content/blog-en/<slug>.md` 放入文件后，本文件**无需任何改动**即会生成
+ * `/en/blog/<slug>/`（G3 契约在英文侧同样成立，见 PLAN.md ADR-10）。
+ */
+export async function getStaticPaths() {
+  const [posts, zhPosts] = await Promise.all([
+    getCollection('blogEn', ({ data }) => !data.draft),
+    getCollection('blog'),
+  ]);
+
+  // 同名即同 slug：据此判断是否存在对应的中文译文，决定语言按钮与 hreflang
+  const zhIds = new Set(zhPosts.map((post) => post.id));
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post, hasTranslation: zhIds.has(post.id) },
+  }));
+}
+
+const { post, hasTranslation } = Astro.props;
+const { Content } = await render(post);
+---
+
+<PostLayout post={post} lang="en" hasTranslation={hasTranslation}>
+  <Content />
+</PostLayout>

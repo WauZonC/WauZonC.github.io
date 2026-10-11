@@ -2,33 +2,64 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getLangFromPath, HTML_LANG, ui, withLang, type Lang } from '../i18n/ui';
 import '../styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
   ogType?: 'website' | 'article';
+  /** 缺省按路径自动判断（`/en/` 前缀 = 英文） */
+  lang?: Lang;
+  /**
+   * 语言按钮的目标地址。
+   * - 语言镜像页（首页 / 关于 / 博客列表 / 项目 / 404）不用传，会自动推导为同路径的另一语言
+   * - 目标语言没有对应内容时（如某篇博客暂无英文版）必须传回退地址 + `translated={false}`，避免死链
+   */
+  altHref?: string;
+  /**
+   * 另一语言是否存在**同一页面**的 1:1 译文。默认 `true`（语言镜像页）。
+   * 为 `false` 时只输出 x-default，不输出双向 hreflang（ADR-10 约束 2）。
+   */
+  translated?: boolean;
 }
 
+const pathname = Astro.url.pathname;
+const lang: Lang = Astro.props.lang ?? getLangFromPath(pathname);
+const t = ui[lang];
+
 const {
-  title = 'WauZonC 的个人主页',
-  description = 'WauZonC 的个人主页：文章、项目与简介。',
+  title = t.defaultTitle,
+  description = t.defaultDescription,
   ogType = 'website',
+  altHref,
+  translated = true,
 } = Astro.props;
+
+const target: Lang = lang === 'zh' ? 'en' : 'zh';
+const buttonHref = altHref ?? withLang(pathname, target);
+// 只有确实存在 1:1 译文时才把地址交给 BaseHead 输出双向 hreflang
+const counterpartHref = translated ? buttonHref : undefined;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={HTML_LANG[lang]}>
   <head>
-    <BaseHead title={title} description={description} ogType={ogType} />
+    <BaseHead
+      title={title}
+      description={description}
+      ogType={ogType}
+      lang={lang}
+      altHref={counterpartHref}
+    />
   </head>
   <body>
-    <a class="skip-link" href="#main">跳到正文</a>
-    <Header />
+    <a class="skip-link" href="#main">{t.skipToContent}</a>
+    <Header lang={lang} altHref={buttonHref} />
     <main id="main" class="container">
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
   </body>
 </html>
 

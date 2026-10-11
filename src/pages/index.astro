@@ -89,20 +89,5 @@ const featuredProjects = (await getCollection('projects', ({ data }) => data.fea
     margin: 1.35rem 0 0;
   }
 
-  .home-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2.25rem;
-  }
-
-  .home-column {
-    min-width: 0;
-  }
-
-  @media (max-width: 900px) {
-    .home-grid {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 2rem;
-    }
-  }
+  /* .home-grid / .home-column 已上移到 global.css，供英文首页复用（ADR-10） */
 </style>

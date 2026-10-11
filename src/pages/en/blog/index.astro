@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import LangNotice from '../../../components/LangNotice.astro';
+import { ui } from '../../../i18n/ui';
+
+const t = ui.en;
+
+// 英文集合当前为空；加入 src/content/blog-en/<slug>.md 后本页会自动列出（G3 契约在英文侧同样成立）
+const posts = (await getCollection('blogEn', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout
+  lang="en"
+  title={`Blog | ${t.siteName}`}
+  description="All posts by WauZonC, newest first."
+  altHref="/blog/"
+>
+  <div class="measure">
+    <div class="page-head">
+      <h1>Blog</h1>
+      <p>{posts.length} {posts.length === 1 ? 'post' : 'posts'}.</p>
+    </div>
+
+    {
+      posts.length > 0 ? (
+        <div class="stack">
+          {posts.map((post) => (
+            <PostCard post={post} lang="en" />
+          ))}
+        </div>
+      ) : (
+        <LangNotice zhHref="/blog/" />
+      )
+    }
+  </div>
+</BaseLayout>

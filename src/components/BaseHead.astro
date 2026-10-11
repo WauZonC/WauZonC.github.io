@@ -1,20 +1,63 @@
 ---
+import { ui, type Lang } from '../i18n/ui';
+
 interface Props {
   title: string;
   description: string;
   ogType?: 'website' | 'article';
+  lang: Lang;
+  /**
+   * 另一语言**同一页面**的地址。
+   * 只有在确实存在 1:1 译文时才传；传了才输出双向 hreflang（ADR-10 约束 2）。
+   * 语言按钮的「回退地址」（目标语言没有对应内容时）**不要**走这个参数。
+   */
+  altHref?: string;
 }
 
-const { title, description, ogType = 'website' } = Astro.props;
+const { title, description, ogType = 'website', lang, altHref } = Astro.props;
 
-const siteName = 'WauZonC 的个人主页';
+const t = ui[lang];
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
+
+// altHref 由调用方给出，通常是 `/en/...` 这样的站内相对路径；
+// hreflang / x-default 必须是绝对 URL（相对地址对搜索引擎无意义），故统一补全。
+const toAbsolute = (href: string | URL): string | URL =>
+  Astro.site ? new URL(href, Astro.site) : href;
+
+// hreflang 互指：只有这一对页面都存在时才输出双向链接
+const zhHref = lang === 'zh' ? canonical : altHref && toAbsolute(altHref);
+const enHref = lang === 'en' ? canonical : altHref && toAbsolute(altHref);
+const hasBoth = Boolean(zhHref && enHref);
+// x-default 优先指向中文版；中文版不存在时退回当前页面
+const xDefault = zhHref ?? canonical;
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="generator" content={Astro.generator} />
-<!-- 移动端地址栏配色：与 global.css 的 --bg-color 保持一致（浅色 #eaf1fb / 暗色 #0b1020） -->
+
+<!--
+  首屏渲染前应用已保存的主题（ADR-9）。
+  这里必须用 is:inline 指令：
+    1) Astro 默认会把内联脚本打包成模块并产出 .js 文件，那会打破 R3（dist 内 .js 为 0）；
+    2) 必须同步、阻塞地在首次绘制前执行，否则会闪一下错误配色。
+  同时给 <html> 加 js 类，供 CSS 显示主题按钮（无 JS 时不显示这个死按钮）。
+-->
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add('js');
+    try {
+      var saved = window.localStorage.getItem('theme');
+      if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    } catch (e) {
+      /* localStorage 不可用时保持「跟随系统」，不影响其余功能 */
+    }
+  })();
+</script>
+
+<!-- 移动端地址栏配色：与 global.css 的 --bg-color 保持一致（浅色 #eaf1fb / 暗色 #0b1020）。
+     未手动选择主题时由这两条生效；手动选择后由 ThemeToggle 的脚本换成单一 meta。 -->
 <meta name="theme-color" content="#eaf1fb" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)" />
 
@@ -24,11 +67,26 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.u
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
 
+<!-- 双语互指（ADR-10）：x-default 优先中文版；仅单侧存在时不输出另外两条 -->
+<link rel="alternate" hreflang="x-default" href={xDefault} />
+{
+  hasBoth && (
+    <>
+      <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+      <link rel="alternate" hreflang="en" href={enHref} />
+    </>
+  )
+}
+
 <meta property="og:type" content={ogType} />
-<meta property="og:site_name" content={siteName} />
+<meta property="og:site_name" content={t.ogSiteName} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
+<meta property="og:locale" content={lang === 'zh' ? 'zh_CN' : 'en_US'} />
+{
+  hasBoth && lang === 'zh' && <meta property="og:locale:alternate" content="en_US" />
+}
 
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content={title} />

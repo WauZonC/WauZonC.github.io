@@ -11,8 +11,9 @@
 - 本地仓库根目录：`D:\WZC\mypage\WauZonC.github.io`
 - **工作区状态：🟢 维护阶段（Maintenance）** —— 自 2026-10-11 起；开发阶段 P0–P6 **全部完成**，站点已上线 <https://wauzonc.github.io>，推送 `main` 即自动构建并部署（操作手册：§10）
 - 维护期内容基线（对照基准，2026-10-11 实测）：博客 **3** 篇 / 项目 **4** 条 / 构建页面 **8** 个 / `dist` 内 `.js` **0** 个
-- 已知未闭合项（维护期待办）：RSS / 站点搜索 / 评论 / 访问统计 / 文章 TOC（§9 开放项 3 → §10.3 候选清单）；手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`
-- 文档版本：**v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
+  - **m2.2 更新（M-1 + M-2 后）**：构建页面 **8 → 13**（+5 条英文镜像路由，见 §4.1）；博客仍 **3**、项目仍 **4**（英文集合 `blogEn`/`projectsEn` 为空，正文待翻译）；`dist` 内 `.js` 仍为 **0**。**页面数基线自此改为 13**
+- 已知未闭合项（维护期待办）：**英文正文翻译**（M-2 只交付了框架，接缝见 ADR-10）；RSS / 站点搜索 / 评论 / 访问统计 / 文章 TOC（§9 开放项 3 → §10.3 候选清单）；手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`
+- 文档版本：**v2.2**（2026-10-11，**M-1 + M-2 落地**：页头新增「中英文切换」与「浅色/深色切换」两个按钮；新增 **ADR-9**（主题手动切换，取代 ADR-7 取舍第 1 条）与 **ADR-10**（`/`+`/en/` 两套真实路由）；§4.1/4.2/4.3 同步、§1.2 的 R2/R3 基线更新、新增 **§10.6 维护任务执行记录**；本地门禁全绿，**尚未 `git push`**，故 §10.5 状态为「本地已验收 · 待推送」）；上一版 **v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
 
 ---
 
@@ -48,8 +49,8 @@
 | 编号 | 标准 | 验收方式（命令 / 方法） | 基线（2026-10-11 实测） |
 |---|---|---|---|
 | R1 | 本地构建通过 | `pnpm build` → 退出码 `0`，日志无 `[InvalidContentEntryDataError]` | `8 page(s) built` |
-| R2 | 页面数与内容数一致 | `dist` 下 `.html` 文件数 = 路由数；`src/content/blog` 下非 draft `.md` 数 = 文章数 | `.html` **8**；博客 **3**、项目 **4** |
-| R3 | 零客户端 JS 未被破坏（ADR-1） | `(Get-ChildItem -Recurse -File -Filter *.js dist).Count` → `0` | `0` |
+| R2 | 页面数与内容数一致 | `dist` 下 `.html` 文件数 = 路由数；`src/content/blog` 下非 draft `.md` 数 = 文章数 | `.html` **8**；博客 **3**、项目 **4**（2026-10-11 基线）。**M-2 后：`.html` 13**（+5 条英文路由）；博客仍 3、项目仍 4（英文集合为空） |
+| R3 | 零客户端 JS 未被破坏（ADR-1） | `(Get-ChildItem -Recurse -File -Filter *.js dist).Count` → `0` | `0`。**⚠️ M-1 后此命令的含义需要正确理解**：命令本身**未变、仍应为 0**，但「零客户端 JS」已不再是字面事实——`src/**` 里有 2 段 `is:inline` 内联脚本（主题切换，ADR-9）。`is:inline` 不产出 `.js` 文件，所以命令返回 0。**禁止**把该命令改写成「HTML 里没有 `<script>`」来掩盖这次变化 |
 | R4 | 无横向滚动 | `pnpm preview` + 同源 iframe 探针，各路由 × 320/390/1440 全部 `scrollWidth <= clientWidth` | 24 组全过（方法见 P4 执行记录） |
 | R5 | 无隐私 / 版权泄漏 | 对 `src/`、`public/`、`dist/` 扫描硬红线（手机号 / 学号 / 真名 / 他人姓名 / 成绩 / 身份证 / 入党等）→ **0 命中** | **0 命中**（唯一命中项为用户批准公开的邮箱） |
 | R6 | 线上一致且 Actions 绿 | push 后 Actions `build` + `deploy` 全绿；线上关键产物与本地 `dist` 一致（至少核对 `index.html` 的 SHA-256） | run `38128165438` 全绿；`index.html` SHA-256 相同 |
@@ -135,6 +136,65 @@
   4. **每次改动先立项**（§10.1），并跑完 R1–R6。
 - **放弃的方案**：①「继续按 P 阶段推进」——已无阶段可推，且会诱导无收益的扩张；②「完全冻结、不再改动」——用户明确要求后续仍能加博客、改风格、加功能；③「无门禁的随手改」——公开站点的隐私 / 版权红线与零 JS 契约会被逐步侵蚀。
 
+### ADR-9：主题手动切换（浅色 / 深色）—— 取代 ADR-7 的取舍第 1 条（2026-10-11，用户指示）
+
+- **决策**：在页头右上角新增**手动浅色 / 深色切换按钮**，行为模型 = **默认仍跟随系统**（`prefers-color-scheme`）；**用户点击后锁定其选择并写入 `localStorage`**，此后跨页面、跨刷新保持。纯两态，**不提供**第三个「跟随系统」档。
+- **为什么现在做**：用户 2026-10-11 明确要求（同时参考 csdiy.wiki 的实现）。ADR-7 当年把「不加手动暗色切换」写成明确取舍，并留下了条件——「若日后需要手动切换，**必须先新增 ADR 并接受一小段内联脚本**」。本 ADR 就是那个「日后」。
+- **与 ADR-7 的关系**：本 ADR **取代**（不删除）ADR-7 取舍第 1 条；ADR-7 的其余内容（玻璃拟态视觉语言、容器 960px、`backdrop-filter` 兜底、零外部请求）**继续有效**。§10.2 轨道 B 约束 3「不新增手动切换按钮」自本 ADR 起同步改写。
+- **两个参考实现的评估（用户提供）**
+  1. **[csdiy.wiki](https://csdiy.wiki/)（Material for MkDocs）**：页头两个 `type=radio`、`name=__palette`，配 `data-md-color-media` / `data-md-color-scheme`，用 `:has()` 选中后换肤；另用 `__md_get/__md_set` 把选择写进 `localStorage`（key 带 `pathname` 前缀）。→ **采纳其行为模型**（跟随系统 → 点击后持久化）。
+  2. **[jh3y《Night && Day Toggle》](https://codepen.io/jh3y/pen/LYgjpYZ)（CodePen `LYgjpYZ`）**：用一个 `[aria-pressed=true] { --dark: 1 }` 的 0/1 变量 + `calc()` 驱动全部过渡，可访问性建立在真实 `<button>` 上。→ **只采纳这个机制**（`aria-pressed` + `--dark`），**不搬它的视觉素材**。
+- **明确不做：不原样搬 jh3y 那个动画开关**（4 条实测硬冲突，保留在此以免日后重犯）
+  1. 它自带 `body { display: grid; place-items: center; min-height: 100vh; overflow: hidden; background: var(--bg) }`——`overflow: hidden` 会让**整页无法滚动**，`background` 会覆盖 ADR-7 的玻璃拟态渐变背景；
+  2. 它是 **hero 级尺寸**（`--width: clamp(200px, 45vmin, 500px)`、`aspect-ratio: 8 / 3`，桌面端约 500×187px），页头塞不下（那里还要放站名 + 4 个导航项）；
+  3. 它自带 `:root` 变量（`--bg`/`--color`/`--sun`/`--moon`/`--crater`）与 `color-scheme: light only`，会与 `global.css` 的令牌体系冲突；
+  4. 它**缺两个多页站点必需的能力**：没有 `localStorage`（跳一次页面就重置）、没有 `prefers-color-scheme`（会丢掉现有的自动暗色）；素材约 60KB 内联 SVG + 约 500 行 CSS，每页一份，且两条无限动画没有 `prefers-reduced-motion` 兜底。
+- **CSS 侧实现（关键决策）：`data-theme` 属性 + `@media` 兜底，放弃 `light-dark()` 方案**
+  - 要让选择**同时**受 `prefers-color-scheme` 与用户选择影响，而 CSS **无法把 `@media` 与属性选择器 OR 在同一个规则里**。曾考虑的 `light-dark()` + `color-scheme`（令牌成对声明、零重复）**未采用**：不支持 `light-dark()` 的浏览器会让 `var(--token)` 全部变成 guaranteed-invalid，**整套配色与背景一起失效**（不是「退回浅色」），而本项目把「改不坏」放在第一位。
+  - 最终结构：浅色在 `:root`；暗色**出现两处且必须保持同步**——`:root[data-theme='dark']`（手动覆盖）与 `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) }`（未手动选择时跟随系统，**含无 JS 环境**）。这是本 ADR 明确接受的一处重复，理由是**零浏览器特性依赖**；`global.css` 中已就地写明同步要求。
+  - `color-scheme` 同步切换（`data-theme='light' | 'dark'`），保证滚动条与表单控件配色一致。
+- **JS 侧实现**：仅两段 `<script is:inline>`。**必须 `is:inline`**——Astro 默认把 `<script>` 打包成模块并**产出 `.js` 文件**，那会同时打破 R3 与「渲染前应用」的时序。
+  1. `BaseHead.astro` 的 `<head>` 内：**渲染前**读 `localStorage.theme`，命中即设 `document.documentElement.dataset.theme`（避免首屏闪白/闪黑），并给 `<html>` 加 `js` 类。
+  2. `Header.astro` 按钮之后：同步 `aria-pressed` / 无障碍标签 / `theme-color`；点击时翻转 `data-theme` 并写 `localStorage`；无手动选择时监听系统配色变化。
+  - 按钮**仅在 JS 可用时显示**（`html.js .theme-toggle`），避免无 JS 环境下出现一个点了没反应的死按钮。文案通过 `data-*` 属性传进内联脚本（`is:inline` 的内容不做模板插值）。
+- **约束与已披露的代价**
+  1. **ADR-1「默认零客户端 JS」的性质发生变化**：`src/**` 里出现两段内联脚本。但 **R3 的判定命令不变且仍应为 `0`**——`is:inline` 不产出 `.js` 文件，`(Get-ChildItem -Recurse -File -Filter *.js dist).Count` 仍是 `0`。**不得**把该命令改写成「HTML 里没有 `<script>`」来掩饰这次性质变化。
+  2. 无 JS 时：回到「浅色 + 跟随系统」的原始行为，主题按钮不显示。
+  3. `localStorage` 只存一个枚举字符串（`'light'` / `'dark'`）；无第三方请求、无新依赖、无隐私影响。
+- **被放弃的方案**：①原样搬 jh3y 的完整动画开关（理由见上 4 条）；②mkdocs-material 的 radio + `:has()` 全套（需每页输出两个 radio 与两份图标，语义也不如真实 `<button aria-pressed>`）；③三态（浅 / 深 / 跟随系统）——用户本轮选择两态，日后要改再立 ADR；④`light-dark()`（见上，浏览器特性风险不可接受）。
+- **归属（MIT）**：机制取自 jh3y《Night && Day Toggle》（CodePen `LYgjpYZ`）。CodePen 公开 pen 默认 **MIT** 许可，可自由使用；仓库为公开站点，故按 MIT 要求在组件注释中保留出处与许可说明。
+
+### ADR-10：中英文双语 = 真实路由（`/` + `/en/`），语言按钮是链接（2026-10-11，用户指示）
+
+- **决策**：语言切换采用**两套真实路由**，而不是在同一页面里用 JS 换字。中文站点保留原路径（`/`、`/about/`、`/blog/<slug>/`、`/projects/`、`/404.html`）；英文站点为 **`/en/` 前缀镜像**（`/en/`、`/en/about/`、`/en/blog/`、`/en/projects/`、`/en/404/`）。页头右上角一个**链接按钮**：中文页显示 `EN`、英文页显示 `中`，点击直接跳到**对应语言的同一页面**。
+  - **实测修正（构建后才发现）**：英文 404 页落在 **`/en/404/`** 而**不是 `/en/404.html`** —— Astro 只把**根目录**的 `src/pages/404.astro` 特殊化为 `404.html`，`src/pages/en/404.astro` 只是个普通页面，产物为 `dist/en/404/index.html`。因此两侧语言按钮的地址是 `/404.html` ↔ `/en/404/`（不对称，但两边都是真实存在的页面）。
+  - **由此暴露的一个既有局限（不在本次范围内）**：GitHub Pages 对**全站**未命中路径只返回**根** `404.html`（中文版）。所以访问 `/en/does-not-exist/` 会看到中文 404 页，`/en/404/` 只能从中文 404 页的语言按钮或直接输入到达。这是静态托管「只有一个 404 页」的固有限制；要修得在根 404 页做客户端语言判断（等于再引入一段 JS），本次不做，仅如实记录。
+- **理由**
+  1. **与参考实现一致**：csdiy.wiki 正是这么做的——它的语言按钮是一个下拉，里面是 `<a href="/" hreflang="zh">简体中文</a>` 与 `<a href="/en/" hreflang="en">English</a>` 两个**真实链接**，两套页面各自完整（**不是** JS 换字）。
+  2. **语言切换零 JS**：链接天然可用——JS 失效、爬虫抓取、新标签页打开、分享链接全都正常。
+  3. **SEO 正确**：每页可输出 `hreflang` 互指，避免「一个 URL 两种语言」的歧义。
+  4. 静态站无运行时成本，与 ADR-1 的取向一致。
+- **本期范围（用户 2026-10-11 明确选择「先搭框架」）**
+  - **交付**：`/en/` 全部路由 + 英文界面文案（导航 / 页脚 / 按钮 / 页面标题）+ 语言切换按钮 + 内容接缝（`blogEn` / `projectsEn` 两个集合）+ `hreflang`。
+  - **暂不交付**：英文**正文**（3 篇博客、4 个项目、`about` 正文的翻译）。英文页在正文位置显示**明确的「翻译中」提示 + 回到中文版的链接**，**不复用中文正文**（避免重复内容与中英混排）。
+  - **接缝用法（日后轨道 A 的扩展）**：新增一篇英文文章 = 在 `src/content/blog-en/` 放一个**与中文同名**的 `.md`（如 `cuda-notes.md`），frontmatter 与中文 schema 完全一致。`/en/blog/<slug>/` 会自动生成，**不需要改任何 `.astro`**——G3 契约在英文侧同样成立。
+- **新增集合（附加变更，向后兼容）**
+  - 新增 `blogEn` / `projectsEn`，`base` 分别为 `./src/content/blog-en` 与 `./src/content/projects-en`；**与既有 `blog` / `projects` 共用同一份 zod schema**（提取为 schema 常量，避免两处漂移）。
+  - **刻意用「兄弟目录」而非 `blog/en/` 子目录**：`blog` 的 glob 是递归的 `**/*.md`，若把英文放进 `src/content/blog/en/`，英文文章会被中文集合**一并收走**（同一篇出现在两种语言里）。兄弟目录从根本上避免这个冲突，且**既有 loader 的 `base` 与 pattern 零改动**。
+  - 英文条目与中文条目**同名即同 slug**，语言互跳天然一一对应。
+- **URL 契约**
+  - 中文路径**一个都不变**（ADR-8「不动已上线 URL」的延续）。
+  - 英文一律 `/en/` 前缀；`/en/` 本身是英文首页。
+- **被放弃的方案**
+  1. **JS 换字（`data-i18n` + 字典）**：需要客户端 JS（再碰 ADR-1）、SEO 差（爬虫只看到单一语言）、Markdown 正文无法参与、首屏可能闪原文。
+  2. **只切换界面文字、正文永远中文**：与 csdiy.wiki 的做法不符，英文读者依然读不到内容，属半成品。
+  3. **Astro 内置 i18n 路由（`i18n` 配置 + `prefixDefaultLocale`）**：会改动 `astro.config.mjs` 与既有中文 URL 的生成方式，风险与收益不匹配（§8.3 不做大重构）；手工镜像路由的产物形态完全可控。
+  4. **第三方翻译服务 / 中英并排**：引入外部依赖与隐私问题，阅读体验也差。
+- **约束**
+  1. 语言按钮**必须总是**落在存在的页面上：若目标语言没有对应内容（如某篇博客暂无英文版），回退到该语言的列表页 / 首页，**不得**产生死链。
+  2. `hreflang` 只在**双侧都存在**的页面输出；仅单侧存在的页面输出 `x-default` 指向中文版。
+  3. 英文页的 `<html lang>` 必须是 `en`；中文保持 `zh-CN`（ADR-6 不被推翻）。
+
 ---
 
 ## 4. 目标信息架构
@@ -147,9 +207,16 @@
 | `/blog` | `src/pages/blog/index.astro` | 文章列表（按 `pubDate` 倒序，过滤 `draft: true`） |
 | `/blog/[slug]` | `src/pages/blog/[...slug].astro` | 文章详情 |
 | `/projects` | `src/pages/projects.astro` | 项目/作品集列表 |
-| `/404` | `src/pages/404.astro` | 自定义未找到页面 |
+| `/404` | `src/pages/404.astro` | 自定义未找到页面（Astro 只把**根目录**的 `404.astro` 特殊化为 `404.html`） |
+| **— 英文镜像路由（M-2 / ADR-10，2026-10-11 新增）—** | | |
+| `/en/` | `src/pages/en/index.astro` | 英文首页（界面文案已英文；正文待翻译，当前显示「翻译中」提示） |
+| `/en/about/` | `src/pages/en/about.astro` | 英文关于页（同上） |
+| `/en/blog/` | `src/pages/en/blog/index.astro` | 英文文章列表（读 `blogEn` 集合，当前为空） |
+| `/en/blog/[slug]` | `src/pages/en/blog/[...slug].astro` | 英文文章详情（`blogEn` 为空 → 不生成任何页面，属预期） |
+| `/en/projects/` | `src/pages/en/projects.astro` | 英文项目列表（读 `projectsEn` 集合，当前为空） |
+| `/en/404/` | `src/pages/en/404.astro` | 英文 404。**注意**：产物是 `/en/404/`，**不是** `/en/404.html`——Astro 只对根目录的 `404.astro` 做特殊化 |
 
-### 4.2 目录结构（P2 结束后的目标形态）
+### 4.2 目录结构（M-2 落地后的实际形态；P2 骨架 + 双语与主题切换）
 ```
 .
 ├── .github/workflows/deploy.yml
@@ -158,18 +225,30 @@
 │   └── images/
 ├── src/
 │   ├── components/
-│   │   ├── BaseHead.astro
-│   │   ├── Header.astro
+│   │   ├── BaseHead.astro        # <head>：含首屏前应用主题的内联脚本 + hreflang（ADR-9/10）
+│   │   ├── Header.astro          # 壳：站名 + 语言感知导航 + 两个切换按钮
+│   │   ├── LangSwitch.astro      # 中英文切换按钮（纯链接，零 JS，ADR-10）
+│   │   ├── ThemeToggle.astro     # 浅色/深色切换按钮（ADR-9）
+│   │   ├── LangNotice.astro      # 英文页的「翻译中」提示（ADR-10）
+│   │   ├── NotFoundPanel.astro   # 404 面板（中英共用）
 │   │   ├── Footer.astro
-│   │   └── PostCard.astro
+│   │   ├── PostCard.astro        # 语言感知（链接前缀 / 日期本地化）
+│   │   ├── ProjectCard.astro     # 语言感知（链接文案 / 配图 alt）
+│   │   └── ProjectBody.astro
 │   ├── content/                  # 内容条目（Markdown）
-│   │   ├── blog/
-│   │   └── projects/
+│   │   ├── blog/                 # 中文博客（既有，未改动）
+│   │   ├── blog-en/              # 英文博客镜像（新集合 blogEn，当前为空）
+│   │   ├── projects/             # 中文项目（既有，未改动）
+│   │   └── projects-en/          # 英文项目镜像（新集合 projectsEn，当前为空）
 │   ├── content.config.ts         # Content Layer 集合定义（Astro 7 强制位置，见 4.3）
+│   ├── content-types.ts          # 中英集合条目的联合类型 + 集合键映射（ADR-10）
+│   ├── i18n/
+│   │   └── ui.ts                 # 界面文案字典（zh/en）+ 路由前缀助手（ADR-10）
 │   ├── layouts/
-│   │   ├── BaseLayout.astro
+│   │   ├── BaseLayout.astro      # lang / altHref / translated 三个与双语有关的 props
 │   │   └── PostLayout.astro
-│   ├── pages/            # 见 4.1 路由表
+│   ├── pages/            # 中文路由，见 4.1
+│   │   └── en/           # 英文镜像路由，见 4.1
 │   └── styles/global.css
 ├── astro.config.mjs
 ├── package.json
@@ -208,18 +287,24 @@ const blog = defineCollection({
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    tech: z.array(z.string()).default([]),
-    repoUrl: z.string().url().optional(),
-    demoUrl: z.string().url().optional(),
-    featured: z.boolean().default(false),
-    order: z.number().default(0),
-  }),
+  schema: projectsSchema,
 });
 
-export const collections = { blog, projects };
+// ---- M-2 / ADR-10 新增：英文镜像集合 ----
+// 刻意用「兄弟目录」（blog-en / projects-en）而不是 blog/en/ 子目录：
+// 中文集合的 glob 是递归的 `**/*.md`，子目录里的英文文章会被中文集合**一并收走**。
+// 文件名即 slug，因此 `blog-en/cuda-notes.md` 与 `blog/cuda-notes.md` 天然一一对应。
+const blogEn = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/blog-en' }),
+  schema: blogSchema,
+});
+
+const projectsEn = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects-en' }),
+  schema: projectsSchema,
+});
+
+export const collections = { blog, blogEn, projects, projectsEn };
 ```
 
 **`blog` 集合**
@@ -243,6 +328,14 @@ export const collections = { blog, projects };
 | `demoUrl` | string(url) | 否 | 演示地址 |
 | `featured` | boolean | 否，默认 `false` | 是否在首页展示 |
 | `order` | number | 否，默认 `0` | 排序权重，大者靠前 |
+| `cover` | string | 否 | 卡片配图路径（P4 新增，相对 `public/`） |
+
+**英文镜像集合 `blogEn` / `projectsEn`（M-2 / ADR-10 新增）**
+- 字段与 `blog` / `projects` **完全一致**——`src/content.config.ts` 里两套集合**共用同一个 schema 常量**，因此不可能漂移；上两张表同时就是它们的字段表。
+- 目录为 `src/content/blog-en/` 与 `src/content/projects-en/`（**兄弟目录**，理由见上方代码注释与 ADR-10）。
+- **既有中文集合的 loader / `base` / schema 与 4 个既有 `.md` 零改动**：本次是纯附加变更，没有任何字段从可选变成必填。
+- **新增一篇英文文章 = 在 `src/content/blog-en/` 放一个与中文同名的 `.md`**，`/en/blog/<slug>/` 自动生成，**不需要改任何 `.astro`**（G3 契约在英文侧同样成立）。
+- ⚠️ **已知噪音（预期内）**：英文集合为空时构建会打印 `[glob-loader] No files found matching "**/*.md"` 与 `The collection "blogEn" does not exist or is empty` 若干条告警（P2 已记录同类行为）。**退出码仍为 0**，不是故障；往 `blog-en/` 放入第一篇 `.md` 后即消失。
 
 ---
 
@@ -557,6 +650,11 @@ export default defineConfig({
 | **维护期新增依赖但忘记提交 `pnpm-lock.yaml`** | CI 使用 `pnpm install --frozen-lockfile`，锁文件不一致会**直接失败**，站点无法更新 | 新增 / 升级依赖后必须把 `pnpm-lock.yaml` 一并提交；若 pnpm 主版本变化，同步更新 `.github/workflows/deploy.yml` 中 `pnpm/action-setup` 的 `version`（当前 `11.21.0`） |
 | **维护期改动已上线文章的 slug（文件名）** | 旧 URL 立即 404，而本站**没有**重定向机制 | 默认**不改**已上线条目的文件名。确需改名时，另在 `src/pages/blog/<旧 slug>.astro` 放一个 meta refresh 跳转页，并在 §10.5 记录；不要只改文件名 |
 | **维护期为「顺手」放宽 ADR 约束**（引入客户端 JS / CSS 框架 / 框架集成） | 破坏 G3、G5 与零 JS 契约，且不再可低成本回退 | 任何触碰 ADR-1 / ADR-5 / ADR-7 的改动**必须先立新 ADR 或修改既有 ADR**再动手，见 §10.4 维护纪律 |
+| **改暗色令牌时只改一处**（`global.css` 里暗色块有两处：`data-theme='dark'` 与 `prefers-color-scheme` 兜底） | 「手动切换到深色」与「跟随系统变深色」两条路径配色不一致，**且只在其中一条路径下能看出来**，浅色验收完全发现不了 | 改暗色**必须同步两处**；验收时两条路径都要走（手动点击 → 变深色；`--blink-settings=preferredColorScheme` 或不加参数让其跟随系统）。理由与取舍见 ADR-9 |
+| **误认为 `/en/404.html` 存在** | Astro 只把**根目录** `404.astro` 特殊化为 `404.html`；`src/pages/en/404.astro` 的产物是 `/en/404/`。按 `/en/404.html` 写链接会得到**死链**（M-2 第一版即踩到） | 英文 404 的地址是 **`/en/404/`**；改语言按钮或新增镜像页后，务必跑「语言按钮落点断言 + 站内链接 200 检查」两道（只做后者会漏掉「指向了错误的但存在的页面」这类 bug） |
+| **给英文站加内容时文件名与中文不一致** | 语言互跳靠「同名即同 slug」，文件名不一致会让 `hasTranslation` 判为 false，语言按钮退回列表页（不报错，只是跳不到对应文章） | 英文条目的文件名必须与中文**逐字同名**（如 `blog/cuda-notes.md` ↔ `blog-en/cuda-notes.md`）；模板/脚本化添加时以中文文件名为准 |
+| **把 `hreflang` / `canonical` 写成站内相对路径** | 搜索引擎无法把相对地址当作语言互指，双语 SEO 失效（页面本身仍正常，属静默失效） | `BaseHead.astro` 已统一用 `new URL(href, Astro.site)` 补全为绝对 URL；新增语言相关 `<link rel="alternate">` 时保持该写法 |
+| **无头截图在 `< 500px` 时的「右侧被裁」假象**（P4 已记录，M-1/M-2 再次踩到） | 误判移动端横向溢出，或误判页头两个新按钮放不下 | 窄屏判断**只用同源 iframe 探针**；要看真实窄屏版式，把 320/390 宽的 iframe 嵌进一个更宽的页面再截图（M-1/M-2 采用此法）。另：`--blink-settings=preferredColorScheme=2` 在本机 Edge 上不生效，深色截图请**不加该参数** |
 
 ---
 
@@ -647,7 +745,7 @@ export default defineConfig({
 - **约束**
   1. 不引入 CSS 框架（ADR-5）；不引入位图背景、外部字体、CDN（维持 ADR-7 / P2.5 的「零外部请求」性质）
   2. `backdrop-filter` 的 `@supports not (...)` 兜底分支**不得删除**（ADR-7）
-  3. **暗色保持自动切换**：不新增手动切换按钮（ADR-7 的明确取舍）；确实需要时先立新 ADR，并接受少量内联脚本
+  3. **暗色**：**默认仍自动跟随系统**；手动切换按钮已由 **ADR-9**（2026-10-11）立项落地，**取代** ADR-7 取舍第 1 条。⚠️ 改动暗色令牌时**必须同步 `global.css` 中两处暗色块**（`:root[data-theme='dark']` 与 `@media (prefers-color-scheme: dark)` 兜底），漏改一处会让「手动切换」与「跟随系统」两条路径配色不一致
   4. 文本类页面继续用 `.measure` 约束行宽；`.container` 维持 960px（ADR-7）
   5. 新页面**复用**既有工具类（`.glass` / `.card` / `.panel` / `.pill` / `.measure`），不要另起一套卡片样式
 - **验收**：R1、R3；**必须浅色 + 暗色两套都验**（浅色用 `--blink-settings=preferredColorScheme=1` 强制，或把产物里的暗色媒体查询改成永不匹配，方法见 P3 记录）；R4 探针三档宽度无横向滚动
@@ -705,9 +803,50 @@ export default defineConfig({
 
 | 编号 | 轨道 | 目标 | 写作用域 | 验收命令 | 风险门禁 | 状态 |
 |---|---|---|---|---|---|---|
-| —— | —— | *（等待用户提出第一条维护需求）* | —— | —— | —— | 待办 |
+| M-1 | C | 页头右上角新增**浅色/深色切换按钮**：默认跟随系统，点击后锁定并持久化 | `src/styles/global.css`、`src/components/BaseHead.astro`、`src/components/Header.astro`、`src/components/ThemeToggle.astro`、`src/layouts/BaseLayout.astro` | `pnpm build` 退出码 0；`dist` 内 `.js` 计数仍为 **0**；浅/暗两态无头截图目视；刷新与跳页后选择保持；系统配色改变且无手动选择时跟随 | 触碰 ADR-1（零 JS）与 ADR-7 取舍 1 → **先立 ADR-9**；需 2 段内联脚本 | **本地已验收 · 待推送** |
+| M-2 | C | 页头右上角新增**中英文切换按钮** + `/en/` 全套路由框架（界面文案双语，正文待翻译） | `src/i18n/**`、`src/pages/en/**`、`src/content.config.ts`、`src/content/blog-en/**`、`src/content/projects-en/**`、`src/components/**`、`src/layouts/**`、`src/pages/**`、`src/content-types.ts` | `pnpm build` 退出码 0；页面数 **8 → 13**；5 条 `/en/` 路由均 200；语言按钮在中英两侧都落在存在的页面（无死链） | 触碰 ADR-1 / ADR-6 → **先立 ADR-10**；不得改既有中文 URL；不得把 schema 可选字段改成必填 | **本地已验收 · 待推送** |
 
-> 台账为空表示开发阶段收尾后尚无新的维护任务；用户提出需求时，先在 §10.1 按格式新增一行，再执行。
+> M-1 与 M-2 的写作用域在 `src/components/Header.astro`、`src/components/BaseHead.astro`、`src/layouts/**` 上**重叠**，因此**串行执行**，不做并行写入。两者均属轨道 C，但语言与主题互不依赖，故拆成两条以便分别回滚。
+>
+> **状态口径说明**：本表原定状态只有「待办 / 进行中 / 已发布」。本次两条任务**本地门禁全部通过但尚未 `git push`**，故记为「本地已验收 · 待推送」；**推送并确认 Actions 全绿后**才改为「已发布」（见 §10.4 步骤 5–7 与下方执行记录）。
+
+### 10.6 维护任务执行记录
+
+> 开发期 P0–P6 的执行记录在 §6。维护任务的记录写在这里，格式对齐 P 阶段：产出物 / 实测验收 / 发现的真实问题 / 与设计的偏离 / 遗留项。
+
+#### M-1 + M-2 实际执行记录（2026-10-11）
+
+- **执行方式**：两条任务在**同一轮工作**里落地，但**验收分开做**——先满足 M-1 的全部验收（主题切换），再补齐 M-2 的 `/en/` 路由。原因是两者的写作用域在 `Header.astro` / `BaseHead.astro` / `BaseLayout.astro` 上重叠，强行拆成两次提交只会产生一整轮中间态；**已在 §10.5 披露该偏离**（原计划要求 M-1 完全验收后才动 M-2）。
+- **产出物（新增）**：`src/i18n/ui.ts`（界面文案字典 + 路由助手）、`src/content-types.ts`、`src/components/ThemeToggle.astro`、`src/components/LangSwitch.astro`、`src/components/LangNotice.astro`、`src/components/NotFoundPanel.astro`、`src/pages/en/{index,about,projects,404}.astro`、`src/pages/en/blog/{index,[...slug]}.astro`、`src/content/blog-en/.gitkeep`、`src/content/projects-en/.gitkeep`
+- **产出物（修改）**：`src/styles/global.css`（主题令牌双块 + `color-scheme` 切换 + `.toggle-btn` + 上移 `.home-grid`/`.project-grid`）、`src/components/{BaseHead,Header,Footer,PostCard,ProjectCard}.astro`、`src/layouts/{BaseLayout,PostLayout}.astro`、`src/pages/{index,projects,404,blog/[...slug]}.astro`、`src/content.config.ts`、`PLAN.md`
+- **实测验收（本地，2026-10-11）**
+  - `pnpm build` **退出码 0**，`13 page(s) built`；`dist` 下 `.html` **13**、`.js` **0**（R2/R3 ✅）
+  - **全部 10 条代表性路由 HTTP 200**（`/`、`/about/`、`/blog/`、`/projects/`、`/404.html`、`/en/`、`/en/about/`、`/en/blog/`、`/en/projects/`、`/en/404/`）
+  - **无横向滚动**：同源 iframe 探针 **33 组（11 路由 × 320/390/1440）全部 `scrollWidth <= clientWidth`**，0 失败（R4 ✅）
+  - **主题切换（真实浏览器探针，两种系统配色各测一遍）**：未手动选择时 `data-theme` 为空、配色跟随系统（系统浅 → `rgb(234,241,251)`；系统深 → `rgb(11,16,32)`），按钮 `aria-pressed` 与之一致；点击后写入 `localStorage.theme`、`color-scheme` 与 `body` 背景色同步切换；**新开页面（等价于跳页/刷新）首屏即带上 `data-theme`**，无闪色；再点一次可切回；预置 `theme=dark` 后加载英文页同样生效
+  - **无 JS 降级**：移除 `js` 类后主题按钮 `display: none`（不出现死按钮），语言按钮仍为 `flex`（纯链接不受影响）
+  - **链接完整性**：抓取全部路由的站内链接，**13 个唯一地址全部 200，0 死链**（ADR-10 约束 1 ✅）
+  - **语言按钮落点**：11 个页面逐一核对，中↔英互跳全部落在存在的页面上，`allOk = true`
+  - **R5 泄漏扫描**：`手机号 / 18 位身份证 / 学号 / 成绩排名 / 政治面貌 / 学号邮箱` 在 `src/`、`public/`、`dist/` **0 命中**；`src/`+`dist/` 内唯一命中项是**用户批准公开**的 `zhongchangwang25@stu.pku.edu.cn`（与 v2.1 基线一致）。`PLAN.md` / `README.md` 里的「学号 / 政治面貌 / 成绩」命中均为**红线规则本身的描述文字**，非真实数据
+  - **目视复核**：浅色 / 深色两套首页无头截图；英文首页与 320/390px 窄屏改用**同源 iframe 画布**渲染（见下）
+- **发现的真实问题（对后续 agent 有价值）**
+  1. **Astro 只把根目录的 `404.astro` 特殊化成 `404.html`**。`src/pages/en/404.astro` 是普通页面，产物是 `dist/en/404/index.html`。第一版把语言按钮指向 `/en/404.html` → **死链**。已在 ADR-10 与 §4.1 记录，最终地址对为 `/404.html` ↔ `/en/404/`。
+  2. **`hreflang` 必须是绝对 URL**。`altHref` 传入的是站内相对路径（`/en/`），直接输出会得到 `<link rel="alternate" hreflang="en" href="/en/">`，而中文那条是绝对 URL——两条不对等。已在 `BaseHead.astro` 里用 `new URL(href, Astro.site)` 统一补全。
+  3. **语言按钮在有译文的判断上曾写错回退目标**：`PostLayout` 最初用「当前语言的列表页」当回退，导致一篇无英文译文的博客上，语言按钮指向 `/blog/`——**用户正在看的那个页面**（点击等于没反应）。探针按「期望落点」逐条断言才暴露出来。正确做法是回退到**目标语言**的列表页（`/en/blog/`）。**注意：链接完整性检查抓不到这个 bug**——`/blog/` 是 200，只是落点错了。
+  4. **`--blink-settings=preferredColorScheme=2` 在本机 Edge 上不生效**（`=1` 浅色有效），深色截图需**不加该参数**（该环境默认即深色）。不要据此以为暗色样式没生效。
+  5. **`< 500px` 的无头截图仍不可信**（P4 已记录，本次再次踩到：`--window-size=390` 截出的页头右侧被裁，但 iframe 探针在 390/320 两档都判定无横向滚动）。最终改用**同源 iframe 画布**（把 320/390 宽的 iframe 嵌在 1180 宽的页面里截图）才看到真实窄屏版式——页头在 320px 会自然折成三行（站名 / 导航 / 两个按钮），390px 单行放得下。
+  6. **`matchMedia` 可能在内联脚本执行时尚未解析完成**：无头 Chromium 下实测到 `body` 背景已经是深色（CSS 的 `prefers-color-scheme` 已生效），但脚本里 `matchMedia('(prefers-color-scheme: dark)').matches` 仍返回 `false`，于是按钮显示「切换到深色」而页面已是深色——**按钮状态与真实配色不一致**。已在 `ThemeToggle.astro` 增加 `window.addEventListener('load', paint)` 兜底重绘（另有 `change` 监听）。复验方式：把「`aria-pressed` 是否等于背景确为深色」写成**不变量断言**，两种系统配色下各跑两遍，全部 `consistent: true`。**这类不一致浅色验收看不出来**，所以要靠不变量而不是目视。
+- **与设计的偏离（均已披露）**
+  1. **M-1 与 M-2 合并为一轮实现**（理由见上，§10.5 已注明）。
+  2. **`.home-grid` / `.home-column` / `.project-grid` 从页面 scoped 样式上移到 `global.css`**：英文镜像页需要同一套栅格，否则要复制出第二份必然漂移的规则。这会让 `index.astro` / `projects.astro` 各少一段 `<style>`（行为不变）。
+  3. **新增 `NotFoundPanel.astro`**：中英 404 共用同一份标记与样式，取代原先内联在 `404.astro` 的写法。
+  4. **CSS 重复一处（ADR-9 明确接受）**：暗色令牌在 `global.css` 出现两次（手动 `data-theme` 一块 + 跟随系统兜底一块）。放弃 `light-dark()` 的理由见 ADR-9：不支持它的浏览器会让整套令牌一起失效。**改暗色必须同步两处**，`global.css` 中已就地写明。
+- **遗留项（交给后续任务）**
+  1. **英文正文未翻译**（用户选择「先搭框架」）：3 篇博客 + 4 个项目 + `about` 正文。接缝已就位——在 `src/content/blog-en/` 放同名 `.md` 即可，无需改 `.astro`。
+  2. `/en/does-not-exist/` 会看到**中文** 404 页（GitHub Pages 全站只认根 `404.html`），原因与修法见 ADR-10。
+  3. 英文集合为空会让每次构建打印若干 `[glob-loader]` / `collection ... is empty` **告警**（退出码 0，非故障）；放入第一篇英文文章后消失。
+  4. 主题按钮是**两态**（浅/深），没有第三个「跟随系统」档；要加需再立 ADR。
+
 
 ---
 
@@ -726,3 +865,4 @@ export default defineConfig({
 | v1.8 | P6 | P6 完成：站点上线 <https://wauzonc.github.io>。用户建仓（**公开**）并把 Pages 来源设为 **GitHub Actions** → 本地 `git remote add origin`（SSH）→ `git push -u origin main`（退出码 0）。**实测**：`git ls-remote` 的 `refs/heads/main` = 本地 `HEAD`（`20c2571`）；Actions run `38128165438` **首次运行即 build + deploy 全绿**（无需重跑）；`/` `/about/` `/blog/` `/projects/` `/404.html` 与 3 篇博客详情**全部 200**、UTF-8 中文正常、canonical 为根路径、无 `/mypage/` 前缀；不存在路径返回 **404** 且与本地 `dist/404.html` 逐字节一致；线上 `index.html` 与本地 `dist/index.html` **SHA-256 相同**（线上 = 本地构建产物）。**无设计偏离**，工作流文件在 P6 期间零改动。**闭合 §9 开放项 1**（不绑定自定义域名）与**开放项 4 末句**（仓库公开）；§1.2 新增 G1–G6 验收状态。同步更新：文档头「当前阶段」与版本、§1.2、§6 P6 章节（执行记录）、§9、README.md |
 | v2.0 | 维护 | **工作区状态由「开发」切换为「维护」**（用户指示：站点已上线）。新增 **ADR-8「工作区进入维护阶段」**（三条轨道 A 内容 / B 样式 / C 功能、维护期与开发期的差别、4 条硬性约束、3 个被放弃的方案）；新增 **§10 维护阶段操作手册**（10.1 立项模板与规则、10.2 三条轨道的写作用域 + 步骤 + 验收 + 门禁 + 禁止事项、10.3 功能候选清单「RSS / sitemap+robots / TOC / 搜索 / 评论 / 统计」含代价与是否触碰零 JS、10.4 发布流程 / 回滚 / 6 条维护纪律、10.5 空台账）；**§1.1** 增补 5 条维护期目标；**§1.2** 新增**维护期回归验收 R1–R6**（构建 / 页面数 / 零 JS / 无横向滚动 / 泄漏扫描 / 线上一致，含 2026-10-11 实测基线：8 页面、博客 3、项目 4、`dist` `.js` 0）；**§6** 路线图标注「全部完成，已冻结」并指向 §10（维护任务不得写成 `P7`）；**§7** 新增 4 行维护期风险（内容夹带隐私素材 / 只验浅色 / 新增依赖未提交锁文件 / 改已上线 slug）；**§8** 拆为 8.1 长期边界 + 8.2 开发期历史条目 + 8.3 维护期边界（不做大重构、不动 URL 契约、不静默偏离 ADR、不批量重排）；**§9** 加状态说明（开放项 1/2/4 已闭合，开放项 3 转入 §10.3）。**未改动任何代码 / 配置 / 内容文件**（`src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml`、`.github/**` 零改动）；**`README.md` 同批同步**（改为维护阶段状态、补三条轨道表、补新增文章规范与隐私门禁、改写后续计划）——本次提交与推送、线上核验的记录见 v2.1 行 |
 | v2.1 | 维护 | **文档同步 + 维护期首次发布**。提交 `98454f6`（`docs(plan): 状态由开发切换为维护（ADR-8 + §10 维护手册 + R1-R6）并同步 README`，2 文件 / `216 插入 / 16 删除`）并 `git push origin main`（SSH，`28e258c..98454f6`）。**本地门禁实测（R1–R3、R5）**：`pnpm build` 退出码 **0**（`8 page(s) built`，2.09 s）；`dist` 下 `.html` **8** = 路由数，博客非 draft **3**、项目 **4**（R2 ✅）；`dist` 内 `.js` **0**（R3 ✅）；对 `src/`、`public/`、`dist/` 扫硬红线（手机号 / 18 位身份证 / 「学号 + 数字」/ 政治面貌 / 成绩排名）**全部 0 命中**，出现的邮箱仅用户批准公开的 `WauZonC@qq.com` 与 `zhongchangwang25@stu.pku.edu.cn`（R5 ✅）。**R4 说明（诚实标注）**：本次**未**改动 `src/**`、`public/**`，构建产物与已通过 24 组 iframe 探针的版本**逐字节相同**，故 R4 由同一性保证，**未**重复起服务实测。**线上门禁实测（R6）**：Actions run [`38129131299`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38129131299)（`head_sha=98454f6`）**run 与 Build / Deploy 两个作业全绿**（`Install dependencies`、`Build site`、`Upload Pages artifact`、`Deploy to GitHub Pages` 每一步 success）；线上 10 条资源全部 **200**（`/` `/about/` `/blog/` `/projects/` `/404.html` + 3 篇博客详情 + `/favicon.svg` + `/images/pku-table-canvas.png`），不存在路径 `/no-such-page-xyz/` → **404**；线上 `index.html` 与本地 `dist/index.html` 的 SHA-256 **均为** `71B2DAF6AD25D62FF801CF5CCF2F2DD370090AE2E1EFC9456DC41AAB646DB22C`，**与 P6 记录的值相同** → 纯文档改动确实未改变站点产物。**补充记录**：前一条 P6 文档推送（`28e258c`）触发的运行 `38128305072` 亦为 **success**（P6 记录中的「副作用说明」已预测该行为，此处补上实测编号）。**未改动任何代码 / 配置 / 内容文件**；PLAN.md 与 README.md 之外零改动 |
+| v2.2 | 维护 | **M-1 + M-2 落地：页头右上角新增「中英文切换」与「浅色/深色切换」两个按钮**（用户 2026-10-11 需求，参考 csdiy.wiki 的实现）。**先改 ADR 后动代码**：新增 **ADR-9**（主题手动切换，**取代** ADR-7 取舍第 1 条）与 **ADR-10**（中英文 = `/` + `/en/` 两套真实路由，语言按钮是纯链接）；§10.5 台账新增 M-1 / M-2 两行并附「写作用域重叠 → 串行」说明；新增 **§10.6 维护任务执行记录**；§4.1 路由表补 5 条英文路由、§4.2 目录树更新、§4.3 新增 `blogEn`/`projectsEn` 集合说明；§1.2 的 R2 基线由 8 页改为 **13 页**，R3 明确标注「命令仍为 0，但零 JS 已不再是字面事实」。**实测（本地）**：`pnpm build` 退出码 **0**、**13 page(s)**；`dist` 内 `.js` **0**；10 条代表性路由全 **200**；**33 组（11 路由 × 320/390/1440）无横向滚动**；真实浏览器探针验证主题「跟随系统 → 点击锁定 → 刷新保持 → 可切回」在**浅色与深色两种系统配色下各通过一遍**，且无 JS 时主题按钮自动隐藏；站内链接 **13 个唯一地址 0 死链**；泄漏扫描 `src/`+`dist/` 仅命中用户批准公开的邮箱。**过程中发现并修正 3 个真实 bug**：① 英文 404 产物是 `/en/404/` 而非 `/en/404.html`（第一版指向死链）；② `hreflang` 输出了相对 URL；③ `PostLayout` 的语言按钮在无译文时回退到了**当前中文页**（点击等于没反应，且链接完整性检查抓不到）。**未推送**（§10.5 状态记为「本地已验收 · 待推送」） |

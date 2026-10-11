@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NotFoundPanel from '../../components/NotFoundPanel.astro';
+import { ui } from '../../i18n/ui';
+
+const t = ui.en;
+---
+
+<BaseLayout
+  lang="en"
+  title={`404 · Page not found | ${t.siteName}`}
+  description="The requested page does not exist."
+  altHref="/404.html"
+>
+  <NotFoundPanel lang="en" />
+</BaseLayout>

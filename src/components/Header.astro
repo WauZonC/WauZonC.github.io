@@ -1,42 +1,64 @@
 ---
-const siteName = 'WauZonC';
+import ThemeToggle from './ThemeToggle.astro';
+import LangSwitch from './LangSwitch.astro';
+import { getLangFromPath, stripLang, ui, withLang, type Lang } from '../i18n/ui';
 
-const navItems = [
-  { href: '/', label: '首页' },
-  { href: '/about/', label: '关于' },
-  { href: '/blog/', label: '博客' },
-  { href: '/projects/', label: '项目' },
-];
-
-const currentPath = Astro.url.pathname;
-
-function isCurrent(href: string, pathname: string): boolean {
-  if (href === '/') {
-    return pathname === '/';
-  }
-  return pathname === href || pathname.startsWith(href);
+interface Props {
+  /** 由 BaseLayout 传入；缺省时按路径自动判断（/en/ 前缀 = 英文） */
+  lang?: Lang;
+  /** 目标语言缺少对应页面时的语言按钮回退地址（ADR-10 约束 1） */
+  altHref?: string;
 }
+
+const pathname = Astro.url.pathname;
+const lang: Lang = Astro.props.lang ?? getLangFromPath(pathname);
+const t = ui[lang];
+
+// 导航文案与地址都随语言走：中文页 -> 中文路径，英文页 -> /en/ 前缀
+const navItems = [
+  { path: '/', label: t.nav.home },
+  { path: '/about/', label: t.nav.about },
+  { path: '/blog/', label: t.nav.blog },
+  { path: '/projects/', label: t.nav.projects },
+].map((item) => ({ ...item, href: withLang(item.path, lang) }));
+
+// 当前高亮在「去掉语言前缀」的路径上判断，中英两套导航共用同一份逻辑
+const bare = stripLang(pathname);
+
+function isCurrent(path: string): boolean {
+  if (path === '/') {
+    return bare === '/';
+  }
+  return bare === path || bare.startsWith(path);
+}
+
+const homeHref = withLang('/', lang);
 ---
 
 <header class="site-header">
   <div class="container header-inner">
-    <a class="site-title" href="/">{siteName}</a>
-    <nav class="site-nav" aria-label="主导航">
-      <ul>
-        {
-          navItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isCurrent(item.href, currentPath) ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <a class="site-title" href={homeHref}>{t.siteName}</a>
+
+    <div class="header-actions">
+      <nav class="site-nav" aria-label={t.navLabel}>
+        <ul>
+          {
+            navItems.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isCurrent(item.path) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="header-toggles">
+        <LangSwitch lang={lang} pathname={pathname} altHref={Astro.props.altHref} />
+        <ThemeToggle lang={lang} />
+      </div>
+    </div>
   </div>
 </header>
 
@@ -73,6 +95,22 @@ function isCurrent(href: string, pathname: string): boolean {
     letter-spacing: 0.05em;
     text-decoration: none;
     color: var(--fg);
+  }
+
+  /* 导航与右侧两个切换按钮同组，窄屏时整组换行（避免撑出横向滚动） */
+  .header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem 0.75rem;
+    min-width: 0;
+  }
+
+  .header-toggles {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
   }
 
   .site-nav ul {

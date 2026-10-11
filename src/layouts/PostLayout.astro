@@ -1,26 +1,53 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
+import { ui, withLang, type Lang } from '../i18n/ui';
+import type { BlogEntry } from '../content-types';
 
 interface Props {
-  post: CollectionEntry<'blog'>;
+  post: BlogEntry;
+  lang?: Lang;
+  /**
+   * 另一语言是否存在**同 slug 的译文**。
+   * 决定 hreflang 是否输出、以及语言按钮是跳到对应文章还是退回列表页（ADR-10 约束 1）。
+   */
+  hasTranslation?: boolean;
 }
 
-const { post } = Astro.props;
+const { post, hasTranslation = false } = Astro.props;
+const lang: Lang = Astro.props.lang ?? 'zh';
+const t = ui[lang];
+
 const { title, description, pubDate, updatedDate, tags } = post.data;
+
+const listHref = withLang('/blog/', lang);
+const target: Lang = lang === 'zh' ? 'en' : 'zh';
+const counterpartHref = withLang(`/blog/${post.id}/`, target);
+// 没有译文时，语言按钮必须落到**目标语言**的列表页。
+// （曾经误用 listHref = 当前语言的列表页，结果按钮指向用户已经在看的页面，等于点了没反应。）
+const fallbackHref = withLang('/blog/', target);
+const dateLocale = t.dateLocale;
 ---
 
-<BaseLayout title={`${title} | WauZonC`} description={description} ogType="article">
+<BaseLayout
+  title={`${title} | ${t.siteName}`}
+  description={description}
+  ogType="article"
+  lang={lang}
+  altHref={hasTranslation ? counterpartHref : fallbackHref}
+  translated={hasTranslation}
+>
   <article class="glass panel measure">
     <header class="post-header">
       <h1>{title}</h1>
       <p class="post-meta">
-        <time datetime={pubDate.toISOString()}>{pubDate.toLocaleDateString('zh-CN')}</time>
+        <time datetime={pubDate.toISOString()}>{pubDate.toLocaleDateString(dateLocale)}</time>
         {
           updatedDate && (
             <>
               <span class="sep">·</span>
-              <span>更新于 {updatedDate.toLocaleDateString('zh-CN')}</span>
+              <span>
+                {t.updatedOn} {updatedDate.toLocaleDateString(dateLocale)}
+              </span>
             </>
           )
         }
@@ -41,7 +68,7 @@ const { title, description, pubDate, updatedDate, tags } = post.data;
     </div>
   </article>
 
-  <p class="post-back measure"><a href="/blog/">← 返回文章列表</a></p>
+  <p class="post-back measure"><a href={listHref}>{t.backToList}</a></p>
 </BaseLayout>
 
 <style>

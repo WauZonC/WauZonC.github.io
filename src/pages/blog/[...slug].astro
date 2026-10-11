@@ -3,18 +3,24 @@ import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const [posts, enPosts] = await Promise.all([
+    getCollection('blog', ({ data }) => !data.draft),
+    getCollection('blogEn', ({ data }) => !data.draft),
+  ]);
+
+  // 同名即同 slug：存在英文同名文件才算有译文（ADR-10 约束 1，避免语言按钮指向死链）
+  const enIds = new Set(enPosts.map((post) => post.id));
 
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, hasTranslation: enIds.has(post.id) },
   }));
 }
 
-const { post } = Astro.props;
+const { post, hasTranslation } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<PostLayout post={post}>
+<PostLayout post={post} lang="zh" hasTranslation={hasTranslation}>
   <Content />
 </PostLayout>

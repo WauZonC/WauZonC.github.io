@@ -3,8 +3,12 @@
  *
  * 结构：设计令牌 → 基础重置 → 排版与链接 → 版式容器 → 玻璃组件工具类
  *       → 正文(prose) → 响应式断点（900px 版式 / 640px 排版）
- * 约束：零客户端 JS；仅原生 CSS；不引入任何框架；
+ * 约束：仅原生 CSS；不引入任何框架；
  *       backdrop-filter 通过 @supports 提供不透明兜底，保证正文对比度。
+ * 主题：浅色在 :root，暗色有两处同步块（手动 data-theme / 跟随系统），见下方 ADR-9 说明。
+ *
+ * ⚠️ 2026-10-11 起「零客户端 JS」的性质有变（ADR-1 → ADR-9）：新增了浅色/深色手动切换，
+ *    由 2 段 is:inline 内联脚本实现。本文件仍不含任何 JS；R3（dist 内 .js 计数为 0）依然成立。
  * ========================================================================== */
 
 /* ---------- 设计令牌：浅色（默认） ---------- */
@@ -48,9 +52,51 @@
   --gap: 1.25rem;
 }
 
-/* ---------- 设计令牌：暗色（跟随系统） ---------- */
+/* 用户显式选了浅色：锁定 color-scheme，系统暗色不再生效（ADR-9）。
+ * 未设置 data-theme 时保持上面的 color-scheme: light dark，即跟随系统。 */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+/* ---------- 设计令牌：暗色 ----------
+ * ⚠️ 暗色令牌在本文件中出现【两处】，必须逐字保持同步（ADR-9 明确接受的重复，
+ *    换来的是零浏览器特性依赖；曾考虑的 light-dark() 在不支持的浏览器上会让
+ *    整套令牌一起失效，风险不可接受）：
+ *      ① :root[data-theme='dark']                                —— 用户手动切到深色
+ *      ② @media (prefers-color-scheme: dark) 下的 :root:not([data-theme='light'])
+ *                                                                —— 未手动选择时跟随系统（含无 JS 环境）
+ *    只改一处的后果：手动切换与跟随系统两条路径配色不一致。
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --fg: #eef2f9;
+  --fg-muted: #a7b2c5;
+  --accent: #9ec1ff;
+  --accent-soft: rgba(158, 193, 255, 0.16);
+
+  --glass: rgba(22, 28, 40, 0.55);
+  --glass-solid: rgba(20, 25, 37, 0.94);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-tint: rgba(255, 255, 255, 0.08);
+  --hairline: rgba(255, 255, 255, 0.14);
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.42);
+
+  --bg-color: #0b1020;
+  --bg-image:
+    radial-gradient(46rem 30rem at 12% -10%, #1c3a6e 0%, rgba(28, 58, 110, 0) 62%),
+    radial-gradient(38rem 26rem at 92% 4%, #4a1f47 0%, rgba(74, 31, 71, 0) 60%),
+    radial-gradient(40rem 30rem at 50% 110%, #10403a 0%, rgba(16, 64, 58, 0) 62%);
+
+  --code-bg: rgba(255, 255, 255, 0.09);
+  --code-fg: #e8eef8;
+}
+
+/* ② 跟随系统（未手动选择）。:not([data-theme='light']) 保证用户显式选了浅色时系统暗色不生效 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --fg: #eef2f9;
     --fg-muted: #a7b2c5;
     --accent: #9ec1ff;
@@ -371,6 +417,92 @@ a:hover {
   border: 1px solid var(--hairline);
   padding: 0.45rem 0.6rem;
   text-align: left;
+}
+
+/* ---------- 页头工具按钮（ADR-9 主题切换 / ADR-10 语言切换） ----------
+ * 与 .pill / 药丸导航同一材质语言：玻璃底 + 发丝边 + 全圆角。
+ * 具体按钮的图标动画放在各自的组件里（ThemeToggle.astro）。
+ */
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  padding: 0 0.55rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-tint);
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--fg);
+  background: var(--glass);
+}
+
+.toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 无 JS 时主题按钮是死按钮，直接不显示（见 ThemeToggle.astro 的 html.js 约定） */
+html:not(.js) .theme-toggle {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-btn {
+    transition: none;
+  }
+}
+
+/* ---------- 页面级网格（中英两套页面共用，ADR-10） ----------
+ * 原本分别内联在 index.astro 与 projects.astro 的 <style> 里；
+ * 英文镜像页需要同一套版式，故上移为共享工具类，避免复制出第二份必然漂移的栅格规则。
+ */
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.25rem;
+}
+
+.home-column {
+  min-width: 0;
+}
+
+/* 项目页：宽画布双列玻璃卡片；≤760px 降为单列 */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .project-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ---------- 响应式断点 ---------- */

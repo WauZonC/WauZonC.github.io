@@ -1,0 +1,64 @@
+---
+/**
+ * 404 面板（中英共用，ADR-10）。
+ * 抽成组件是为了让两种语言用同一份标记与样式，避免复制出第二套必然漂移的样式。
+ */
+import { ui, withLang, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+
+const heading = lang === 'zh' ? '404 · 页面未找到' : '404 · Page not found';
+const message =
+  lang === 'zh'
+    ? '你访问的页面不存在，或者已经被移动了。'
+    : 'The page you requested does not exist, or it has been moved.';
+const homeLabel = lang === 'zh' ? '返回首页' : 'Back to home';
+const blogLabel = lang === 'zh' ? '浏览文章' : 'Browse posts';
+---
+
+<section class="glass panel measure error-panel">
+  <h1>{heading}</h1>
+  <p>{message}</p>
+  <p class="error-links">
+    <a href={withLang('/', lang)}>{homeLabel}</a>
+    <span class="sep">·</span>
+    <a href={withLang('/blog/', lang)}>{blogLabel}</a>
+  </p>
+</section>
+
+<style>
+  .error-panel {
+    text-align: center;
+    padding-block: 3rem;
+  }
+
+  .error-panel h1 {
+    margin: 0 0 0.6rem;
+    font-size: clamp(1.5rem, 4.4vw, 2.1rem);
+  }
+
+  .error-panel p {
+    margin: 0;
+    color: var(--fg-muted);
+  }
+
+  .error-links {
+    margin-top: 1.25rem;
+  }
+
+  .sep {
+    margin: 0 0.4rem;
+    color: var(--fg-muted);
+  }
+
+  @media (max-width: 640px) {
+    .error-panel {
+      padding-block: 2rem;
+    }
+  }
+</style>

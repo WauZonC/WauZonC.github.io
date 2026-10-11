@@ -1,13 +1,19 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { ui, withLang, type Lang } from '../i18n/ui';
+import type { BlogEntry } from '../content-types';
 
 interface Props {
-  post: CollectionEntry<'blog'>;
+  post: BlogEntry;
+  /** 缺省中文；英文列表页传 'en'，链接会自动带 /en 前缀 */
+  lang?: Lang;
 }
 
 const { post } = Astro.props;
+const lang: Lang = Astro.props.lang ?? 'zh';
 const { title, description, pubDate, tags } = post.data;
-const href = `/blog/${post.id}/`;
+// 链接前缀随语言走：中文 /blog/<slug>/，英文 /en/blog/<slug>/
+const href = withLang(`/blog/${post.id}/`, lang);
+const dateLocale = ui[lang].dateLocale;
 ---
 
 <article class="glass card post-card">
@@ -15,7 +21,7 @@ const href = `/blog/${post.id}/`;
     <a href={href}>{title}</a>
   </h3>
   <p class="post-card-meta">
-    <time datetime={pubDate.toISOString()}>{pubDate.toLocaleDateString('zh-CN')}</time>
+    <time datetime={pubDate.toISOString()}>{pubDate.toLocaleDateString(dateLocale)}</time>
   </p>
   <p class="post-card-description">{description}</p>
   {

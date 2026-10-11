@@ -1,0 +1,57 @@
+---
+/**
+ * 英文页的「翻译中」提示（ADR-10）。
+ *
+ * 本期只交付双语**框架**：英文站的路由、导航、页脚、按钮都已就位，
+ * 但正文尚未翻译。此处**刻意不复用中文正文**——那会让同一份中文出现在两个 URL 上
+ * （重复内容 + 中英混排），对 SEO 与阅读体验都更差。
+ * 因此给一个明确的提示 + 一条回到完整中文版的链接。
+ *
+ * 用 <h2> 而非 <h1>：每个英文页自己提供 <h1>（.page-head），保证一页只有一个 h1。
+ */
+interface Props {
+  /** 对应中文页面的地址 */
+  zhHref: string;
+}
+
+const { zhHref } = Astro.props;
+---
+
+<section class="glass panel measure lang-notice">
+  <p class="lang-notice-eyebrow">Translation in progress</p>
+  <h2>English version coming soon</h2>
+  <p class="lang-notice-lead">
+    The bilingual framework for this site is in place — navigation, page structure and the
+    language switch all work — but the English text itself has not been written yet. The Chinese
+    version is complete and always up to date.
+  </p>
+  <p class="lang-notice-cta">
+    <a href={zhHref}>Read the Chinese version →</a>
+  </p>
+</section>
+
+<style>
+  .lang-notice-eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .lang-notice h2 {
+    margin: 0 0 0.85rem;
+    font-size: clamp(1.4rem, 3.6vw, 1.9rem);
+  }
+
+  .lang-notice-lead {
+    margin: 0;
+    max-width: 52ch;
+    color: var(--fg-muted);
+  }
+
+  .lang-notice-cta {
+    margin: 1.35rem 0 0;
+  }
+</style>

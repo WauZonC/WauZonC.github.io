@@ -21,9 +21,10 @@
  *       backdrop-filter 完全不支持时降级为不透明玻璃（承接 ADR-7 的兜底要求）。
  * 主题：浅色在 :root，暗色有两处同步块（手动 data-theme / 跟随系统），见下方 ADR-9 说明。
  *
- * ⚠️ 2026-10-11 起「零客户端 JS」的性质有变（ADR-1 → ADR-9）：新增了浅色/深色手动切换，
- *    由 2 段 is:inline 内联脚本实现。本文件仍不含任何 JS；R3（dist 内 .js 计数为 0）依然成立。
- * ⚠️ 同日「零位图背景」的性质也结束了：背景改成 public/images/background.jpg（ADR-11）。
+ * ⚠️ 2026-10-11 起「零客户端 JS」的性质有变（ADR-1 → ADR-9 / ADR-12）：新增了浅色/深色手动切换
+ *    （现按用户要求**静默停用**，见下方「主题静默门控」）与「随机换背景」，由 3 段 is:inline 内联脚本实现。
+ *    本文件仍不含任何 JS；R3（dist 内 .js 计数为 0）依然成立。
+ * ⚠️ 同日「零位图背景」的性质也结束了：背景改成 public/images/backgrounds/ 下的照片池（ADR-11 / ADR-12）。
  * ========================================================================== */
 
 /* ---------- 设计令牌：浅色（默认） ----------
@@ -62,9 +63,11 @@
   /* 通用「极淡表面」：页脚、标签这类不需要完整材质的场景（原 --glass-tint 的接任者） */
   --tint-soft: rgba(255, 255, 255, 0.12);
 
-  /* 照片背景（ADR-11） */
+  /* 照片背景（ADR-11 引入，ADR-12 起变为「照片池 + 日期映射」） */
+  --bg-photo: url('/images/backgrounds/default.jpg'); /* 由首屏内联 <style> 按当日照片覆盖 */
   --photo-dim: 0.42;             /* 压暗强度：保证正文对比度的关键旋钮 */
   --photo-position: center;      /* 取景位置 */
+  --photo-fade: 420ms;           /* 换图交叉淡入时长；prefers-reduced-motion 下 CSS 会关掉 */
 
   /* 代码块 */
   --code-bg: rgba(255, 255, 255, 0.14);
@@ -123,9 +126,17 @@
   --code-fg: #e8eef8;
 }
 
-/* ② 跟随系统（未手动选择）。:not([data-theme='light']) 保证用户显式选了浅色时系统暗色不生效 */
+/* ② 跟随系统（未手动选择）。:not([data-theme='light']) 保证用户显式选了浅色时系统暗色不生效。
+ *
+ * ⚠️ ADR-12（M-4）：选择器里额外的 `.gate-dark` 类是**刻意的门控**，不是笔误。
+ *    用户 2026-10-11 要求「深色/浅色切换静默：保留代码但不在页面上展示，保持浅色」，
+ *    而本块是「未手动选择时跟随系统」那条路径 —— 若不门控，系统设为深色的访客
+ *    会看到深色外观却**没有任何按钮可以切回**，与「保持浅色」相矛盾。
+ *    门控来源：`src/backgrounds/config.ts` 的 `THEME_TOGGLE_ENABLED`，
+ *    由 BaseHead 给 `<html>` 加/不加 `gate-dark` 类。
+ *    改回 `true` 即恢复本块（连同页头的 ThemeToggle 按钮），**不需要改这里**。 */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  html.gate-dark:not([data-theme='light']) {
     --fg: #f4f7fc;
     --fg-muted: #c9d3e2;
     --accent: #a9c8ff;
@@ -163,20 +174,64 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* 照片背景（ADR-11）。photo-dim 那层叠在照片之上，负责压暗到正文可读。
- * 照片已是清空 EXIF、缩到 2560×1920 的副本，见 PLAN.md ADR-11 的隐私说明。 */
+/* 照片背景（ADR-11 引入；ADR-12 / M-4 改为「固定双层 + --bg-photo」）。
+ *
+ * 为什么从「body 直接背照片」改成两个固定层：
+ *   1. 换图时改的是 `--bg-photo`；若照片直接铺在 body 上，浏览器要重绘整页背景，
+ *      而且无法在不闪的前提下做交叉淡入。
+ *   2. 两层的初值是**同一张图**（层 1 在 :root 的 --bg-photo，层 2 显式重复一次），
+ *      所以任何时刻都至少有一层是「有图的」，交叉淡入过程中不会露出下面的纯色底。
+ *   3. 层是 fixed 且 pointer-events: none、z-index: -1，处在所有内容之下，
+ *      不参与滚动宽度计算（不会引入横向滚动）。
+ *
+ * ⚠️ 可见性用 `[data-active]` 普通选择器做**切换**，过渡写在不依赖该属性的
+ *    基类规则里 —— 这样「叠加一层新样式」不会把过渡本身覆盖掉（M-3 踩过同类坑）。 */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
+    var(--bg-photo);
+  background-size: cover, cover;
+  background-position: center, var(--photo-position);
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed; /* 滚动时照片不动，避免视觉跳动 */
+  opacity: 0;
+  transition: opacity var(--photo-fade) ease;
+}
+
+.bg-layer[data-active='true'] {
+  opacity: 1;
+}
+
+.bg-layer[data-active='false'] {
+  opacity: 0;
+}
+
+/* 层 2：与层 1 同尺寸、同压暗，只有过渡时机不同（它是「换图的目的地」）。
+ * 这里的第二个 url() 是【故意的重复】：初值必须是一张真图，否则首次点击会闪一下空白。
+ * 由 BaseHead 的内联 <style> 与层 1 一起覆盖为「当日照片」，两者始终一致。 */
+.bg-layer-back {
+  background-image:
+    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
+    url('/images/backgrounds/default.jpg');
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-layer {
+    transition: none;
+  }
+}
+
+/* 正文/页头/页脚本身不需要额外规则：固定层已 z-index: -1，处于全部内容之下。
+ * 照片都已是「清空 EXIF、长边 ≤2560」的副本（导入走 `pnpm add:background`，见 ADR-12 的隐私门禁）。 */
 body {
   margin: 0;
   min-height: 100vh;
   color: var(--fg);
   background-color: #0d1420; /* 照片加载前的兜底底色 */
-  background-image:
-    linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
-    url('/images/background.jpg');
-  background-size: cover, cover;
-  background-position: center, var(--photo-position);
-  background-repeat: no-repeat, no-repeat;
-  background-attachment: fixed, fixed; /* 滚动时照片不动，避免视觉跳动 */
   font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 1.8; /* 中文排版：行高略大于英文习惯，见 PLAN.md 5.2 */
@@ -627,8 +682,15 @@ a:hover {
   outline-offset: 2px;
 }
 
-/* 无 JS 时主题按钮是死按钮，直接不显示（见 ThemeToggle.astro 的 html.js 约定） */
+/* 无 JS 时主题按钮是死按钮，直接不显示（见 ThemeToggle.astro 的 html.js 约定）。
+ * ⚠️ ADR-12 起主题按钮整体静默（config.ts 的 THEME_TOGGLE_ENABLED = false），
+ *    这条规则保留不动，恢复开关时无需改动。 */
 html:not(.js) .theme-toggle {
+  display: none;
+}
+
+/* 背景按钮同理：没有 JS 就无法换图，不显示（见 BackgroundButton.astro 的 html.bg 约定） */
+html:not(.bg) .bg-toggle {
   display: none;
 }
 

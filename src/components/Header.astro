@@ -1,7 +1,10 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import BackgroundButton from './BackgroundButton.astro';
 import LangSwitch from './LangSwitch.astro';
 import { getLangFromPath, stripLang, ui, withLang, type Lang } from '../i18n/ui';
+import { THEME_TOGGLE_ENABLED } from '../backgrounds/config';
+import { BACKGROUND_IDS } from '../backgrounds/generated';
 
 interface Props {
   /** 由 BaseLayout 传入；缺省时按路径自动判断（/en/ 前缀 = 英文） */
@@ -60,8 +63,12 @@ const homeHref = withLang('/', lang);
 
       <div class="header-toggles">
         <LangSwitch lang={lang} pathname={pathname} altHref={Astro.props.altHref} />
-        <ThemeToggle lang={lang} />
+        {/* 主题切换按 ADR-12 静默：开关为 false 时不渲染；ThemeToggle.astro、其内联脚本
+            与 global.css 的两处深色令牌都完整保留，把 config.ts 的开关改回 true 即恢复。 */}
+        {THEME_TOGGLE_ENABLED && <ThemeToggle lang={lang} />}
+        <BackgroundButton lang={lang} poolSize={BACKGROUND_IDS.length} />
       </div>
+
     </div>
   </div>
 </header>

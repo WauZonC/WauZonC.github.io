@@ -12,9 +12,10 @@
 - **工作区状态：🟢 维护阶段（Maintenance）** —— 自 2026-10-11 起；开发阶段 P0–P6 **全部完成**，站点已上线 <https://wauzonc.github.io>，推送 `main` 即自动构建并部署（操作手册：§10）
 - 维护期内容基线（对照基准，2026-10-11 实测）：博客 **3** 篇 / 项目 **4** 条 / 构建页面 **8** 个 / `dist` 内 `.js` **0** 个
   - **m2.2 更新（M-1 + M-2 后）**：构建页面 **8 → 13**（+5 条英文镜像路由，见 §4.1）；博客仍 **3**、项目仍 **4**（英文集合 `blogEn`/`projectsEn` 为空，正文待翻译）；`dist` 内 `.js` 仍为 **0**。**页面数基线自此改为 13**
-- 已知未闭合项（维护期待办）：**英文正文翻译**（M-2 只交付了框架，接缝见 ADR-10）；RSS / 站点搜索 / 评论 / 访问统计 / 文章 TOC（§9 开放项 3 → §10.3 候选清单）；手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`
+  - **M-4 更新（2026-10-11）**：页面仍 **13**、`.js` 仍 **0**，但**每页 `<script>` 由 2 段变为 3 段**（ADR-12）；新增 `public/images/backgrounds/` 照片池（当前 1 张，原 `background.jpg` 迁入为 `default.jpg`）；**深浅色切换静默**（恒定浅色，代码保留）
+- 已知未闭合项（维护期待办）：**英文正文翻译**（M-2 只交付了框架，接缝见 ADR-10）；RSS / 站点搜索 / 评论 / 访问统计 / 文章 TOC（§9 开放项 3 → §10.3 候选清单）；手势识别项目缺配图；「本站」项目卡片可补 `repoUrl`；根目录原始照片仍未移出仓库（M-3 遗留项，本轮未擅自删除）
 - `demo/` 当前状态（**M-3，2026-10-11**）：**原型的内容已落地到正式站点**（ADR-11）——站点现在就是「液态玻璃 + 照片背景」。`demo/` 保留为**设计过程证据与调参沙盒**（含改造前的毛玻璃对照组 `real-home-plain.html`），按 §10.2 轨道 B 惯例属**临时目录**，正式验收后可删除。
-- 文档版本：**v2.5**（2026-10-11，**M-3 正式落地**：全站改为 iOS 26 风格**液态玻璃 + 照片背景**（新增 **ADR-11**，取代 ADR-7 的材质与背景）；`src/styles/global.css` 重写材质层（四层 + 4 组角色化滤镜 + 三层兜底），11 个组件/页面改标记，新增 `public/images/background.jpg`（**EXIF/GPS 已清空**），`theme-color` 同步；实测 `pnpm build` 退出码 0 / **13 页** / `dist` 内 `.js` **0** / 产物 CSS 外部请求 **0**、**44 组无横向滚动全过**、**对比度全部过 WCAG AA**（浅色态最低 4.94，深色态最低 7.93）、R5 泄漏扫描 0 命中；**关键发现**：原型的「白玻璃 + 浅色文字」在这张照片上只有约 2.2:1，改为**深色玻璃**后 6.5~6.9:1，故两态玻璃都是深色底；**尚未 `git push`**）；上一版 **v2.3**（2026-10-11，**M-1 + M-2 已发布**：提交 `7b5e9c0` 推送 `origin/main`（`d9f451c..7b5e9c0`），Actions run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679) 的 **Build 与 Deploy 两个作业均 success**；**线上 R6 实测**：13 条资源全部 **200**（含 5 条新增 `/en/` 路由）、不存在路径 → **404**、线上 `index.html` 与本地 `dist/index.html` 的 **SHA-256 相同**（`42393CB1…D6C2AF`），并实测线上页面确实带上了两个新按钮与首屏前主题脚本；§10.5 台账两行状态按 §10.4 步骤 7 回填为「已发布」）；上一版 **v2.2**（2026-10-11，**M-1 + M-2 落地**：页头新增「中英文切换」与「浅色/深色切换」两个按钮；新增 **ADR-9**（主题手动切换，取代 ADR-7 取舍第 1 条）与 **ADR-10**（`/`+`/en/` 两套真实路由）；§4.1/4.2/4.3 同步、§1.2 的 R2/R3 基线更新、新增 **§10.6 维护任务执行记录**；本地门禁全绿，**尚未 `git push`**，故 §10.5 状态为「本地已验收 · 待推送」）；上一版 **v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
+- 文档版本：**v2.6**（2026-10-11，**M-4 落地**：背景升级为「照片池 + 客户端日期映射 + 随机换背景按钮」，并按要求**静默停用深浅色切换**（保留全部代码、恒定浅色）；新增 **ADR-12**，新增 `src/backgrounds/**`（配置 / 求解 / 运行期脚本生成）、`scripts/**`（导入与同步，零 npm 依赖）、`src/components/BackgroundButton.astro`、`public/images/backgrounds/`；`global.css` 改背景为两个固定层 + `--bg-photo`、给 `@media (prefers-color-scheme: dark)` 加 `gate-dark` 门控；`Header`/`BaseHead`/`BaseLayout`/`i18n`/`package.json` 同步；实测 `pnpm build` 退出码 0 / **13 页** / `dist` 内 `.js` **0** / 每页 `<script>` **3**、**52 组无横向滚动**、**构建期与运行期 1461 天逐日一致**（含真实浏览器）、逐张照片 EXIF/GPS 为 0 且过 WCAG AA；**尚未 `git push`**）；上一版 **v2.5**（2026-10-11，**M-3 正式落地**：全站改为 iOS 26 风格**液态玻璃 + 照片背景**（新增 **ADR-11**，取代 ADR-7 的材质与背景）；`src/styles/global.css` 重写材质层（四层 + 4 组角色化滤镜 + 三层兜底），11 个组件/页面改标记，新增 `public/images/background.jpg`（**EXIF/GPS 已清空**），`theme-color` 同步；实测 `pnpm build` 退出码 0 / **13 页** / `dist` 内 `.js` **0** / 产物 CSS 外部请求 **0**、**44 组无横向滚动全过**、**对比度全部过 WCAG AA**（浅色态最低 4.94，深色态最低 7.93）、R5 泄漏扫描 0 命中；**关键发现**：原型的「白玻璃 + 浅色文字」在这张照片上只有约 2.2:1，改为**深色玻璃**后 6.5~6.9:1，故两态玻璃都是深色底；**尚未 `git push`**）；上一版 **v2.3**（2026-10-11，**M-1 + M-2 已发布**：提交 `7b5e9c0` 推送 `origin/main`（`d9f451c..7b5e9c0`），Actions run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679) 的 **Build 与 Deploy 两个作业均 success**；**线上 R6 实测**：13 条资源全部 **200**（含 5 条新增 `/en/` 路由）、不存在路径 → **404**、线上 `index.html` 与本地 `dist/index.html` 的 **SHA-256 相同**（`42393CB1…D6C2AF`），并实测线上页面确实带上了两个新按钮与首屏前主题脚本；§10.5 台账两行状态按 §10.4 步骤 7 回填为「已发布」）；上一版 **v2.2**（2026-10-11，**M-1 + M-2 落地**：页头新增「中英文切换」与「浅色/深色切换」两个按钮；新增 **ADR-9**（主题手动切换，取代 ADR-7 取舍第 1 条）与 **ADR-10**（`/`+`/en/` 两套真实路由）；§4.1/4.2/4.3 同步、§1.2 的 R2/R3 基线更新、新增 **§10.6 维护任务执行记录**；本地门禁全绿，**尚未 `git push`**，故 §10.5 状态为「本地已验收 · 待推送」）；上一版 **v2.1**（2026-10-11，维护期**首次发布**：文档同步提交 `98454f6` 已推送 `origin/main`，Actions run `38129131299` **build + deploy 全绿**，本地 R1–R3、R5 与线上 R6 实测通过，线上产物 SHA-256 与 P6 一致）；上一版 **v2.0**（2026-10-11，**工作区状态由「开发」切换为「维护」**：新增 ADR-8「维护模式」、新增 §10 维护阶段操作手册（三条轨道 A 内容 / B 样式 / C 功能 + 立项模板 + 发布流程 + 回滚 + 维护纪律 + 任务台账）、§1.1 增补维护期目标、§1.2 增补维护期回归验收 R1–R6、§6 路线图标注全部完成并冻结、§7 增补 4 行维护期风险、§8 与 §9 按维护边界改写、变更记录 v2.0）；上一版 **v1.8**（P6 完成：远端仓库已创建并推送 `main`，首次 Actions 运行 build+deploy **全绿**；站点 6 条路由实测 200、中文正常、部署产物与本地 `dist` **逐字节一致**；关闭两处开放项——用户决定**不绑定自定义域名**、仓库**公开**）；上一版 **v1.7**（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
 
 ---
 
@@ -51,7 +52,7 @@
 |---|---|---|---|
 | R1 | 本地构建通过 | `pnpm build` → 退出码 `0`，日志无 `[InvalidContentEntryDataError]` | `8 page(s) built` |
 | R2 | 页面数与内容数一致 | `dist` 下 `.html` 文件数 = 路由数；`src/content/blog` 下非 draft `.md` 数 = 文章数 | `.html` **8**；博客 **3**、项目 **4**（2026-10-11 基线）。**M-2 后：`.html` 13**（+5 条英文路由）；博客仍 3、项目仍 4（英文集合为空） |
-| R3 | 零客户端 JS 未被破坏（ADR-1） | `(Get-ChildItem -Recurse -File -Filter *.js dist).Count` → `0` | `0`。**⚠️ M-1 后此命令的含义需要正确理解**：命令本身**未变、仍应为 0**，但「零客户端 JS」已不再是字面事实——`src/**` 里有 2 段 `is:inline` 内联脚本（主题切换，ADR-9）。`is:inline` 不产出 `.js` 文件，所以命令返回 0。**禁止**把该命令改写成「HTML 里没有 `<script>`」来掩盖这次变化 |
+| R3 | 零客户端 JS 未被破坏（ADR-1） | `(Get-ChildItem -Recurse -File -Filter *.js dist).Count` → `0` | `0`。**⚠️ M-1 后此命令的含义需要正确理解**：命令本身**未变、仍应为 0**，但「零客户端 JS」已不再是字面事实——`src/**` 里有 2 段 `is:inline` 内联脚本（主题切换，ADR-9）。`is:inline` 不产出 `.js` 文件，所以命令返回 0。**禁止**把该命令改写成「HTML 里没有 `<script>`」来掩盖这次变化。**M-4 / ADR-12 后为 3 段**（新增首屏背景与背景按钮各一段，主题那段仍在但不渲染），命令仍为 `0`、每页 `<script>` 计数为 **3** |
 | R4 | 无横向滚动 | `pnpm preview` + 同源 iframe 探针，各路由 × 320/390/1440 全部 `scrollWidth <= clientWidth` | 24 组全过（方法见 P4 执行记录） |
 | R5 | 无隐私 / 版权泄漏 | 对 `src/`、`public/`、`dist/` 扫描硬红线（手机号 / 学号 / 真名 / 他人姓名 / 成绩 / 身份证 / 入党等）→ **0 命中** | **0 命中**（唯一命中项为用户批准公开的邮箱） |
 | R6 | 线上一致且 Actions 绿 | push 后 Actions `build` + `deploy` 全绿；线上关键产物与本地 `dist` 一致（至少核对 `index.html` 的 SHA-256） | run `38128165438` 全绿；`index.html` SHA-256 相同 |
@@ -252,6 +253,51 @@
   3. 页面结构（§4.1 路由表）与内容契约（G3）**零变化**：本次是纯样式与资源改动。
   4. 照片**必须**保持已清空 EXIF 的副本；根目录原图不得入库。
 
+### ADR-12：背景改为「照片池 + 客户端日期映射 + 随机换背景按钮」，并静默停用主题切换（2026-10-11，用户指示）
+
+- **决策**：把 ADR-11 的「一张写死的照片」升级为**照片池**，并同时做三件事：
+  1. **照片池**：`public/images/backgrounds/<id>.jpg`，id 即文件名（`[a-z0-9-]`）；目录里有什么 = 池里有什么（由 `pnpm sync:backgrounds` 扫描成 `src/backgrounds/generated.ts`）。
+  2. **按日期固定**：`src/backgrounds/config.ts` 的 `rules` 定义「日期 → 照片」，优先级**从上到下**，支持 `YYYY-MM-DD`（一次性）/ `MM-DD`（每年）/ `0`–`6`（星期几），都没命中则按 `fallback`（`hash` 稳定打散 / `cycle` 按天轮转）兜底。求解函数是**纯函数**，日期由调用方传入。
+  3. **页头第二个按钮换成「随机换背景」**（替换原深浅色切换按钮的位置）；深浅色切换**静默**：保留全部代码，但页头不再渲染、`<html>` 不再带 `gate-dark` 类。
+- **为什么现在做**：用户 2026-10-11 明确要求「可以更换背景图片；把一个目录作为背景源，我可以上传自己喜欢的照片；把原来深浅色按钮改成随机切换背景按钮；刷新不改变当前背景；按客户端日期设计一个函数，某个日期打开一定是固定一张，并且我可以在本地调整映射值（例如指定某个节假日用某张）」，同时要求「深色与浅色切换静默（保留代码但不在页面上展示），保持当前的浅色状态」。
+- **构建期 + 运行期双实现（本 ADR 的核心取舍）**：日期必须取**客户端**的，而站点是**静态**的，所以：
+  - **构建期**（`runtime.ts`）：构建机当天算一次，写进内联 `<style>`（`--bg-photo`）与内联 JSON。作用有三 —— 无 JS 时也有确定的一张；构建机与访客同一天时运行期**不需要改任何东西**（不闪图、不多发一次请求）；`<link rel="preload">` 可以预取那一张。
+  - **运行期**（`is:inline` 脚本）：读同一个 JSON，用**客户端本地日期**重算，只在与构建期不同才覆写 `--bg-photo`；并读 `localStorage['bg-v1']` 处理「点过按钮」的情况。
+  - 两端的算法**只有一份真实来源**：`src/backgrounds/date-map.ts` 里的函数，运行期脚本用的是它的**源码字符串**（不能 import —— 那会产出 `.js` 文件，打破 R3）。
+  - **一致性靠测试而不是注释**：`tmp/test_bg_map.mjs` 断言「构建期与运行期在 **1461 天**上给出完全相同的 id 与 reason」；`tmp/probe_browser.py` + `tmp/check_bg_days.mjs` 再断言「**真实浏览器里**跑的产物与 TS 实现逐日一致」（1461 天 0 差异）。
+- **优先级与语义**
+  1. 当天点过「随机」按钮 → 用它（`persist: 'day'` 时只认**当天**写入的记录，隔天自动回到日期规则）；
+  2. 精确日期 → `MM-DD` → 星期几（数组顺序即优先级，`sync:backgrounds` 会拦下「精确日期写在 `MM-DD` 之后」这种永不命中的写法）；
+  3. 兜底 hash（FNV-1a）或 cycle —— **同一天在任何设备上恒定同一张**，这是「某天打开一定固定一张」的保证。
+- **背景渲染方式：两个固定层交叉淡入（而非直接改 `body` 的 `background-image`）**
+  - 层 1/层 2 都是 `position: fixed; inset: 0; z-index: -1; pointer-events: none`，照片 + 压暗渐变都在这两层里（**不重复**）；`[data-active]` 切换可见性，过渡写在**不依赖该属性**的基类规则里（M-3 踩过「叠加选择器把过渡覆盖掉」的坑）。
+  - 两层的初值是**同一张图**（层 2 在 `global.css` 里刻意重复一次 `url()`），所以交叉淡入的任一时刻都不会露出纯色底；代价是这一处**刻意的 CSS 重复**，已在文件里就地写明它与内联 `<style>` 永远同步。
+  - `background-attachment: fixed` 与 ADR-11 保持一致（滚动时照片不动）。
+- **「刷新不改变当前背景」= `localStorage['bg-v1'] = { id, date }`**，键名带 `-v1` 便于日后改语义；无第三方请求、不上传任何数据；隐私模式下 `localStorage` 不可用时降级为「只按日期规则」。
+- **隐私门禁（承接 ADR-11 的教训）**：新增 `pnpm add:background -- <文件> --id <slug>`，它调用 `scripts/prepare_photo.py`：**先（可选）把 EXIF 方向烘焙进像素，再剥掉全部元数据**、长边压到 2560、转渐进式 JPEG，然后**重新打开产物实测** `EXIF 0 标签 / GPS 0 条目`，不干净就拒绝写盘。第一张背景图曾带 GPS `36°02′59.4″N / 120°20′36.0″E`，仓库是公开的，因此这条门禁是硬性的；`pnpm check:backgrounds` 与 `tmp/check_bg_privacy.py` 会再验一遍。
+- **静默停用主题切换的精确做法（可一行恢复）**：`config.ts` 导出 `THEME_TOGGLE_ENABLED = false`。
+  - `false` 时：`Header.astro` **不渲染** `ThemeToggle`；`BaseLayout` 不给 `<html>` 加 `gate-dark` 类；因此 `global.css` 里 `@media (prefers-color-scheme: dark)` 那条**跟随系统**的深色令牌**不生效**，站点恒定浅色。
+  - 为什么要门控而不是删代码：否则「系统设为深色的访客」会看到深色外观，却**已经没有按钮可以切回**，直接违背「保持当前的浅色状态」。`gate-dark` 这个类名**不是死代码**，注释里已写明来历。
+  - 保留清单（**一行都没删**）：`ThemeToggle.astro` 及其内联脚本、`html:not(.js) .theme-toggle` 样式、`:root[data-theme='dark']` 与 `@media (prefers-color-scheme: dark)` 两处深色令牌、`i18n` 里的 `themeSwitch` 文案、`color-scheme: light dark` 与两条 `theme-color`。
+  - `BaseHead` 里**移除了**「读 `localStorage.theme` 并设置 `data-theme`」的 4 行 —— 否则以前点过深色的访客会被**静默锁在深色**且再也无法退出。
+- **代价（如实记录）**
+  1. **每页 `<script>` 由 2 段变 3 段**（ADR-1 的「零客户端 JS」性质进一步变化）。**R3 的判定命令不变且仍应为 `0`**：`is:inline` 不产出 `.js` 文件。**不得**把该命令改写来掩盖这一点。
+  2. **构建期常量会被内联**：实测产物里 `data.persist` 被替换为字面量 `"day"`、函数源码被重排（制表符/CRLF/去注释/加 `/* @__PURE__ */`）。因此**不能假设产物脚本文本与源码逐字节相同**；改 `config.ts` 后**必须重新构建**才会生效（本仓库「推送即重建」，无需额外操作）。
+  3. **照片是位图且会随提交累积**：单张软预算 ≤2 MB，池总量软预算 18 MB，`sync` 超预算会告警；替换过的版本**永久留在 Git 历史**（维护期不做历史重写）。
+  4. **客户端日期跨时区可能落在不同的一天**：这是「按客户端日期」的题中之义（UTC+8 与 UTC-8 的「今天」不同），已在文档中写明。
+- **被放弃的方案**
+  1. **构建期决定一切**（不引入运行期脚本）：构建机时区 ≠ 访客时区，无法满足「根据客户端的日期」，且构建产物会被缓存到换日之后。
+  2. **运行期 `fetch` 清单/规则**：多一次请求、首屏会闪一帧错图；改为把数据内联进 HTML（数据本身不含隐私，且 `<` 已转义）。
+  3. **把映射写进 CSS**：CSS 表达不了「精确日期 / 每年 / 星期几」的优先级，也拿不到客户端日期。
+  4. **引入 JS 依赖 / 框架做背景切换**：与 ADR-1 / ADR-5 / §8.1 冲突，且这点逻辑不值得。
+  5. **用 `sessionStorage` 或 URL 参数保存选择**：前者一跳页/新标签就丢，后者会污染 URL 契约。
+- **约束**
+  1. `@supports not (backdrop-filter)` 与 `prefers-reduced-transparency` 的兜底分支**不得删除**（承接 ADR-7 / ADR-11）。
+  2. 不引入客户端 JS 依赖、CSS 框架、CDN（ADR-1 / ADR-5 不变）；照片与规则都自包含。
+  3. 路由表（§4.1）与内容契约（G3）**零变化**；本次是纯功能与样式改动。
+  4. **照片必须经 `pnpm add:background` 导入**（或自行剥净元数据），入库前 EXIF/GPS 必须为 0。
+  5. 不可访问的 `config.ts` 规则（写错形状、指向不存在的 id、顺序导致永不命中）必须**构建/同步期报错**，不得静默失效。
+
 ---
 
 ## 4. 目标信息架构
@@ -277,15 +323,27 @@
 ```
 .
 ├── .github/workflows/deploy.yml
+├── scripts/                      # 仓库自带的本地工具（零 npm 依赖）
+│   ├── background-photos.mjs     #   sync / check / add —— 照片池维护与规则校验（ADR-12）
+│   └── prepare_photo.py          #   剥 EXIF/GPS + 压尺寸 + 实测元数据为 0（ADR-12 隐私门禁）
 ├── public/
 │   ├── favicon.svg
 │   └── images/
+│       ├── backgrounds/          # 背景照片池：文件名 = id（ADR-12）
+│       │   └── default.jpg       #   原 background.jpg 迁移而来（内容未变，EXIF 0）
+│       └── pku-table-canvas.png
 ├── src/
+│   ├── backgrounds/              # 背景照片池的配置与求解（ADR-12）
+│   │   ├── config.ts             #   ★ 用户唯一需要手改的文件：defaultId / persist / fallback / rules
+│   │   ├── generated.ts          #   由 `pnpm sync:backgrounds` 生成，勿手改
+│   │   ├── date-map.ts           #   日期 → 照片的纯函数（构建期与运行期共用同一份源码）
+│   │   └── runtime.ts            #   生成浏览器端内联脚本 + 计算首屏默认背景
 │   ├── components/
-│   │   ├── BaseHead.astro        # <head>：含首屏前应用主题的内联脚本 + hreflang（ADR-9/10）
-│   │   ├── Header.astro          # 壳：站名 + 语言感知导航 + 两个切换按钮
+│   │   ├── BaseHead.astro        # <head>：注入 bg-config JSON / 当日背景 / 内联脚本；hreflang（ADR-9/10/12）
+│   │   ├── Header.astro          # 壳：站名 + 语言感知导航 + 语言按钮 + 背景按钮
+│   │   ├── BackgroundButton.astro# 「随机换背景」按钮（ADR-12，取代主题按钮的位置）
 │   │   ├── LangSwitch.astro      # 中英文切换按钮（纯链接，零 JS，ADR-10）
-│   │   ├── ThemeToggle.astro     # 浅色/深色切换按钮（ADR-9）
+│   │   ├── ThemeToggle.astro     # 浅色/深色切换按钮 —— ADR-12 起**静默保留但不再渲染**
 │   │   ├── LangNotice.astro      # 英文页的「翻译中」提示（ADR-10）
 │   │   ├── NotFoundPanel.astro   # 404 面板（中英共用）
 │   │   ├── Footer.astro
@@ -393,6 +451,26 @@ export const collections = { blog, blogEn, projects, projectsEn };
 - **既有中文集合的 loader / `base` / schema 与 4 个既有 `.md` 零改动**：本次是纯附加变更，没有任何字段从可选变成必填。
 - **新增一篇英文文章 = 在 `src/content/blog-en/` 放一个与中文同名的 `.md`**，`/en/blog/<slug>/` 自动生成，**不需要改任何 `.astro`**（G3 契约在英文侧同样成立）。
 - ⚠️ **已知噪音（预期内）**：英文集合为空时构建会打印 `[glob-loader] No files found matching "**/*.md"` 与 `The collection "blogEn" does not exist or is empty` 若干条告警（P2 已记录同类行为）。**退出码仍为 0**，不是故障；往 `blog-en/` 放入第一篇 `.md` 后即消失。
+
+**背景照片池的配置（M-4 / ADR-12 新增，`src/backgrounds/config.ts`）**
+> 注意：它**不是** Content Collection（不进 `src/content/`、不改 `content.config.ts`、不走 zod 校验），而是普通 TS 模块。
+> 原因：照片是**二进制资源**而不是「有条目 frontmatter 的内容」，且它的消费者是**浏览器内联脚本**（需要一份能序列化进 HTML 的最小数据集），走集合 API 只会凭空多一层。
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `dir` | string | `public/images/backgrounds` | 照片目录（相对仓库根）；一般不用改 |
+| `urlBase` | string | `/images/backgrounds` | 站点路径前缀；一般不用改 |
+| `defaultId` | string | `default` | 兜底照片 id；**必须**在目录里真实存在，否则 `sync` 报错 |
+| `persist` | `'day' \| 'forever'` | `'day'` | 点过随机按钮后的结果保留多久：当日 / 永久 |
+| `fallback` | `'hash' \| 'cycle'` | `'hash'` | 日期规则都没命中时怎么挑（同一天恒定同一张） |
+| `fadeMs` | number | `420` | 换图交叉淡入时长；`prefers-reduced-motion` 下 CSS 会关掉 |
+| `rules` | `{ on, bg }[]` | `[]` | **日期 → 照片**，命中顺序 = 数组顺序；`on` 取 `'YYYY-MM-DD'` / `'MM-DD'` / `'0'`–`'6'` |
+
+- **照片池清单**：`public/images/backgrounds/<id>.jpg`（png/webp 亦可），文件名即 id，规则只允许 `[a-z0-9-]{1,41}`
+- **生成物**：`src/backgrounds/generated.ts`（`BACKGROUND_POOL` / `BACKGROUND_IDS`），由 `pnpm sync:backgrounds` 写入，**入库但勿手改**
+- **校验**：`pnpm check:backgrounds`（= `sync --check`，不写文件）在「配置与目录不一致」时**非 0 退出**；`sync` 还会拦下非法 `on` 形状、`'06'` 这类会静默失效的星期几写法、指向不存在照片的 `bg`、以及「精确日期排在 `MM-DD` 之后」的死规则
+- **导入**：`pnpm add:background -- <本地文件> --id <slug>`（剥 EXIF/GPS + 压尺寸 + 实测 0 元数据；`--rotate` 烘焙方向、`--force` 覆盖）
+- ⚠️ **这四处必须保持一致**：`config.ts` 的规则、目录里的文件、`generated.ts`、以及**已构建的产物**（改规则后要重新构建才生效）
 
 ---
 
@@ -713,6 +791,20 @@ export default defineConfig({
 | **把 `hreflang` / `canonical` 写成站内相对路径** | 搜索引擎无法把相对地址当作语言互指，双语 SEO 失效（页面本身仍正常，属静默失效） | `BaseHead.astro` 已统一用 `new URL(href, Astro.site)` 补全为绝对 URL；新增语言相关 `<link rel="alternate">` 时保持该写法 |
 | **无头截图在 `< 500px` 时的「右侧被裁」假象**（P4 已记录，M-1/M-2 再次踩到） | 误判移动端横向溢出，或误判页头两个新按钮放不下 | 窄屏判断**只用同源 iframe 探针**；要看真实窄屏版式，把 320/390 宽的 iframe 嵌进一个更宽的页面再截图（M-1/M-2 采用此法）。另：`--blink-settings=preferredColorScheme=2` 在本机 Edge 上不生效，深色截图请**不加该参数** |
 
+**维护期风险（M-4 / ADR-12 新增）**
+
+| 风险 | 影响 | 应对 |
+|---|---|---|
+| **新背景照片夹带 EXIF/GPS** | 仓库公开，提交即公开拍摄地点（第一张图曾带 GPS `36°02′59.4″N / 120°20′36.0″E`，不可逆） | **必须**经 `pnpm add:background` 导入（`prepare_photo.py` 剥净后**再实测** EXIF 0 / GPS 0，不干净拒绝写盘）；`pnpm check:backgrounds` 与 `tmp/check_bg_privacy.py` 再验一遍；**禁止**手工把原图拷进 `public/` |
+| **新照片偏亮导致正文对比度跌破 WCAG AA** | 浅色文字叠在深色玻璃上读不清，而**浅色环境下肉眼看不出来**（ADR-11 踩过：白玻璃只有约 2.2:1） | 照片入库前跑 `node tmp/check_bg_contrast.py`：按真实像素合成「压暗 + 玻璃」取最差 10% 区域，正文与次要文字都要 ≥4.5；不达标就换图或先压暗 |
+| **改动 `config.ts` 的规则却忘记重新构建** | 规则只在构建期烘焙进页面；只改文件不重新构建 → 线上行为不变，且**没有任何报错**（看起来像「规则不生效」） | 改完必须 `pnpm sync:backgrounds` + `pnpm build`；本仓库「推送即重建」因此推送后自动生效。`sync` 的 `check` 模式在 `generated.ts` 过期时非 0 退出 |
+| **规则写错导致永不命中**（`'06'` 当星期几、精确日期排在 `MM-DD` 之后、`bg` 指向已删除的照片） | **静默失效**：页面照常显示兜底照片，看起来「好像没事」，但用户指定的节假日永远不生效 | `pnpm sync:backgrounds` **直接报错拦下**这三类写法（`tmp/check_bg_rules.py` 逐条断言）；改规则后务必看这条命令的退出码 |
+| **两个背景固定层破坏层级或引入横向滚动** | 内容被遮住 / 出现横向滚动条 | 层是 `position: fixed; inset: 0; z-index: -1; pointer-events: none`，不参与滚动宽度计算；改这两层后必须重跑 `tmp/probe_browser.py` 的 52 组无横向滚动 + 层级断言 |
+| **照片池累积导致仓库膨胀** | 每次替换都会在 Git 历史留下旧版本，**不可回收**（维护期不做历史重写） | 单张软预算 2 MB、池总量 18 MB（`sync` 超预算告警）；替换前先想清楚；必要时先用 `tmp/check_bg_contrast.py` 选图再导入 |
+| **误以为 `gate-dark` 是死代码而删掉**（或把深色令牌当「已废弃」清理） | 用户要求的「**保留代码**、静默、需要时可恢复」被破坏；恢复主题切换会变成要重新写一遍 | ADR-12 明确规定：`ThemeToggle.astro`、两处深色令牌、`themeSwitch` 文案**一行未删**；`gate-dark` 是恢复开关的关键，`global.css` 与 `config.ts` 里均已就地写明来历 |
+| **把 R3 的判定命令改写来掩盖内联脚本变多** | 「零客户端 JS」的性质被悄然抹掉（ADR-9 已明文禁止） | R3 命令保持原样且必须为 `0`；每页 `<script>` 计数由 2 变 3 这件事**如实记账**在 §1.2 与 ADR-12 |
+
+
 ---
 
 ## 8. 明确不做的事（范围边界）
@@ -800,9 +892,13 @@ export default defineConfig({
 - **写作用域**：`src/styles/global.css`、`src/components/**`、`src/layouts/**`（**不含** `src/content/**`）
 - **首选做法（低成本、易回退）**：只改 `global.css` 顶部 `:root` 的设计令牌（颜色、渐变、圆角、字体栈、`--glass-*`）。想换整体观感，**先改令牌**，不动结构与类名
 - **约束**
-  1. 不引入 CSS 框架（ADR-5）；不引入位图背景、外部字体、CDN（维持 ADR-7 / P2.5 的「零外部请求」性质）
+  1. 不引入 CSS 框架（ADR-5）；不引入外部字体、CDN（维持 ADR-7 / P2.5 的「零外部请求」性质）。
+     ⚠️ **「不引入位图背景」这一条自 M-3 / ADR-11 起已作废**（背景就是位图），M-4 / ADR-12 又把它变成**照片池**；
+     现行约束是「照片必须是本地文件、逐张清空 EXIF/GPS、单张 ≤2 MB（软预算）」，见 ADR-12 与 §4.3
   2. `backdrop-filter` 的 `@supports not (...)` 兜底分支**不得删除**（ADR-7）
-  3. **暗色**：**默认仍自动跟随系统**；手动切换按钮已由 **ADR-9**（2026-10-11）立项落地，**取代** ADR-7 取舍第 1 条。⚠️ 改动暗色令牌时**必须同步 `global.css` 中两处暗色块**（`:root[data-theme='dark']` 与 `@media (prefers-color-scheme: dark)` 兜底），漏改一处会让「手动切换」与「跟随系统」两条路径配色不一致
+  3. **暗色**：**默认仍自动跟随系统**；手动切换按钮已由 **ADR-9**（2026-10-11）立项落地，**取代** ADR-7 取舍第 1 条。⚠️ 改动暗色令牌时**必须同步 `global.css` 中两处暗色块**（`:root[data-theme='dark']` 与 `@media (prefers-color-scheme: dark)` 兜底），漏改一处会让「手动切换」与「跟随系统」两条路径配色不一致。
+     ⚠️ **M-4 / ADR-12 起本条被静默**：两条路径的令牌**必须继续保留**（一行都没删），但「跟随系统」那条被 `html.gate-dark` 门控，默认不生效 —— 站点恒定浅色，界面与改动前一致。
+     恢复方式：把 `src/backgrounds/config.ts` 的 `THEME_TOGGLE_ENABLED` 改成 `true`。**不要把 `gate-dark` 当死代码删掉**（那是恢复开关的关键）。
   4. 文本类页面继续用 `.measure` 约束行宽；`.container` 维持 960px（ADR-7）
   5. 新页面**复用**既有工具类（`.glass` / `.card` / `.panel` / `.pill` / `.measure`），不要另起一套卡片样式
 - **验收**：R1、R3；**必须浅色 + 暗色两套都验**（浅色用 `--blink-settings=preferredColorScheme=1` 强制，或把产物里的暗色媒体查询改成永不匹配，方法见 P3 记录）；R4 探针三档宽度无横向滚动
@@ -863,6 +959,7 @@ export default defineConfig({
 | M-1 | C | 页头右上角新增**浅色/深色切换按钮**：默认跟随系统，点击后锁定并持久化 | `src/styles/global.css`、`src/components/BaseHead.astro`、`src/components/Header.astro`、`src/components/ThemeToggle.astro`、`src/layouts/BaseLayout.astro` | `pnpm build` 退出码 0；`dist` 内 `.js` 计数仍为 **0**；浅/暗两态无头截图目视；刷新与跳页后选择保持；系统配色改变且无手动选择时跟随 | 触碰 ADR-1（零 JS）与 ADR-7 取舍 1 → **先立 ADR-9**；需 2 段内联脚本 | **已发布** |
 | M-2 | C | 页头右上角新增**中英文切换按钮** + `/en/` 全套路由框架（界面文案双语，正文待翻译） | `src/i18n/**`、`src/pages/en/**`、`src/content.config.ts`、`src/content/blog-en/**`、`src/content/projects-en/**`、`src/components/**`、`src/layouts/**`、`src/pages/**`、`src/content-types.ts` | `pnpm build` 退出码 0；页面数 **8 → 13**；5 条 `/en/` 路由均 200；语言按钮在中英两侧都落在存在的页面（无死链） | 触碰 ADR-1 / ADR-6 → **先立 ADR-10**；不得改既有中文 URL；不得把 schema 可选字段改成必填 | **已发布** |
 | M-3 | B | 把现有毛玻璃升级为 iOS 26 风格**液态玻璃 + 照片背景**：先做原型 `demo/`（用户选定照片版），按 **ADR-11** 正式落地到站点 | `demo/**`、`src/styles/global.css`、`src/components/{Header,Footer,PostCard,ProjectCard,LangNotice,NotFoundPanel,LangSwitch,ThemeToggle,BaseHead}.astro`、`src/layouts/PostLayout.astro`、`src/pages/{index,about}.astro`、`public/images/background.jpg`、`PLAN.md`、`.gitignore` | `pnpm build` 退出码 0、`13 page(s) built`、`dist` 内 `.js` = **0**；**44 组（11 路由 × 320/390/768/1440）无横向滚动全过**；**对比度实测全过 WCAG AA**（最差 10% 区域：浅色态正文 ≥5.99、次要文字 ≥4.94；深色态 ≥11.15/≥7.93）；R5 泄漏扫描 0 命中且入库照片 EXIF/GPS 为 0 | 触 ADR-7 材质与背景 → **先立 ADR-11**；**照片带 GPS，必须用清空 EXIF 的副本，原图不得入库**；不引入客户端 JS / 框架 / CDN | **已发布** |
+| M-4 | C+B | **背景照片池 + 按客户端日期固定某张 + 页头「随机换背景」按钮**；同时按用户要求**静默停用深浅色切换**（保留代码、保持浅色外观） | `src/backgrounds/**`、`scripts/**`、`src/components/{BaseHead,Header,BackgroundButton}.astro`、`src/layouts/BaseLayout.astro`、`src/styles/global.css`、`src/i18n/ui.ts`、`public/images/backgrounds/**`、`package.json`、`PLAN.md`、`README.md`、`docs/操作手册.md` | `pnpm build` 退出码 0、`13 page(s) built`、`dist` 内 `.js` = **0**（每页 `<script>` = **3**）；`pnpm check:backgrounds` 退出码 0；**52 组（13 路由 × 320/390/768/1440）无横向滚动**；**构建期与运行期在 1461 天上逐日一致**（Node + 真实浏览器各一遍）；刷新/跳页保持点击结果、隔天回落日期规则；页头**无**主题按钮且系统为深色时仍保持浅色；逐张照片 EXIF/GPS = 0 且过 WCAG AA | 触碰 ADR-1（内联脚本 2→3 段）与 ADR-9（主题静默）→ **先立 ADR-12**；照片必须经 `pnpm add:background` 导入（GPS 红线）；改规则后必须重新构建 | 见 §10.6 |
 
 > M-1 与 M-2 的写作用域在 `src/components/Header.astro`、`src/components/BaseHead.astro`、`src/layouts/**` 上**重叠**，因此**串行执行**，不做并行写入。两者均属轨道 C，但语言与主题互不依赖，故拆成两条以便分别回滚。
 >
@@ -1041,6 +1138,52 @@ export default defineConfig({
      建议用户把它移出仓库目录，否则任何 `git add -f` 仍可能带上 GPS。
   5. **`demo/` 的去留**：按 §10.2 轨道 B 惯例属临时目录，正式验收后可删除。
 
+#### M-4 实际执行记录（2026-10-11，**已落地，待推送**）
+
+- **用户需求（原话要点）**：可以更换背景图片；深色与浅色切换**静默**（保留代码但不在页面上展示），保持当前浅色状态；把一个**目录**作为背景源、可以上传自己喜欢的照片；把原来深浅色交换按钮改成**随机切换背景**按钮；**刷新不改变当前背景**；按**客户端日期**设计一个函数，某个日期打开网站一定是**固定的一张照片**，并且可以在**本地调整这个映射值**（例如指定某个节假日全部用某一张照片）。
+- **先立 ADR 再动代码**（§10.1 规则 4）：先写 **ADR-12**，再改 `src/**`。
+- **产出物（新增）**
+  | 文件 | 作用 |
+  |---|---|
+  | `src/backgrounds/config.ts` | ★ 用户唯一手改的文件：`defaultId` / `persist` / `fallback` / `fadeMs` / `rules` + `THEME_TOGGLE_ENABLED` |
+  | `src/backgrounds/date-map.ts` | 日期 → 照片的纯函数；**函数源码字符串**供运行期内联脚本复用（两端只此一份真源） |
+  | `src/backgrounds/runtime.ts` | 生成浏览器内联脚本；算「构建机当天」的默认背景；导出主题门控类名 |
+  | `src/backgrounds/generated.ts` | 由 `pnpm sync:backgrounds` 生成（照片 id 列表 + 体积），入库 |
+  | `src/components/BackgroundButton.astro` | 「随机换背景」按钮 + 内联脚本 + 读屏播报区 |
+  | `scripts/background-photos.mjs` | `sync` / `check` / `add` 三个子命令：扫描目录、校验规则、导入照片，**零 npm 依赖** |
+  | `scripts/prepare_photo.py` | 剥 EXIF/GPS + 压尺寸 + **实测产物元数据为 0**（隐私门禁），并输出亮度摘要 |
+  | `public/images/backgrounds/default.jpg` | 原 `public/images/background.jpg` **git mv 而来，内容零改动**（2560×1920 / 1.57 MB / EXIF 0） |
+- **产出物（修改）**：`src/components/BaseHead.astro`（注入 `bg-config` JSON + 内联当日背景 + 内联脚本；**移除**读 `localStorage.theme` 的 4 行）、`src/components/Header.astro`（主题按钮改由 `THEME_TOGGLE_ENABLED` 门控 + 渲染背景按钮）、`src/layouts/BaseLayout.astro`（`html` 加 `gate-dark` 门控类 + 两个背景固定层）、`src/styles/global.css`（`--bg-photo` / `--photo-fade`、两个 `.bg-layer`、`@media` 深色块加 `.gate-dark` 门控、`html:not(.bg) .bg-toggle`）、`src/i18n/ui.ts`（`backgroundSwitch` 文案）、`package.json`（3 个新脚本）、`README.md`、`docs/操作手册.md`（新增第 3 章「背景照片」并把后续章节顺延）。
+- **实测验收（本地，2026-10-11）**
+  - **R1/R2/R3**：`pnpm build` 退出码 **0**、**13 page(s) built**；`dist` 内 `.html` **13**、`.js` **0**；每页 `<script>` 计数 **3**（原 2 段 + 背景一段），页面结构断言逐页通过（两个 `.bg-layer`、`#bg-config`、`#bg-toggle`、**无** `#theme-toggle`、无 `localStorage.getItem('theme')`）
+  - **R4**：`python tmp/probe_browser.py` 用**真实浏览器 CDP** 实测 **52 组（13 路由 × 320/390/768/1440）`scrollWidth <= clientWidth` 全过**
+  - **日期映射一致性（本轮新增的核心门禁）**：`tmp/test_bg_map.mjs` 断言「构建期与运行期在 **1461 天**（2024–2027）上 id 与 reason 完全相同」，并覆盖精确日期 / 跨年 `MM-DD` / 闰日 / 星期几 / 兜底 hash 分布（5 张照片各出现 56–116 次，未退化）/ `cycle` 轮转 / `stored` 的当日与跨天语义 / 空池与打错字的 `defaultId`
+  - **真实浏览器里的产物**：`tmp/probe_browser.py` 在页面内跑同一批日期并导出，`tmp/check_bg_days.mjs` 与 TS 实现比对 → **1461 天 0 差异**
+  - **交互语义**：连续点 24 次按钮 → 每次都换了一张（`['default','charlie','alpha','bravo','default','bravo', …]`，无「点了没反应」）、抽到的都在池内、写入 `localStorage['bg-v1']`、读屏播报为「背景已更换为 …」；**刷新后与跳页后背景不变**；把存储日期改成 `2000-01-01` 后**回落日期规则**
+  - **静默生效**：DOM 中**没有** `#theme-toggle`、`data-theme` 未设置；`html` 无 `gate-dark`；**系统配色实测为深色**时 `--photo-dim` 仍是 `0.42`、`body` 底色仍是 `rgb(13,20,32)`、玻璃区配色与改动前一致（即门控真的生效，不会被系统深色带走）
+  - **对比度（逐张门禁）**：`tmp/check_bg_contrast.py` 对 `default.jpg` 用真实像素合成「压暗 + 玻璃」，取最差 10% → 页头 5.99/4.94、hero 6.20/5.12、文章卡 10.73/8.85、项目卡 8.14/6.71，**与 M-3 记录值一致（仅浮点末位差）**
+  - **隐私与体积**：`tmp/check_bg_privacy.py` → 池内每张 **EXIF 0 / GPS 0**、单张 ≤2 MB（池总量 1.57 MB / 1 张）；`src/`、`public/`、`dist/`、`scripts/` 硬红线扫描 **0 命中**
+  - **导入管道端到端演练**：用一张**带 GPS 4 条目 + 3 个 EXIF 标签**的合成照片跑 `pnpm add:background` → 产物 `EXIF 0 / GPS 0 -> CLEAN`；导入后 `pnpm check:backgrounds` **按预期失败**（`generated.ts is out of date`），`sync` 后 2 张照片入池、构建 13 页、探针全过；演练产物已删除并重新 `sync` 回单张池（`git status` 确认干净）
+  - **规则校验门禁**：`tmp/check_bg_rules.py` 用 `RULES_JSON` 覆盖（**不改动入库的 config**）逐条断言：空规则/合法 `MM-DD`/精确日期在前 → 通过；精确日期排在 `MM-DD` 之后、`'06'` 两位星期几、`'7'` 越界、`'1-1'` 残缺、`bg` 指向不存在照片、`bg` 非法 id → **全部按预期非 0 退出**
+- **发现的真实问题（对后续 agent 有价值，本轮的坑几乎都在「静默失效」这一类）**
+  1. **`new Function` 拿到函数声明的两种错法都会静默返回 `undefined`**。实测对照：`new Function('a','b','c', 声明源码)` 与 `new Function('a','b','c', '('+源码+')')` 都返回 `undefined`（函数体只是一条声明语句）；后者再加 `()` 直接抛 `(intermediate value)(...) is not a function`；**唯一可用的是 `new Function('return (' + 源码 + ')')()`**。第一版两种都踩过 —— 现象是**按钮完全没反应、`__dshBg` 从未被赋值**，而页面看起来一切正常（因为首屏背景来自构建期注入的 CSS，被这层「兜底」掩盖了）。现在 `tmp/probe_fnrule.mjs`（单元）、`tmp/test_bg_map.mjs`（产物）、`tmp/probe_browser.py`（真实浏览器）三道门分别拦住它。**教训：静态检查与「页面看起来对」都抓不到这类 bug，必须有真实浏览器探针。**
+  2. **Astro/Vite 会对 `is:inline` 脚本的内容做一次打印重排，并把构建期常量内联进脚本**：实测产物里出现制表符缩进、CRLF、单行 `return` 被加上花括号、注释被删、`/* @__PURE__ */` 被插入、括号被去掉，且 `backgroundData.persist` 被替换成字面量 `"day"`（因为数据来自 `config.ts`）。因此**不能断言产物脚本与源码逐字节相同**；`tmp/test_bg_map.mjs` 的断言相应改为「行为等价」（1461 天逐日一致）+「构造方式与站点相同」。
+  3. **生成内联脚本的模板字符串里不能出现反引号**：注释里写 `` `...` `` 会提前结束模板字符串，报错位置指向**下一个** token，误导性极强（本轮被误导了两次）。已在 `runtime.ts` 就地写明，并可用「模板内反引号计数必须为 2」自检。
+  4. **`tmp/probe_browser.py` 的 `os.chdir(DIST)` 会改变进程工作目录**：后续用相对路径读 `dist/index.html` 的脚本随之失败（`ENOENT`）。改为给 `SimpleHTTPRequestHandler` 传 `directory=DIST`，不 `chdir`。
+  5. **浏览器缓存会让探针量测到上一版产物**：本地静态服务必须发 `Cache-Control: no-store`，否则「重建 + 重跑探针」会静默地验证旧构建。
+  6. **探索时踩到的两个次要坑**：① 星期几规则写成 `'06'` 会被当成「6 月某日」的残缺写法而**永不命中**（本轮自测里就写错过，现已由 `sync` 直接报错拦下）；② 配置解析器必须**先剥注释**，否则 `config.ts` 里注释掉的示例规则会被当成真规则，`sync` 会要求并不存在的照片。
+- **与设计的偏离（均已披露）**
+  1. **背景改用两个固定层 + 交叉淡入**，而不是（计划里写的）`body::before/::after` 双层。原因：`body` 上会各自触发属性的重新计算与重复请求，且 `::after` 需要处理层级；改为两个显式 `.bg-layer` 元素后层级、可见性、过渡都能用普通选择器明确表达。代价是**每页多两个空元素**（`aria-hidden`、`pointer-events: none`），以及 `global.css` 里**刻意重复一次** `url()` 作为层 2 初值。
+  2. **`persist` 语义定为「当日有效」**（`config.ts` 可改成 `'forever'`）：这样「刷新不变」与「某日期一定是固定一张」不再互相打架 —— 当天点过就保持你点的那张，隔天回到日期规则。
+  3. **`add:background` 与 `sync:backgrounds` 走 Node + Python（Pillow），未新增任何 npm 依赖**（Pillow 是本机已有、且 M-3 的剥 EXIF 就用的它）；子进程输出用临时文件回传，避免管道捕获限制。
+  4. **`docs/操作手册.md` 一并更新并纳入本次提交**（新增第 3 章、后续章节顺延）：该文件此前是**未跟踪**状态（上一轮工作产物），本轮把它与本次文档改动一起提交，属写作用域扩展，在此披露。
+  5. **`demo/`、`tmp/`** 未纳入提交（`demo/` 是 P2.5 惯例的临时目录；`tmp/` 已在 `.gitignore`）；本轮所有验收探针都放在 `tmp/` 下（`test_bg_map.mjs`、`check_bg_days.mjs`、`check_bg_contrast.py`、`check_bg_privacy.py`、`check_bg_rules.py`、`probe_browser.py`、`probe_fnrule.mjs`、`check_bg_dist.py`），可随时重跑但不入库。
+- **遗留项（交给后续任务）**
+  1. **手机端性能未真机复核**：仍是 `background-attachment: fixed` + 1.6 MB 照片（M-3 的遗留项 1 未变，本轮也未新增压缩档位）。
+  2. **不做多分辨率 `srcset`**：池内照片统一 2560px 长边，窄屏也下同一张；若要省流量需引入响应式图片（另立项）。
+  3. **根目录原始照片仍然在**（`.gitignore` 精确忽略，M-3 遗留项 4 未闭合）：建议用户把它移出仓库目录；本轮**未擅自删除**（属破坏性操作，PLAN.md §10.1 规则 5）。
+  4. **照片池的 Git 体积**：每次替换都会在历史里留下旧版本，不可回收（维护期不做历史重写）；`sync` 只做软预算告警（单张 2 MB / 总量 18 MB）。
+  5. **`tmp/probe_browser.py` 依赖 CDP + 本机 Edge 路径**，不是通用 CI 脚本；若日后要进 CI，需要改成无浏览器依赖的子集（`test_bg_map.mjs` 已经可以无浏览器运行）。
 
 ---
 
@@ -1063,3 +1206,4 @@ export default defineConfig({
 | v2.3 | 维护 | **M-1 + M-2 发布回填**。提交 `7b5e9c0`（`feat(ui): 页头新增中英文与浅色/深色切换按钮（ADR-9 / ADR-10 + /en 路由框架）`，29 文件 / `1345 插入 / 191 删除`）已 `git push origin main`（`d9f451c..7b5e9c0`，退出码 0；推送前工作树无 `dist/`、`tmp/`、`p4-review/` 混入，暂存路径逐个显式列出而非 `git add -A`）。**发现并修正一处提交卫生问题**：首次提交的消息文件被 PowerShell 写入了 **UTF-8 BOM**，提交标题变成 `<BOM>feat(ui): …`；用 `git cat-file commit HEAD` **逐字节**核对发现（`Format-Hex`/字符串比较会被 PowerShell 的解码器吃掉 BOM 而看不出来），已 `git commit --amend` 去掉 BOM 后重推。**Actions**：run [`38134469679`](https://github.com/WauZonC/WauZonC.github.io/actions/runs/38134469679)（`head_sha=7b5e9c0`）**Build 与 Deploy 均 success**。**线上 R6 实测**：13 条资源全部 **200**（`/` `/about/` `/blog/` `/projects/` `/404.html` `/blog/cuda-notes/` `/en/` `/en/about/` `/en/blog/` `/en/projects/` `/en/404/` `/favicon.svg` `/images/pku-table-canvas.png`）；不存在路径 `/no-such-page-xyz/` → **404**；线上 `index.html` 与本地 `dist/index.html` 的 SHA-256 **均为 `42393CB1580313BA56E44D6AD2D35A9B9BC8AF38584016471CF623D886D6C2AF`**（线上 = 本地构建产物）；线上页面实测带 `lang-toggle`（href `/en/`）、`theme-toggle`、首屏前 `localStorage.getItem('theme')` 脚本与绝对 URL 的 `hreflang="en"`，`/en/` 实测含英文导航与「翻译中」面板。**本次为回填提交（仅 PLAN.md）**，按 §10.4 说明纯文档改动同样会触发一次部署，属预期行为 |
 | v2.4 | 维护 | **M-3 液态玻璃原型（仅 `demo/`，未接入站点）**。用户需求：把当前毛玻璃改成 iOS 26 风格液态玻璃，参考 [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react)，**先做 demo 在新目录 `demo/`，不急于改现有设计**。故本轮**只新增 `demo/`（6 文件）+ 本文件同步**，**`src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml` 零改动**。**技术路线**：不引入 React / 任何依赖（`liquid-glass-react` 需 React 19 + 客户端 JS，与 ADR-1 / ADR-5 / §8.1 冲突），只借鉴其视觉配方（内置位移贴图 + 三次 `feDisplacementMap` 色散 + 颜色通道抽取 + screen 合成 + 边缘掩膜与干净中心）；实现路线取自同为 Astro 站的 [nikdelvin/liquid-glass](https://github.com/nikdelvin/liquid-glass)：**位移贴图由 SVG 图元现拼并编码成 data URI，直接挂在 `backdrop-filter: url(...)`**，因此**无需插入 `<svg>`、无需 JS 注入**；工程取舍（`@supports` 门禁 / Safari 降级 / ≤768px 关折射 / `prefers-reduced-transparency`）参考 [SquareMediaGroup/glassfx](https://github.com/SquareMediaGroup/glassfx)。**实测（本地）**：`demo/` 3 个 HTML **`<script` 计数均为 0**、无外链、无 `@import`；**真折射 A/B 量化** 像素差 > 8/255 面积 **33.5%**、水平结构强度 **10.82 vs 1.03（10.5×）**；**无横向滚动 27 组（3 页面 × 320/360/390/430/640/768/960/1200/1440）全过**；可读性 A/B 正文最深像素亮度差仅 **0.4/255**；宽窗 `backdrop-filter` 5002 字符含 `url()`、窄窗 **41 字符不含**（分支可用）；`pnpm build` 退出码 **0**、**13 页**、`dist` 内 `.js` **0**；`git diff HEAD -- src public` **无输出**。**发现并修正 1 个功能性 bug + 记录 2 条测量陷阱**：① ≤768px 关折射的第一版选择器特异性不足（`.lg-refract` 被 `.lg-refract.lg-panel` 压住）**完全没生效**，改为逐角色各写一条后复测通过；② **headless Edge 有约 504px 窗口最小宽度**，`--window-size=390` 实际得到 `innerWidth=504`，据此得出的「无横向滚动」结论**全部无效**，必须改用**精确 CSS 宽度的 iframe**（且 `file://` iframe 需要 `--allow-file-access-from-files` 才能读 `contentDocument`）；③ demo 复刻真实标记但拿不到 Astro 的 `[data-astro-cid-*]` 内容哈希，样式的**作用域属性必须剥离**，否则组件样式全部不命中。**新增 §10.5 台账 M-3 行**、**新增 §10.6「M-3 原型实际执行记录」**。**遗留**：正式接入前**必须先立 ADR-11**（取代 ADR-7 材质部分、保留其 `@supports` 兜底、明确不引入 JS）；贴图按名义尺寸烘焙并拉伸 → 圆角随尺寸缩放；`demo/` 按 P2.5 惯例属临时目录。**未推送** |
 | v2.5 | 维护 | **M-3 正式落地：全站改为 iOS 26 风格「液态玻璃」+ 照片背景（ADR-11）**。用户看过原型后**选定 `real-home-photo.html`** 并要求正式改造。**先立 ADR-11 再动代码**（§10.1 规则 4）：ADR-11 取代 ADR-7 的材质与背景，保留其 `@supports` 兜底、零外部请求、`.measure` 行宽与 `container` 960px；新增 `--lg-*` / `--photo-*` 令牌，删除 `--glass` / `--glass-solid` / `--glass-border` / `--shadow` / `--radius` / `--blur`。**实现**：`global.css` 四层材质（折射 / 磨砂 / 镜面 / 厚度）+ 4 组角色化滤镜（位移贴图由 SVG 图元现拼、编码为 data URI，**无需插入 `<svg>`、无需 JS**）+ 三层兜底（不支持 `backdrop-filter: url()` → 磨砂；完全不支持 `backdrop-filter` → 不透明；`prefers-reduced-transparency` → 不透明；≤768px 关折射）；`.glass` 工具类删除、`.card`/`.panel` 只留间距；11 个组件与页面改标记；**新增 `public/images/background.jpg`（2560×1920 / 1.6 MB / EXIF 与 GPS 已清空）**；`BaseHead` 与 `ThemeToggle` 的 `theme-color` 同步改为 `#1b2a3d/#0d1420`。**实测**：`pnpm build` 退出码 0、**13 页**、`dist` 内 `.js` **0**、产物 CSS 外部 `url()`/`@import` 均 **0**；**44 组（11 路由 × 320/390/768/1440）无横向滚动全过**；**新增对比度量化门禁**——对实际入库照片像素逐元素合成「压暗 + 玻璃」，取最差 10% 区域，浅色态正文 ≥**5.99**、次要文字 ≥**4.94**，深色态 ≥**11.15**/≥**7.93**，**全部过 WCAG AA**；R5 泄漏扫描 0 命中且入库照片 EXIF/GPS 为 0。**发现并修掉的关键问题**：① 照搬原型的「白玻璃 + 浅色文字」在这张照片上只有约 **2.2:1**，且**提高不透明度反而更差**（1.9:1）——改成**深色玻璃**后 6.5~6.9:1，因此浅/深两态的玻璃**都是深色底**，两态差异改由「照片压多暗 + 玻璃多实」承担（对「浅色主题」直觉的实质偏离，已如实记录）；② 照片最亮处正好在 sticky 页头所在的顶部（海面高光 p90=251），调 `--photo-position` 收益有限；③ `.glass` 覆盖新材质底色（必须删除而非叠加）；④ `.card:hover` 与 `.lg` 同特异性且源序更后，重设阴影会连未悬浮状态一起覆盖；⑤ `.lg > *` 需显式提层，否则镜面伪元素盖住内容；⑥ `corner-shape: squircle` 必须包 `@supports`。**已披露的偏离**：ADR-7 时代「零位图背景」性质结束（零外部请求与零客户端 JS 仍成立）；`theme-color` 连带改动；`demo/backgroud_chunk.jpg` 删除（与 `public/images/background.jpg` 重复）；`demo/site.css` 重新生成。**遗留**：滚动帧率未实测、贴图按名义尺寸拉伸故圆角随尺寸缩放、Safari/Firefox 降级观感未真机复核、根目录原始照片仍建议移出仓库 |
+| v2.6 | 维护 | **M-4 落地：背景照片池 + 按客户端日期固定某张 + 页头「随机换背景」按钮，并静默停用深浅色切换（ADR-12）**。用户 2026-10-11 要求：可更换背景、把一个**目录**当背景源可上传自己喜欢的照片、把原深浅色按钮改成**随机换背景**按钮、**刷新不改变当前背景**、按**客户端日期**让某天打开一定固定一张且映射值可在本地调整（如节假日指定某张）、深色浅色切换**静默**（保留代码、不在页面展示、保持当前浅色）。**先立 ADR-12 再动代码**（§10.1 规则 4）。**架构**：照片池 = `public/images/backgrounds/`（文件名即 id）；规则 = `src/backgrounds/config.ts` 的 `rules`（`YYYY-MM-DD` 一次性 / `MM-DD` 每年 / `'0'`-`'6'` 星期几，命中顺序即优先级，未命中按 FNV-1a hash 或按天轮转兜底 → **同一天恒定同一张**）；**构建期**算出「构建机当天」写进内联 `<style>` 与内联 JSON（无 JS 也有确定的一张、同一天访问零多余改动），**运行期** `is:inline` 脚本按**客户端本地日期**重算（只在不同才覆写），两端共用 `date-map.ts` 的同一份函数源码。「刷新不变」= `localStorage['bg-v1'] = {id, date}`，`persist: 'day'` 语义（当日有效、隔天回落日期规则）。**主题静默**：`THEME_TOGGLE_ENABLED = false` → 不渲染 `ThemeToggle`、`<html>` 不加 `gate-dark`，于是 `@media (prefers-color-scheme: dark)` 那条跟随系统的深色令牌**不生效**，站点恒定浅色；否则系统为深色的访客会「看到深色却已无按钮可切回」，正好违背用户要求。**保留清单一行未删**（`ThemeToggle.astro` 与其内联脚本、两处深色令牌、`themeSwitch` 文案、`color-scheme`、两条 `theme-color`）；只**移除**了 `BaseHead` 里读 `localStorage.theme` 的 4 行（否则旧访客会被静默锁在深色）。**隐私门禁**：新增 `pnpm add:background`（`scripts/prepare_photo.py`：可选烘焙 EXIF 方向 → 剥全部元数据 → 长边 ≤2560 → 渐进式 JPEG → **重新打开产物实测 EXIF 0 / GPS 0**，不干净拒绝写盘）与 `pnpm sync:backgrounds` / `pnpm check:backgrounds`（扫描目录生成 `generated.ts`；拦下非法 `on` 形状、`'06'` 这种永不命中的星期几、指向不存在照片的 `bg`、以及「精确日期排在 `MM-DD` 之后」的死规则）。**实测（本地，2026-10-11）**：`pnpm build` 退出码 **0**、**13 page(s)**、`dist` 内 `.js` **0**、每页 `<script>` **3**；**52 组（13 路由 × 320/390/768/1440）无横向滚动全过**（真实浏览器 CDP）；**构建期与运行期在 1461 天（2024–2027）上 id 与 reason 完全一致**，且**真实浏览器里跑的产物**与 TS 实现逐日比对 **0 差异**；连续点 24 次按钮每次都换（无「点了没反应」）、刷新与跳页保持、把存储日期改旧后回落日期规则；**系统配色实测为深色时 `--photo-dim` 仍为 0.42、`body` 底色仍为 `rgb(13,20,32)`**（门控确实生效）；逐张对比度门禁与 M-3 记录值一致（页头 5.99/4.94、hero 6.20/5.12、文章卡 10.73/8.85、项目卡 8.14/6.71）；池内照片 **EXIF 0 / GPS 0**、硬红线扫描 **0 命中**；导入管道用一张**带 GPS 4 条目**的合成照片端到端演练通过（产物 `CLEAN`），演练产物已删除并复原为单张池。**发现并修掉的关键问题**：① **`new Function` 拿函数声明的两种错法都静默返回 `undefined`**（写声明 / 只加外层括号都不行，唯一可用的是 `new Function('return (' + 源码 + ')')()`）——现象是按钮完全没反应、`__dshBg` 从未被赋值，而页面看起来一切正常（首屏背景来自构建期 CSS，掩盖了故障）；现在单元（`tmp/probe_fnrule.mjs`）、产物（`tmp/test_bg_map.mjs`）、真实浏览器（`tmp/probe_browser.py`）**三道门**分别拦住它；② Astro/Vite 会对 `is:inline` 脚本内容做**打印重排并内联构建期常量**（实测 `data.persist` 变成字面量 `"day"`），故**不能断言产物脚本与源码逐字节相同**，一致性断言改为「行为等价 + 构造方式相同」；③ 生成内联脚本的**模板字符串里不能出现反引号**（注释里写反引号会提前结束模板，报错位置还指向下一个 token）；④ 探针脚本 `os.chdir(dist)` 会污染进程工作目录，导致后续相对路径 `ENOENT`（改为 `directory=` 参数）；⑤ 本地静态服务必须发 `Cache-Control: no-store`，否则「重建 + 重跑」会静默验证**旧构建**；⑥ 星期几规则写成 `'06'` 会永不命中（自测里就写错过，现已由 `sync` 报错拦下）。**已披露的偏离**：背景改为两个显式 `.bg-layer` 固定层 + 交叉淡入（而非 `body::before/::after`），代价是每页多两个空元素与 `global.css` 里刻意的 `url()` 重复；`persist` 定为「当日有效」（可改 `'forever'`）；导入工具为 Node + Python(Pillow) 且**未新增任何 npm 依赖**；`docs/操作手册.md`（此前未跟踪）一并更新并纳入本次提交。**遗留**：手机端性能未真机复核、不做多分辨率 `srcset`、根目录原始照片仍在（未擅自删除，属破坏性操作）、照片池会累积 Git 历史体积。**未推送** |

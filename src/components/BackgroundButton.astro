@@ -1,0 +1,129 @@
+---
+/**
+ * 「随机换背景」按钮（决策见 PLAN.md **ADR-12** / M-4）。
+ *
+ * 它占据的是**原来浅色/深色切换按钮的位置**（用户 2026-10-11 要求：把原深浅色按钮
+ * 改成随机切换背景按钮，并使深浅色切换静默）。`ThemeToggle.astro` 与
+ * global.css 里的两处深色令牌都**没有被删除**，只是不再被渲染 —— 见 ADR-12。
+ *
+ * 行为（三段脚本配合，全部 is:inline，见各文件注释）：
+ *   BaseHead 的内联脚本：读 localStorage['bg-v1'] -> 计算「今天该用哪张」-> 铺底
+ *                        -> 暴露 window.__dshBg（抽签策略留给本组件，便于改动）
+ *   本组件的内联脚本：点击 -> 在池里排除当前那张后随机抽一张 -> __dshBg.apply(id)
+ *                     -> 写入 localStorage（当日有效，见 config.ts 的 persist）
+ *
+ * 「刷新不改变当前背景」由 localStorage 保证；「某个日期一定是固定一张」由
+ * src/backgrounds/date-map.ts 的纯函数保证（两端一致性由 tmp/test_bg_map.mjs 断言）。
+ */
+import { ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** 照片池里有几张；只有 1 张时按钮不可点（并说明原因），避免「点了没反应」 */
+  poolSize: number;
+}
+
+const { lang, poolSize } = Astro.props;
+const t = ui[lang].backgroundSwitch;
+const onlyOne = poolSize <= 1;
+---
+
+<button
+  id="bg-toggle"
+  class="toggle-btn bg-toggle lg lg-pillbtn lg-refract"
+  type="button"
+  aria-label={t.ariaLabel}
+  title={onlyOne ? t.onlyOne : t.title}
+  aria-disabled={onlyOne ? 'true' : undefined}
+  data-label={t.title}
+  data-only-one={t.onlyOne}
+  data-announce={t.announced('{id}')}
+>
+  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      d="M4 6.6h2.3l1.2-1.7h9l1.2 1.7H20a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 20 18H4a1.6 1.6 0 0 1-1.6-1.6V8.2A1.6 1.6 0 0 1 4 6.6Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linejoin="round"></path>
+    <circle cx="12" cy="12.3" r="2.9" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+  </svg>
+</button>
+
+<!-- 读屏用的播报区：换图后告诉用户换成了哪张（视觉上不可见，不占位） -->
+<p id="bg-announcer" class="visually-hidden" role="status" aria-live="polite"></p>
+
+<script is:inline>
+  (function () {
+    var btn = document.getElementById('bg-toggle');
+    var live = document.getElementById('bg-announcer');
+    var api = window.__dshBg;
+    if (!btn || !api) return;
+
+    // 文案经 data-* 传入（is:inline 的内容不做模板插值）
+    var onlyOne = btn.getAttribute('data-only-one') || '';
+    var announceTpl = btn.getAttribute('data-announce') || '{id}';
+
+    function announce(id) {
+      if (live) live.textContent = announceTpl.replace('{id}', id);
+    }
+
+    // 池子从页面的内联 JSON 读（与 BaseHead 的那段脚本共用同一份数据）
+    function pool() {
+      try {
+        var node = document.getElementById('bg-config');
+        var data = JSON.parse(node.textContent);
+        return data && data.ids ? data.ids : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      var ids = pool();
+      if (ids.length <= 1) {
+        // 只有一张（或数据缺失）：按钮本来就是 aria-disabled，这里再兜一次
+        btn.setAttribute('aria-disabled', 'true');
+        if (btn.getAttribute('title') === btn.getAttribute('data-label')) {
+          btn.setAttribute('title', onlyOne);
+        }
+        return;
+      }
+      var current = api.current();
+      // 排除当前那张：否则「随机」会有一半概率看起来点了没反应
+      var candidates = ids.filter(function (id) {
+        return id !== current;
+      });
+      var next = candidates[Math.floor(Math.random() * candidates.length)];
+      if (api.apply(next)) announce(next);
+    });
+  })();
+</script>
+
+<style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* 图标尺寸与 ThemeToggle 保持一致（同一个药丸按钮体系） */
+  .bg-toggle .icon {
+    display: block;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  /* 只有一张照片时给出「不可用」的视觉提示（但按钮仍可聚焦、可被读屏读到原因） */
+  .bg-toggle[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  .bg-toggle[aria-disabled='true']:hover {
+    color: var(--fg-muted);
+  }
+</style>

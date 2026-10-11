@@ -40,10 +40,23 @@ const zh = {
     title: 'Switch to English',
   },
 
-  /** 主题按钮（ADR-9）：文案描述「点击后会变成什么」 */
+  /** 主题按钮（ADR-9）：文案描述「点击后会变成什么」。
+   *  ⚠️ ADR-12 起该按钮**静默停用**（`THEME_TOGGLE_ENABLED = false`），但文案与组件一并保留：
+   *     恢复开关时不需要重新翻译。主题相关的代码整体未删除。 */
   themeSwitch: {
     toDark: '切换到深色模式',
     toLight: '切换到浅色模式',
+  },
+
+  /** 背景按钮（ADR-12）：点击随机换一张背景照片（替换原来的主题按钮位置） */
+  backgroundSwitch: {
+    label: '换背景',
+    ariaLabel: '随机更换背景照片',
+    title: '随机更换背景照片',
+    /** 背景池只有一张照片时（没有第二张可换） */
+    onlyOne: '背景照片只有一张，导入更多照片后再来随机切换',
+    /** 供读屏播报「已换成哪张」 */
+    announced: (id: string) => `背景已更换为 ${id}`,
   },
 
   updatedOn: '更新于',
@@ -81,6 +94,14 @@ const en: typeof zh = {
   themeSwitch: {
     toDark: 'Switch to dark mode',
     toLight: 'Switch to light mode',
+  },
+
+  backgroundSwitch: {
+    label: 'Shuffle',
+    ariaLabel: 'Pick a random background photo',
+    title: 'Pick a random background photo',
+    onlyOne: 'Only one background photo is available; import more to shuffle',
+    announced: (id: string) => `Background changed to ${id}`,
   },
 
   updatedOn: 'Updated',

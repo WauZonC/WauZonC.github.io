@@ -9,7 +9,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "sync:backgrounds": "node scripts/background-photos.mjs sync",
+    "check:backgrounds": "node scripts/background-photos.mjs check",
+    "add:background": "node scripts/background-photos.mjs add"
   },
   "dependencies": {
     "astro": "^7.3.8"

@@ -1,5 +1,12 @@
 ---
 import { ui, type Lang } from '../i18n/ui';
+import {
+  BACKGROUND_CONFIG_ID,
+  backgroundInlineScript,
+  serializeBackgroundData,
+  buildTimeBackgroundUrl,
+} from '../backgrounds/runtime';
+import { BACKGROUND_CONFIG } from '../backgrounds/config';
 
 interface Props {
   title: string;
@@ -30,6 +37,15 @@ const enHref = lang === 'en' ? canonical : altHref && toAbsolute(altHref);
 const hasBoth = Boolean(zhHref && enHref);
 // x-default 优先指向中文版；中文版不存在时退回当前页面
 const xDefault = zhHref ?? canonical;
+
+/**
+ * 背景（ADR-12 / M-4）：构建期先算出「构建机当天」的那张照片，写进内联 <style>。
+ *   · 无 JS 环境就显示它（必须有确定值，不能留空）
+ *   · 构建机与访客同一天时，运行期脚本不会覆写它 —— 不闪图、也不多发一次请求
+ */
+const bakedBg = buildTimeBackgroundUrl(new Date());
+const bgDataJson = serializeBackgroundData();
+const bgScript = backgroundInlineScript();
 ---
 
 <meta charset="utf-8" />
@@ -37,28 +53,32 @@ const xDefault = zhHref ?? canonical;
 <meta name="generator" content={Astro.generator} />
 
 <!--
-  首屏渲染前应用已保存的主题（ADR-9）。
-  这里必须用 is:inline 指令：
-    1) Astro 默认会把内联脚本打包成模块并产出 .js 文件，那会打破 R3（dist 内 .js 为 0）；
-    2) 必须同步、阻塞地在首次绘制前执行，否则会闪一下错误配色。
-  同时给 <html> 加 js 类，供 CSS 显示主题按钮（无 JS 时不显示这个死按钮）。
+  背景照片池数据（ADR-12）。必须是 type="application/json"：内容是**数据**、
+  不会被执行，标签内的 `<` 已在 serializeBackgroundData() 里转成 \u003c。
+  运行期脚本只读它，不发起任何网络请求 —— 首屏因此不会「等清单」而闪错图。
 -->
-<script is:inline>
-  (function () {
-    var root = document.documentElement;
-    root.classList.add('js');
-    try {
-      var saved = window.localStorage.getItem('theme');
-      if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
-    } catch (e) {
-      /* localStorage 不可用时保持「跟随系统」，不影响其余功能 */
-    }
-  })();
-</script>
+<script type="application/json" id={BACKGROUND_CONFIG_ID} set:html={bgDataJson}></script>
 
-<!-- 移动端地址栏配色：与 global.css 的 body 底色一致（ADR-11 后背景是压暗的照片，
-     所以浅/深两态都偏深）。未手动选择主题时由这两条生效；
-     手动选择后由 ThemeToggle 的脚本换成单一 meta。 -->
+<!--
+  背景：先按**构建机当天**的映射结果铺底（无 JS 也能看到确定的照片），
+  再由下面的运行期脚本按**客户端本地日期**覆盖。
+  --photo-fade 来自 config.ts 的 fadeMs，与 ThemeToggle 的 theme-color 无关。
+-->
+<style is:inline set:html={`:root{--bg-photo:url('${bakedBg.src}');--photo-fade:${BACKGROUND_CONFIG.fadeMs}ms}`}></style>
+<!--
+  运行期脚本（ADR-12 / M-4）。必须 is:inline：
+    1) Astro 默认会把内联脚本打包成模块并产出 .js 文件，那会打破 R3（dist 内 .js 为 0）；
+    2) 必须同步、阻塞地在首次绘制前执行完，否则会先闪一张错的背景再换。
+  内容由 src/backgrounds/runtime.ts 在构建期生成（其中日期映射函数的源码与 TS 版本同源，
+  一致性由 tmp/test_bg_map.mjs 逐日断言）。
+-->
+<script is:inline set:html={bgScript}></script>
+
+<!--
+  移动端地址栏配色：与 global.css 的 body 底色一致（ADR-11 后背景是压暗的照片，
+  浅/深两态都偏深）。ADR-12 起主题切换静默，恒为浅色态这一条；
+  ThemeToggle 的脚本（保留未删）一旦被重新启用，会把它换成单一 meta。
+-->
 <meta name="theme-color" content="#1b2a3d" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0d1420" media="(prefers-color-scheme: dark)" />
 

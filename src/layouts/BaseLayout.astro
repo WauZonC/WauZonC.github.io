@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getLangFromPath, HTML_LANG, ui, withLang, type Lang } from '../i18n/ui';
+import { THEME_GATE_CLASS } from '../backgrounds/runtime';
 import '../styles/global.css';
 
 interface Props {
@@ -43,7 +44,12 @@ const counterpartHref = translated ? buttonHref : undefined;
 ---
 
 <!doctype html>
-<html lang={HTML_LANG[lang]}>
+<!--
+  `gate-dark` 是主题静默门控（ADR-12 / M-4）：只有 config.ts 的 THEME_TOGGLE_ENABLED
+  为 true 时才加这个类。未加时 global.css 里 `@media (prefers-color-scheme: dark)`
+  那条深色令牌**不生效**，站点恒定浅色 —— 也就是「保留代码、静默、保持浅色」。
+-->
+<html lang={HTML_LANG[lang]} class={THEME_GATE_CLASS || undefined}>
   <head>
     <BaseHead
       title={title}
@@ -54,6 +60,15 @@ const counterpartHref = translated ? buttonHref : undefined;
     />
   </head>
   <body>
+    <!--
+      背景照片的两个固定层（ADR-12 / M-4）。两层初值是**同一张图**（层 2 在 global.css 里
+      刻意重复了一次），所以交叉淡入的任意时刻都至少有一层是有图的，不会露出纯色底。
+      这里**不写 style 属性**：`--bg-photo` 由 BaseHead 的内联 <style>（构建期当日照片）
+      与运行期脚本（客户端当日照片）负责，两边写法保持一致才不会漂移。
+      两层的 `--photo-dim` 会随主题令牌变化，因此深色令牌保留也不会影响它们。
+    -->
+    <div class="bg-layer bg-layer-front" data-active="true" aria-hidden="true"></div>
+    <div class="bg-layer bg-layer-back" data-active="false" aria-hidden="true"></div>
     <a class="skip-link" href="#main">{t.skipToContent}</a>
     <Header lang={lang} altHref={buttonHref} />
     <main id="main" class="container">

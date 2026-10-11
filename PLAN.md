@@ -8,8 +8,8 @@
 - 仓库名（目标，GitHub 侧）：`WauZonC.github.io`
 - 线上地址（目标）：<https://wauzonc.github.io>
 - 本地仓库根目录：`D:\WZC\mypage\WauZonC.github.io`
-- 当前阶段：**P4 已完成（内容取材与迁移，分两阶段并经用户逐项审批）—— 下一步 P5（GitHub Actions 自动部署）**
-- 文档版本：v1.6（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
+- 当前阶段：**P5 已完成（GitHub Actions 自动部署工作流落地，并通过 actionlint + 结构断言 + CI 等价命令本地验收）—— 下一步 P6（GitHub 侧配置与首次上线）**
+- 文档版本：v1.7（P5 完成：`.github/workflows/deploy.yml` 落地；Action 版本按 Node 24 代际裁定并实测；本地 actionlint 0 告警 + `pnpm install --frozen-lockfile`/`pnpm build` 退出码 0）；上一版 **v1.6**（P4 完成：真实内容上站——博客 3 篇、项目 4 条、`about` 重写；建立"两阶段人工审批 + 发布前泄漏扫描"流程）
 
 ---
 
@@ -46,7 +46,7 @@
 | HTTPS 连通性 | `api.github.com` 直连 200 |
 | `WauZonC/WauZonC.github.io` | **不存在**（GitHub API 404） |
 | `https://wauzonc.github.io` | **尚未上线**（404） |
-| 依赖版本基线 | Astro `7.3.8`；`actions/checkout@v7.0.1`；`actions/deploy-pages@v5.0.1` |
+| 依赖版本基线 | Astro `7.3.8`；GitHub Actions（P5 于 2026-10-11 按 Releases 实测）：`actions/checkout@v7.0.1`、`pnpm/action-setup@v6.1.0`、`actions/setup-node@v7.1.0`、`actions/upload-pages-artifact@v5.0.0`、`actions/deploy-pages@v5.0.1` |
 
 ---
 
@@ -408,9 +408,14 @@ export default defineConfig({
   - 手势识别项目卡片**暂缺配图**（用户决定先缺省）：`vision/` 目录里没有任何图片，运行该原型需要真实摄像头，无法生成真实截图；卡片当前为纯文字 + 技术标签，日后用户提供运行画面即可补 `cover`。
   - 目标仓库 `WauZonC/WauZonC.github.io` 尚不存在（P6 才创建），故"本站"项目卡片暂未填 `repoUrl`。
 
-### P5 —— GitHub Actions 自动部署
+### P5 —— GitHub Actions 自动部署 ✅ 已完成（2026-10-11）
 - **前置依赖**：P2（P3/P4 可与 P5 并行，但首次上线建议在 P3 后）
 - **产出物**：`.github/workflows/deploy.yml`
+- **版本裁定（2026-10-11，先改文档后执行）**：本节原写 `pnpm/action-setup@v4`、`actions/setup-node@v4`、`actions/upload-pages-artifact@v3`，**照抄会导致工作流不可用**。理由与裁定如下（属"依赖版本"事实更新，**不改变本工作流的结构、触发条件、权限与并发设置**）：
+  1. **Node 20 运行时已进入移除期**：GitHub 自 2026-06-16 起把托管 runner 的默认运行时切到 Node 24，并计划 **2026 年秋移除 Node 20**。上述三个旧版 Action 的 `runs.using` 均为 `node20`（实测 `pnpm/action-setup@v4/action.yml` → `using: node20`），新写工作流不应采用旧版。
+  2. **pnpm 版本必须显式指定**：`pnpm/action-setup` 要求 `version` 输入或 `package.json` 的 `packageManager` 字段；本项目 `package.json` **无** `packageManager` 字段（且该文件不在 P5 写作用域内），故工作流显式传 `version: 11.21.0`——与本地 pnpm 一致，`pnpm-lock.yaml`（`lockfileVersion: 9.0`）即由该版本生成。
+  3. **裁定版本**（均于 2026-10-11 按 GitHub Releases 与 `action.yml` 实测存在且为 Node 24）：`actions/checkout@v7`（基线 v7.0.1）／`pnpm/action-setup@v6`（最新 v6.1.0，支持 pnpm 11/12）／`actions/setup-node@v7`（最新 v7.1.0，`cache: pnpm` 仍受支持）／`actions/upload-pages-artifact@v5`（最新 v5.0.0，composite 动作，内部固定 `upload-artifact@v7.0.0`）／`actions/deploy-pages@v5`（基线 v5.0.1）。
+  4. **不引入 `actions/configure-pages`**：本节未列该动作；本项目由 P6 手动把仓库 Pages 来源设为 "GitHub Actions"，不需要它的 `enablement` 能力。由此产生的 **P6 执行顺序提醒**见下方 P5 执行记录。
 - **工作流要点**
   - 触发：`on: push: branches: [main]` + `workflow_dispatch`
   - 权限：`contents: read`、`pages: write`、`id-token: write`
@@ -421,6 +426,21 @@ export default defineConfig({
 - **写作用域**：`.github/workflows/**`
 - **验收命令**：推送后 `git log --oneline origin/main` 与新提交一致；Actions 页面 build 与 deploy 两步均绿色
 
+#### P5 实际执行记录（2026-10-11）
+
+- **产出物（写作用域内，1 个文件）**：`.github/workflows/deploy.yml` —— 两个作业（`build` / `deploy`），Node 24 + pnpm 11.21.0，步骤为 checkout → setup pnpm → setup node（`cache: pnpm`）→ `pnpm install --frozen-lockfile` → `pnpm build` → 上传 Pages 产物（`path: dist`）→ 部署（`environment: github-pages`）。触发条件、权限、并发设置**与本节点完全一致**
+- **实测验收（本地；**"推送后"的验收本阶段不可能完成**，因为远端仓库要到 P6 才创建）**
+  - **actionlint 1.7.12**（从官方 Releases 下载到系统临时目录运行，**未入仓**）：`actionlint -oneline -color .github/workflows/deploy.yml` → **退出码 0、零告警**（YAML 语法、表达式、`uses`/`with` 输入名、`runs-on` 标签、`needs`/`environment` 均已通过静态检查）
+  - **结构断言**（PyYAML 6.0.2 解析后逐项 assert）：顶层键 = `name`/`on`/`permissions`/`concurrency`/`jobs`；`on` = `push[main]` + `workflow_dispatch`；`permissions` = `contents:read` + `pages:write` + `id-token:write`；`concurrency` = `{group: pages, cancel-in-progress: false}`；build 各步 `uses` 与 `with`（`version: 11.21.0`、`node-version: 24` + `cache: pnpm`、`path: dist`）逐一相符；deploy = `needs: build` + `environment: github-pages` + `actions/deploy-pages@v5` → **全部通过**
+  - **编码与换行**：文件为 UTF-8、**仅 LF、无 BOM**（`.gitattributes` 的 `* text=auto eol=lf` 亦保证入库换行统一）
+  - **CI 等价命令本地实跑**：`pnpm install --frozen-lockfile` → 退出码 **0**（`Already up to date`，pnpm v11.21.0，即工作流中 `action-setup` 安装的同一版本）；`pnpm build` → 退出码 **0**，**8 page(s) built**（与 P4 一致）
+  - **构建产物**：`dist` 下 `.js` 文件数 **0**（ADR-1 零客户端 JS 未被破坏）、`.html` **8** 个；`dist\index.html`、`about\index.html`、`blog\index.html`、`projects\index.html`、`404.html` 均存在
+  - **上传范围核查**：`dist` 内唯一以 `.` 开头的条目是 `dist/images/.gitkeep`（P2 遗留的空目录占位，无内容），`upload-pages-artifact@v5` 默认 `include-hidden-files: false` 会将其排除，**不影响站点**
+- **与设计的偏离（已先改文档后执行，见本节"版本裁定"）**：三处 Action 主版本升到 Node 24 代际（`pnpm/action-setup@v4→v6`、`actions/setup-node@v4→v7`、`actions/upload-pages-artifact@v3→v5`），并显式传 `version: 11.21.0`；`checkout@v7`、`deploy-pages@v5` 与本节点一致。**工作流的结构、触发条件、权限、并发零变化**
+- **对 P6 的交接提醒（重要）**：本工作流**不含** `actions/configure-pages`（本节点未列该动作），因此 `deploy-pages` 要求仓库 Pages 来源**已是** "GitHub Actions"。而 P6 的顺序是"先 `git push`（步骤 3）再设 Pages 来源（步骤 4）"——**首次 push 触发的运行会在 `deploy` 作业失败**。处理：**先完成步骤 4，再在 Actions 页面 Re-run all jobs（或用 `workflow_dispatch` 手动触发）重跑一次**，此后 build 与 deploy 均应为绿色。这不改变 P6 的任何决策，仅是执行顺序提醒
+- **写作用域的实际扩展（已披露）**：除 `.github/workflows/**` 外，另修改了 `PLAN.md`（§2 依赖版本基线、本节"版本裁定"与本执行记录、§7 风险表 3 行、§9 之外的变更记录 v1.7）与 `README.md`（把过时的"P2 完成 / 下一步 P3"更新为当前进度，并在目录树中登记部署工作流）。**未**改动 `src/**`、`public/**`、`astro.config.mjs`、`package.json`、`pnpm-lock.yaml`、`.gitignore`
+- **遗留问题**：远端验收（G6：推送后 Actions 两步绿色、站点更新）**待 P6**；本阶段无阻塞项
+
 ### P6 —— GitHub 侧配置与首次上线
 - **前置依赖**：P1（本地仓库位于 `D:\WZC\mypage\WauZonC.github.io`）、P5（工作流文件已提交）
 - **手动步骤（在 GitHub 网页完成，`gh` CLI 未安装）**
@@ -429,6 +449,7 @@ export default defineConfig({
   3. 推送：`git push -u origin main`
   4. 仓库 `Settings → Pages → Build and deployment → Source` 选择 **GitHub Actions**
   5. 等待首次工作流完成，访问 <https://wauzonc.github.io> 验证 G1/G2
+     - **P5 交接提醒**：若**首次 push**（步骤 3）触发的运行在 `deploy` 作业失败，属预期——当时 Pages 来源尚未设置（本工作流不含 `actions/configure-pages`，无法自动启用 Pages）。先完成步骤 4，再在 Actions 页面 **Re-run all jobs** 或用 `workflow_dispatch` 手动触发重跑；详见 P5 执行记录
 - **可选**：自定义域名——需在 `public/` 放 `CNAME` 文件并在域名商配置 DNS；**若采用自定义域名，必须同步更新 `astro.config.mjs` 的 `site` 为本节约定**（否则 canonical/og URL 错误）
 - **验收命令**：`Invoke-WebRequest -Method Head https://wauzonc.github.io` → 200；页面中文正常
 - **写作用域**：`git remote` 配置；可选 `public/CNAME`
@@ -459,6 +480,9 @@ export default defineConfig({
 | **照抄旧版 Content Collections 写法**（`src/content/config.ts`、`type: 'content'`、`entry.render()`、`import { z } from 'astro:content'`） | Astro 6 已移除旧版集合；Astro 7 遇到 `src/content/config.ts` 直接抛 `LegacyContentConfigError` **中止构建**，P2 无法验收 | **P2 已实测并修正**：文件改为 `src/content.config.ts`，集合必须带 `loader: glob(...)`，`z` 从 `astro/zod` 导入，渲染用 `render(entry)`。后续 agent **不要**改回旧写法（见 §4.3 开头） |
 | 在**非空仓库目录**里直接跑 `pnpm create astro@latest .` | 模板自带 `README.md` / `.gitignore` 会**覆盖**仓库中的同名文件，P0/P1 的项目文档与忽略规则被冲掉 | **P2 已用规避方案**：脚手架只在仓库外的临时目录运行，仅取回写作用域内的产物；后续 agent 若需重跑脚手架，务必同样避免在仓库根直接生成 |
 | 内容 frontmatter 不合规时的构建表现 | 构建**非 0 退出**（Windows 实测 `-1073740791` / `0xC0000409`，属 Astro 内容校验失败的中止行为，**不是**崩溃）；日志含 `[InvalidContentEntryDataError]` 与字段原因 | 这是 G4 期望行为，不要误判为环境故障；先看日志里的集合名、条目名与字段名，再去修 frontmatter |
+| **照抄旧版（Node 20 代际）GitHub Action**（`pnpm/action-setup@v4`、`actions/setup-node@v4`、`actions/upload-pages-artifact@v3`） | GitHub 自 2026-06-16 起把托管 runner 默认运行时切到 Node 24、并计划 2026 年秋移除 Node 20；旧版 Action 的 `runs.using` 为 `node20`（P5 已实测），继续沿用随时可能整条工作流失败 | **P5 已裁定并实测升级**：`pnpm/action-setup@v6`、`actions/setup-node@v7`、`actions/upload-pages-artifact@v5`（连同 `actions/checkout@v7`、`actions/deploy-pages@v5`）。后续 agent **不要降级回 `v4`/`v3`**；升级后已用 actionlint 1.7.12 复检（0 告警） |
+| `pnpm/action-setup` 未指定 pnpm 版本，且 `package.json` 无 `packageManager` 字段 | 工作流在 "Setup pnpm" 一步直接报错（未指定版本），CI 无法安装依赖 | P5 已在工作流显式传 `with: version: 11.21.0`（与本地 pnpm 及 `pnpm-lock.yaml` 的生成版本一致）。**日后若重新生成锁文件，须同步该版本号** |
+| **首次 `git push` 早于「Pages 来源设为 GitHub Actions」**（P6 步骤 3 先于步骤 4） | 首次触发的运行会在 `deploy` 作业失败（Pages 未启用或来源仍为分支），G6 的"首次即绿色"不成立 | 按 P6 顺序**先完成步骤 4**，再在 Actions 页面 **Re-run all jobs**（或 `workflow_dispatch` 手动触发）重跑一次；本工作流不含 `actions/configure-pages`，不会自动启用 Pages |
 
 ---
 
@@ -494,3 +518,4 @@ export default defineConfig({
 | v1.4 | P2.5 | P2.5 完成：新增**临时**目录 `demo/`（17 个自包含 HTML + README），用统一内容基线做 16 种首页风格样例供选型；自动化验证「32 组 375/1440 无横向滚动 + 零外部请求 + 内容一致 + 构建隔离（`dist/demo` 不存在）」，并修正 `16-swiss.html` 在窄屏的栅格塌列问题。**`demo/` 不纳入 Git、不参与构建**，P3 验收后删除。同步更新：文档头「当前阶段」与版本、新增 §6「P2.5」小节（含 16 风格清单、约束、实测验收、待选项）、P3 前置依赖、§9 开放项 2 标注 |
 | v1.5 | P3 | P3 完成：**用户选定风格 10「玻璃拟态渐变」**并落地全站（新增 ADR-7）。重写 `global.css` 设计令牌与玻璃工具类、粘性玻璃导航、玻璃卡片（PostCard/新增 ProjectCard）、文章与关于/404 面板化、跳转链接与 `theme-color`。实测：`pnpm build` 退出码 0、6 条路由、`dist` 零 `.js`、**12 组（6 路由 × 375/1440）无横向滚动**、浅/暗两套配色目视通过。临时目录 `demo/` 已按约定删除。同步更新：文档头「当前阶段」与版本、ADR-7、§9 开放项 2 结论（保持多页式）、P3 章节（选定方案 + 执行记录）、风险表新增 2 行 |
 | v1.6 | P4 | P4 完成：按**两阶段人工审批**落地真实内容——博客 3 篇（Astro 建站 / 自学 CS61A·CS61B·15-213 / CUDA 笔记）、项目 4 条（pku-table / 个人主页本站 / 手势识别原型 / CS61B Proj 3）、`about` 重写为 8 节。审批文档置于 `p4-review/`（**不入库**，`.gitignore` 已兜住）。实测：`pnpm build` 退出码 0、8 个页面、`dist` 零 `.js`、**24 组（8 路由 × 320/390/1440）无横向滚动**、浅/暗两套配色目视通过、**发布前泄漏扫描 0 命中**。**修正 4 处事实性错误并新增 4 行风险**：P4 素材来源第 1 条（他人主页存档不得作为本人履历）、`articles` 实为 AI 整理的文献笔记库（未采用）、`project/src/**` 属排除项、§9 开放项 4 结论落地；§2 全局 git 邮箱按「文件会公开」脱敏。同步更新：文档头「当前阶段」与版本、§6 P4 章节（素材来源 / 写作用域 / 验收命令 + 执行记录）、§7 风险表、§9 开放项 4 |
+| v1.7 | P5 | P5 完成：写入 `.github/workflows/deploy.yml`（checkout → pnpm → Node 24 → `pnpm install --frozen-lockfile` → `pnpm build` → 上传 Pages 产物 → 部署；触发 `push[main]` + `workflow_dispatch`，权限 `contents:read`/`pages:write`/`id-token:write`，并发 `group: pages` 且不取消进行中部署）。**先改文档后执行的必要偏离（1 处）**：把 `pnpm/action-setup@v4`、`actions/setup-node@v4`、`actions/upload-pages-artifact@v3` 升级到 Node 24 代际的 `@v6`/`@v7`/`@v5`（GitHub 自 2026-06-16 默认 node24、2026 年秋移除 node20；旧版实测 `runs.using: node20`），并显式传 `version: 11.21.0`（`package.json` 无 `packageManager` 字段），`checkout@v7`/`deploy-pages@v5` 与本节点一致，**工作流结构零变化**。实测验收（本地）：actionlint 1.7.12 **退出码 0 零告警**、PyYAML 结构断言全通过、文件 UTF-8/仅 LF/无 BOM、`pnpm install --frozen-lockfile` 与 `pnpm build` **均退出码 0**（8 pages，`dist` 零 `.js`）。**诚实声明**：本节"推送后 origin/main 一致 + Actions 两步绿色"的验收**必须等 P6 建仓后**才能完成。新增 3 行风险（旧版 Action、pnpm 版本未指定、首次 push 早于 Pages 来源设置）；P6 增加 1 条交接提醒（先设 Pages 来源再重跑工作流）。同步更新：文档头「当前阶段」与版本、§2 依赖版本基线、§6 P5 章节（版本裁定 + 执行记录）、§6 P6 步骤 5 提醒、§7 风险表、README.md |

@@ -1,0 +1,64 @@
+# GitHub Pages 自动部署（PLAN.md §6 P5）
+# 触发：main 分支推送或手动 workflow_dispatch
+# 流程：checkout -> pnpm -> node -> frozen 安装 -> astro build -> 上传 Pages 产物 -> 部署
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# deploy-pages 需要 pages: write 与 id-token: write 才能取得 OIDC token 完成部署
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个 Pages 部署，且不取消进行中的部署（避免发布半成品）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # pnpm 必须早于 setup-node 安装：setup-node 的 cache: pnpm 依赖 pnpm 已在 PATH 上
+      # 版本显式指定，因为 package.json 未声明 packageManager 字段（与本地 11.21.0 一致）
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        run: pnpm build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

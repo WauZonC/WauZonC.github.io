@@ -63,8 +63,12 @@
   /* 通用「极淡表面」：页脚、标签这类不需要完整材质的场景（原 --glass-tint 的接任者） */
   --tint-soft: rgba(255, 255, 255, 0.12);
 
-  /* 照片背景（ADR-11 引入，ADR-12 起变为「照片池 + 日期映射」） */
-  --bg-photo: url('/images/backgrounds/default.jpg'); /* 由首屏内联 <style> 按当日照片覆盖 */
+  /* 照片背景（ADR-11 引入，ADR-12 起变为「照片池 + 日期映射」）
+   * ⚠️ 两个变量：双层交叉淡入需要【两层各自的图】。--bg-photo 是「前层」，
+   *    --bg-photo-back 是「后层」；两者初值相同（见 .bg-layer-back 的说明）。
+   *    由首屏内联 <style> 与运行期脚本按当日照片覆盖，**必须成对覆盖**。 */
+  --bg-photo: url('/images/backgrounds/default.jpg');
+  --bg-photo-back: url('/images/backgrounds/default.jpg');
   --photo-dim: 0.42;             /* 压暗强度：保证正文对比度的关键旋钮 */
   --photo-position: center;      /* 取景位置 */
   --photo-fade: 420ms;           /* 换图交叉淡入时长；prefers-reduced-motion 下 CSS 会关掉 */
@@ -211,12 +215,14 @@ html {
 }
 
 /* 层 2：与层 1 同尺寸、同压暗，只有过渡时机不同（它是「换图的目的地」）。
- * 这里的第二个 url() 是【故意的重复】：初值必须是一张真图，否则首次点击会闪一下空白。
- * 由 BaseHead 的内联 <style> 与层 1 一起覆盖为「当日照片」，两者始终一致。 */
+ * 它的初值来自 --bg-photo-back —— 与层 1 用**不同**的变量，因为「交叉淡入」需要两层
+ * 各自持有自己的图：换图时新图写进隐藏的那一层，再翻转可见性。
+ * ⚠️ 换图时必须把 --bg-photo 与 --bg-photo-back **一起**更新（见 runtime.ts 的 apply）。
+ */
 .bg-layer-back {
   background-image:
     linear-gradient(rgba(8, 14, 26, var(--photo-dim)), rgba(8, 14, 26, var(--photo-dim))),
-    url('/images/backgrounds/default.jpg');
+    var(--bg-photo-back);
 }
 
 @media (prefers-reduced-motion: reduce) {

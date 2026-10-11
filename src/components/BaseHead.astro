@@ -62,9 +62,16 @@ const bgScript = backgroundInlineScript();
 <!--
   背景：先按**构建机当天**的映射结果铺底（无 JS 也能看到确定的照片），
   再由下面的运行期脚本按**客户端本地日期**覆盖。
-  --photo-fade 来自 config.ts 的 fadeMs，与 ThemeToggle 的 theme-color 无关。
+  ⚠️ 两处关键点，都是实测踩出来的（见 ADR-12 的执行记录）：
+  1. 必须**成对**覆盖 `--bg-photo` 与 `--bg-photo-back`：两个固定层各用一个变量，
+     只设前者会让「后层」永远停在 CSS 初值，表现为首屏显示的照片与算出来的不一致。
+  2. 选择器必须用 `:root:root`（特异性 0,2,0）而不是 `:root`（0,1,0）：
+     Astro 会把打包好的 CSS 提升到 `<head>` **末尾**，而这段内联 `<style>` 在它**之前**；
+     两者都写 `:root` 时同优先级、**后写的赢**，注入的当日照片会被静态兜底的
+     `default.jpg` 静默覆盖（页面看起来「正常」，只是永远显示兜底那张）。
+  --photo-fade 来自 config.ts 的 fadeMs。
 -->
-<style is:inline set:html={`:root{--bg-photo:url('${bakedBg.src}');--photo-fade:${BACKGROUND_CONFIG.fadeMs}ms}`}></style>
+<style is:inline set:html={`:root:root{--bg-photo:url('${bakedBg.src}');--bg-photo-back:url('${bakedBg.src}');--photo-fade:${BACKGROUND_CONFIG.fadeMs}ms}`}></style>
 <!--
   运行期脚本（ADR-12 / M-4）。必须 is:inline：
     1) Astro 默认会把内联脚本打包成模块并产出 .js 文件，那会打破 R3（dist 内 .js 为 0）；

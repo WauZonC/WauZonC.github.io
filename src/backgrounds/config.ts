@@ -72,7 +72,16 @@ export const BACKGROUND_CONFIG = {
    *   { on: '02-12', bg: 'spring-festival' },
    */
   rules: [
-    // { on: '01-01', bg: 'new-year' },
+    // ---- 用户自己的指定（2026-10-11 导入 green-valley / colorful-danxia 时加的）----
+    // 「带彩霞的丹霞」= colorful-danxia：国庆（10-01）当天优先用它。
+    // 精确日期规则放在 'MM-DD' 之前，否则永远不会命中（sync 会拦下写反的情况）。
+    { on: '2026-10-01', bg: 'colorful-danxia' },
+    // 「绿色山谷」= green-valley：以后每年元旦用这张。
+    { on: '01-01', bg: 'green-valley' },
+    // ---- 下面这些是写法示例，需要时取消注释并换成你自己的 id ----
+    // { on: '10-01',      bg: 'colorful-danxia' },  // 以后每年国庆都用丹霞
+    // { on: '12-25',      bg: 'christmas' },
+    // { on: '6',          bg: 'green-valley' },     // 每周六（单个数字 6，不是 '06'）
   ] as readonly { on: string; bg: string }[],
 } as const;
 

@@ -10,7 +10,9 @@
  */
 
 export const BACKGROUND_POOL = [
+  { id: 'colorful-danxia', bytes: 1246655 },
   { id: 'default', bytes: 1650995 },
+  { id: 'green-valley', bytes: 1250384 },
 ] as const;
 
 export type BackgroundId = (typeof BACKGROUND_POOL)[number]['id'];

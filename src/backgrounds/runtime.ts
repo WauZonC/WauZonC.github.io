@@ -121,10 +121,16 @@ export function backgroundInlineScript(): string {
   var choice = choose(data, today, readStored());
   /** 当前背景 id 的单一真值：初始化一次，之后由 apply 更新 */
   var currentId = choice.id;
+  /** 当前显示的照片 URL（两层交叉淡入时「前层」的那张） */
+  var currentSrc = urlBase + '/' + currentId + '.jpg';
 
-  if (urlBase + '/' + currentId + '.jpg' !== baked) {
-    root.style.setProperty('--bg-photo', "url('" + urlBase + '/' + currentId + '.jpg' + "')");
+  /** 两层各用一个变量，因此设置背景必须成对写；只写一个会让另一层停在旧值。 */
+  function setPhoto(src) {
+    root.style.setProperty('--bg-photo', "url('" + src + "')");
+    root.style.setProperty('--bg-photo-back', "url('" + src + "')");
   }
+
+  if (currentSrc !== baked) setPhoto(currentSrc);
 
   /**
    * 供页头的「随机换背景」按钮使用。
@@ -147,16 +153,18 @@ export function backgroundInlineScript(): string {
         /* 存不下也不影响本次会话内的显示 */
       }
       var src = this.urlOf(id);
+      currentSrc = src;
       var layer = document.querySelector('.bg-layer[data-active="true"]');
       var other = document.querySelector('.bg-layer[data-active="false"]');
       if (!layer || !other) {
-        root.style.setProperty('--bg-photo', "url('" + src + "')");
+        setPhoto(src);
       } else {
-        // 双层交叉淡入：新图写进当前隐藏的那一层，再翻转可见性。
-        // 两层都有图（CSS 里给了同一个初值），所以永远不会露出空白。
-        other.style.setProperty('--bg-photo', "url('" + src + "')");
+        // 双层交叉淡入：两层**共用**同一份 CSS，可见性由 data-active 决定，
+        // 所以做法是「先翻转可见性（新那张在旧图之上淡入，不会露出空白），再更新变量」。
+        // 顺序很重要：若先改变量，两层会在过渡中同时变成新图，看起来像直接跳变。
         other.setAttribute('data-active', 'true');
         layer.setAttribute('data-active', 'false');
+        setPhoto(src);
       }
       choice = { id: id, reason: 'stored' };
       currentId = id;

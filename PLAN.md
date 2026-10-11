@@ -271,7 +271,8 @@
   3. 兜底 hash（FNV-1a）或 cycle —— **同一天在任何设备上恒定同一张**，这是「某天打开一定固定一张」的保证。
 - **背景渲染方式：两个固定层交叉淡入（而非直接改 `body` 的 `background-image`）**
   - 层 1/层 2 都是 `position: fixed; inset: 0; z-index: -1; pointer-events: none`，照片 + 压暗渐变都在这两层里（**不重复**）；`[data-active]` 切换可见性，过渡写在**不依赖该属性**的基类规则里（M-3 踩过「叠加选择器把过渡覆盖掉」的坑）。
-  - 两层的初值是**同一张图**（层 2 在 `global.css` 里刻意重复一次 `url()`），所以交叉淡入的任一时刻都不会露出纯色底；代价是这一处**刻意的 CSS 重复**，已在文件里就地写明它与内联 `<style>` 永远同步。
+  - 两层各用一个变量：`--bg-photo`（前层）/ `--bg-photo-back`（后层），初值相同。交叉淡入要求两层**各自持有自己的图**，所以任何写背景的地方都**必须成对更新**这两个变量（首屏内联 `<style>` 与运行期 `apply()` 都是如此）——只写一个会让另一层永远停在初值。
+  - **首屏注入必须用 `:root:root` 提高特异性**：Astro 会把打包 CSS 提升到 `<head>` 末尾，而注入的内联 `<style>` 在它之前；两者都写 `:root` 时同优先级、后写的赢，于是注入的当日照片会被 CSS 里静态兜底的 `default.jpg` 静默覆盖（页面看起来完全正常，只是**永远显示兜底那张**）。这个坑实际发生过，见下方执行记录。
   - `background-attachment: fixed` 与 ADR-11 保持一致（滚动时照片不动）。
 - **「刷新不改变当前背景」= `localStorage['bg-v1'] = { id, date }`**，键名带 `-v1` 便于日后改语义；无第三方请求、不上传任何数据；隐私模式下 `localStorage` 不可用时降级为「只按日期规则」。
 - **隐私门禁（承接 ADR-11 的教训）**：新增 `pnpm add:background -- <文件> --id <slug>`，它调用 `scripts/prepare_photo.py`：**先（可选）把 EXIF 方向烘焙进像素，再剥掉全部元数据**、长边压到 2560、转渐进式 JPEG，然后**重新打开产物实测** `EXIF 0 标签 / GPS 0 条目`，不干净就拒绝写盘。第一张背景图曾带 GPS `36°02′59.4″N / 120°20′36.0″E`，仓库是公开的，因此这条门禁是硬性的；`pnpm check:backgrounds` 与 `tmp/check_bg_privacy.py` 会再验一遍。
@@ -1153,6 +1154,9 @@ export default defineConfig({
   | `scripts/background-photos.mjs` | `sync` / `check` / `add` 三个子命令：扫描目录、校验规则、导入照片，**零 npm 依赖** |
   | `scripts/prepare_photo.py` | 剥 EXIF/GPS + 压尺寸 + **实测产物元数据为 0**（隐私门禁），并输出亮度摘要 |
   | `public/images/backgrounds/default.jpg` | 原 `public/images/background.jpg` **git mv 而来，内容零改动**（2560×1920 / 1.57 MB / EXIF 0） |
+  | `public/images/backgrounds/green-valley.jpg` | 用户 2026-10-11 导入（源 `D:\WZC\mypage\valley.jpg`，**MPO 4096×3072，导入前 15 个 EXIF 标签 / 9 条 GPS**）→ 2560×1920 / 1.19 MB / **EXIF 0 · GPS 0** |
+  | `public/images/backgrounds/colorful-danxia.jpg` | 用户 2026-10-11 导入（源 `D:\WZC\mypage\danxia.jpg`，MPO 4096×3072，14 个 EXIF 标签）→ 2560×1920 / 1.19 MB / **EXIF 0 · GPS 0** |
+  | `src/backgrounds/config.ts` 的 `rules` | 两条真实规则：`2026-10-01 → colorful-danxia`（精确日期，一次性）、`01-01 → green-valley`（每年元旦）；其余日期走兜底 hash，三张照片各约 1/3 |
 - **产出物（修改）**：`src/components/BaseHead.astro`（注入 `bg-config` JSON + 内联当日背景 + 内联脚本；**移除**读 `localStorage.theme` 的 4 行）、`src/components/Header.astro`（主题按钮改由 `THEME_TOGGLE_ENABLED` 门控 + 渲染背景按钮）、`src/layouts/BaseLayout.astro`（`html` 加 `gate-dark` 门控类 + 两个背景固定层）、`src/styles/global.css`（`--bg-photo` / `--photo-fade`、两个 `.bg-layer`、`@media` 深色块加 `.gate-dark` 门控、`html:not(.bg) .bg-toggle`）、`src/i18n/ui.ts`（`backgroundSwitch` 文案）、`package.json`（3 个新脚本）、`README.md`、`docs/操作手册.md`（新增第 3 章「背景照片」并把后续章节顺延）。
 - **实测验收（本地，2026-10-11）**
   - **R1/R2/R3**：`pnpm build` 退出码 **0**、**13 page(s) built**；`dist` 内 `.html` **13**、`.js` **0**；每页 `<script>` 计数 **3**（原 2 段 + 背景一段），页面结构断言逐页通过（两个 `.bg-layer`、`#bg-config`、`#bg-toggle`、**无** `#theme-toggle`、无 `localStorage.getItem('theme')`）
@@ -1166,18 +1170,23 @@ export default defineConfig({
   - **导入管道端到端演练**：用一张**带 GPS 4 条目 + 3 个 EXIF 标签**的合成照片跑 `pnpm add:background` → 产物 `EXIF 0 / GPS 0 -> CLEAN`；导入后 `pnpm check:backgrounds` **按预期失败**（`generated.ts is out of date`），`sync` 后 2 张照片入池、构建 13 页、探针全过；演练产物已删除并重新 `sync` 回单张池（`git status` 确认干净）
   - **规则校验门禁**：`tmp/check_bg_rules.py` 用 `RULES_JSON` 覆盖（**不改动入库的 config**）逐条断言：空规则/合法 `MM-DD`/精确日期在前 → 通过；精确日期排在 `MM-DD` 之后、`'06'` 两位星期几、`'7'` 越界、`'1-1'` 残缺、`bg` 指向不存在照片、`bg` 非法 id → **全部按预期非 0 退出**
 - **发现的真实问题（对后续 agent 有价值，本轮的坑几乎都在「静默失效」这一类）**
+  0. **【最重要】注入的首屏背景被提升后的打包 CSS 静默覆盖**：Astro 会把打包 CSS 提升到 `<head>` **末尾**，而注入的内联 `<style>` 在它**之前**；两者都写 `:root` 时同优先级、**后写的赢**，于是「按日期算出的那张」被静态兜底 `default.jpg` 覆盖 —— 页面看起来完全正常，只是**永远显示兜底那张**（首屏、无 JS、K 上的实际显示全是错的）。发现方式：真实浏览器探针同时读 `getComputedStyle(root).getPropertyValue('--bg-photo')` 与 `__dshBg.current()`，两者**不一致**（前者 default、后者 green-valley）；纯静态检查完全看不出来。修法：内联样式改用 `:root:root`（特异性 0,2,0）+ 运行期脚本在结果与构建期不同时用元素内联样式兜底。回归门：`tmp/probe_browser.py` 新增「可见层必须真的显示算出来的那张」，`tmp/check_bg_dist.py` 断言内联样式确实是 `:root:root`。
   1. **`new Function` 拿到函数声明的两种错法都会静默返回 `undefined`**。实测对照：`new Function('a','b','c', 声明源码)` 与 `new Function('a','b','c', '('+源码+')')` 都返回 `undefined`（函数体只是一条声明语句）；后者再加 `()` 直接抛 `(intermediate value)(...) is not a function`；**唯一可用的是 `new Function('return (' + 源码 + ')')()`**。第一版两种都踩过 —— 现象是**按钮完全没反应、`__dshBg` 从未被赋值**，而页面看起来一切正常（因为首屏背景来自构建期注入的 CSS，被这层「兜底」掩盖了）。现在 `tmp/probe_fnrule.mjs`（单元）、`tmp/test_bg_map.mjs`（产物）、`tmp/probe_browser.py`（真实浏览器）三道门分别拦住它。**教训：静态检查与「页面看起来对」都抓不到这类 bug，必须有真实浏览器探针。**
-  2. **Astro/Vite 会对 `is:inline` 脚本的内容做一次打印重排，并把构建期常量内联进脚本**：实测产物里出现制表符缩进、CRLF、单行 `return` 被加上花括号、注释被删、`/* @__PURE__ */` 被插入、括号被去掉，且 `backgroundData.persist` 被替换成字面量 `"day"`（因为数据来自 `config.ts`）。因此**不能断言产物脚本与源码逐字节相同**；`tmp/test_bg_map.mjs` 的断言相应改为「行为等价」（1461 天逐日一致）+「构造方式与站点相同」。
-  3. **生成内联脚本的模板字符串里不能出现反引号**：注释里写 `` `...` `` 会提前结束模板字符串，报错位置指向**下一个** token，误导性极强（本轮被误导了两次）。已在 `runtime.ts` 就地写明，并可用「模板内反引号计数必须为 2」自检。
-  4. **`tmp/probe_browser.py` 的 `os.chdir(DIST)` 会改变进程工作目录**：后续用相对路径读 `dist/index.html` 的脚本随之失败（`ENOENT`）。改为给 `SimpleHTTPRequestHandler` 传 `directory=DIST`，不 `chdir`。
-  5. **浏览器缓存会让探针量测到上一版产物**：本地静态服务必须发 `Cache-Control: no-store`，否则「重建 + 重跑探针」会静默地验证旧构建。
-  6. **探索时踩到的两个次要坑**：① 星期几规则写成 `'06'` 会被当成「6 月某日」的残缺写法而**永不命中**（本轮自测里就写错过，现已由 `sync` 直接报错拦下）；② 配置解析器必须**先剥注释**，否则 `config.ts` 里注释掉的示例规则会被当成真规则，`sync` 会要求并不存在的照片。
+  2. **`--bg-photo` / `--bg-photo-back` 必须成对更新**（见 ADR-12 的渲染方式一节）：首屏内联样式与 `apply()` 若只写一个，另一层会停在旧值 —— 这是第 0 条的另一半成因。
+  3. **Astro/Vite 会对 `is:inline` 脚本的内容做一次打印重排，并把构建期常量内联进脚本**：实测产物里出现制表符缩进、CRLF、单行 `return` 被加上花括号、注释被删、`/* @__PURE__ */` 被插入、括号被去掉，且 `backgroundData.persist` 被替换成字面量 `"day"`（因为数据来自 `config.ts`）。因此**不能断言产物脚本与源码逐字节相同**；`tmp/test_bg_map.mjs` 的断言相应改为「行为等价」（1461 天逐日一致）+「构造方式与站点相同」。
+  4. **生成内联脚本的模板字符串里不能出现反引号**：注释里写反引号会提前结束模板字符串，报错位置指向**下一个** token，误导性极强（本轮被误导了两次）。已在 `runtime.ts` 就地写明，并可用「模板内反引号计数必须为 2」自检。
+  5. **验收探针必须从「配置/目录」推导期望值，不能把某次的数据写死**：导入第二批照片后，`check_bg_dist.py` 与 `probe_browser.py` 里「ids 只有 default」「默认照片 = default」「抽到的都在真实池内」等断言全部变成假失败。已改为：从 `config.ts` + 目录推导 ids/rules/期望照片，并用「可见层 = current()」这类不变量断言。
+  6. **`tmp/probe_browser.py` 的 `os.chdir(DIST)` 会改变进程工作目录**：后续用相对路径读 `dist/index.html` 的脚本随之失败（`ENOENT`）。改为给 `SimpleHTTPRequestHandler` 传 `directory=DIST`，不 `chdir`。
+  7. **浏览器缓存会让探针量测到上一版产物**：本地静态服务必须发 `Cache-Control: no-store`，否则「重建 + 重跑探针」会静默地验证旧构建。
+  8. **探索时踩到的两个次要坑**：① 星期几规则写成 `'06'` 会被当成「6 月某日」的残缺写法而**永不命中**（本轮自测里就写错过，现已由 `sync` 直接报错拦下）；② 配置解析器必须**先剥注释**，否则 `config.ts` 里注释掉的示例规则会被当成真规则，`sync` 会要求并不存在的照片。
 - **与设计的偏离（均已披露）**
-  1. **背景改用两个固定层 + 交叉淡入**，而不是（计划里写的）`body::before/::after` 双层。原因：`body` 上会各自触发属性的重新计算与重复请求，且 `::after` 需要处理层级；改为两个显式 `.bg-layer` 元素后层级、可见性、过渡都能用普通选择器明确表达。代价是**每页多两个空元素**（`aria-hidden`、`pointer-events: none`），以及 `global.css` 里**刻意重复一次** `url()` 作为层 2 初值。
+  1. **背景改用两个固定层 + 交叉淡入**，而不是（计划里写的）`body::before/::after` 双层。原因：`body` 上会各自触发属性的重新计算与重复请求，且 `::after` 需要处理层级；改为两个显式 `.bg-layer` 元素后层级、可见性、过渡都能用普通选择器明确表达。代价是**每页多两个空元素**（`aria-hidden`、`pointer-events: none`），以及两层各用一个变量（`--bg-photo` / `--bg-photo-back`，**必须成对更新**）。
   2. **`persist` 语义定为「当日有效」**（`config.ts` 可改成 `'forever'`）：这样「刷新不变」与「某日期一定是固定一张」不再互相打架 —— 当天点过就保持你点的那张，隔天回到日期规则。
   3. **`add:background` 与 `sync:backgrounds` 走 Node + Python（Pillow），未新增任何 npm 依赖**（Pillow 是本机已有、且 M-3 的剥 EXIF 就用的它）；子进程输出用临时文件回传，避免管道捕获限制。
   4. **`docs/操作手册.md` 一并更新并纳入本次提交**（新增第 3 章、后续章节顺延）：该文件此前是**未跟踪**状态（上一轮工作产物），本轮把它与本次文档改动一起提交，属写作用域扩展，在此披露。
-  5. **`demo/`、`tmp/`** 未纳入提交（`demo/` 是 P2.5 惯例的临时目录；`tmp/` 已在 `.gitignore`）；本轮所有验收探针都放在 `tmp/` 下（`test_bg_map.mjs`、`check_bg_days.mjs`、`check_bg_contrast.py`、`check_bg_privacy.py`、`check_bg_rules.py`、`probe_browser.py`、`probe_fnrule.mjs`、`check_bg_dist.py`），可随时重跑但不入库。
+  5. **验收探针全部改为「从 config + 目录推导期望值」**（导入第二批照片后暴露了写死断言的假失败），并新增两条不变量回归门：「可见层显示的必须等于 `current()`」与「内联样式必须是 `:root:root`」。
+  6. **`default.jpg` 暂时保留在池内**（三张并列）：它是 ADR-11 的原始照片，作为「兜底/对照」留着；若要把它移出池，删文件 + `pnpm sync:backgrounds` 即可（记得把 `defaultId` 指向一张仍存在的照片）。
+  7. **`demo/`、`tmp/`** 未纳入提交（`demo/` 是 P2.5 惯例的临时目录；`tmp/` 已在 `.gitignore`）；本轮所有验收探针都放在 `tmp/` 下（`test_bg_map.mjs`、`check_bg_days.mjs`、`check_bg_dist.py`、`check_bg_contrast.py`、`check_bg_privacy.py`、`check_bg_rules.py`、`probe_browser.py`、`probe_fnrule.mjs`、`make_fixture.py`、`verify_live_bg.py`、`shot_live_bg.py`），可随时重跑但不入库。
 - **遗留项（交给后续任务）**
   1. **手机端性能未真机复核**：仍是 `background-attachment: fixed` + 1.6 MB 照片（M-3 的遗留项 1 未变，本轮也未新增压缩档位）。
   2. **不做多分辨率 `srcset`**：池内照片统一 2560px 长边，窄屏也下同一张；若要省流量需引入响应式图片（另立项）。
